@@ -7,6 +7,7 @@ import math
 import scipy.constants as const
 import matplotlib.pyplot as plt
 import spglib as spg
+from numba import jit
 
 """
 Goal of program is to compute S(q,w) with q-points (as vectors) as user-defined inputs.
@@ -174,6 +175,14 @@ def get_atom_integers(masses):
             numbers[i] = curr_int
     return numbers
 
+def create_cell(lattice, positions, masses, magmoms=[]):
+    numbers = get_atom_integers(masses)
+    if len(magmoms) > 0:
+        cell = (lattice, positions, numbers, magmoms)
+    else:
+        cell = (lattice, positions, numbers)
+    return cell
+
 def get_BZ_map(mesh, lattice, positions, masses, magmoms=[]):
     # what do I want????
     # I want to determine the BZ map, and full BZ grid
@@ -192,6 +201,19 @@ def get_BZ_map(mesh, lattice, positions, masses, magmoms=[]):
     grid[:, 2] = grid[:, 2] / mesh[2]
     print(grid)
     return bz_map, grid
+
+def get_symm_operations(lattice, positions, masses, magmoms=[]):
+    numbers = get_atom_integers(masses)
+    if len(magmoms) > 0:
+        cell = (latice, positions, numbers, magmoms)
+    else:
+        cell = (lattice, positions, numbers)
+    symm_dataset = spg.get_symmetry(cell)
+    return (symm_dataset['rotations'], symm_dataset['translations'])
+
+def get_equiv_atoms(lattice, positions, masses, magmoms=[]):
+    cell = create_cell(lattice, positions, masses, magmoms)
+    return spg.get_symmetry(cell)['equivalent_atoms']
 
 def get_grid_index_from_address(address, mesh):
     grid_index = address[0] + mesh[0] * address[1] + mesh[0] * mesh[1] * address[2]
@@ -237,6 +259,7 @@ def create_qpt_map(bzmap, mesh):
     qpt_index_list = np.array([np.where(ir_map==g_pt)[0][0] for g_pt in bzmap])
     return np.reshape(qpt_index_list, mesh)
 
+@jit(nopython=True, parallel=True)
 def compute_Sqw(phonons, q_point, delta_e, max_e, num_overtones):
     # plan is to compute s_\tau\tau'(k, w) as presented in eq 22 in notes
     # once this function is constructed, then convolutions begin
@@ -276,7 +299,6 @@ def compute_Sqw(phonons, q_point, delta_e, max_e, num_overtones):
 
     print('total scattering at w=0:', sum(dist_matrix.flatten()))
     print('supercell =', phonons.supercell)
-    print('DWF =', exp_DWF)
     #TODO: figuring out how normalization is related to num_cells variable
     #num_cells = np.abs(np.linalg.det(phonons.supercell))
     #norm_constant = 1 / phonons.natoms
@@ -317,19 +339,13 @@ def compute_Sqw(phonons, q_point, delta_e, max_e, num_overtones):
                             r_1 = np.dot(phonons.positions[tau_1, :], phonons.lattice)
                             r_2 = np.dot(phonons.positions[tau_2, :], phonons.lattice)
                             #eig_1 = phonons.eigvecs[tau_1, :, eig_index] * np.exp(1j * np.vdot(q_point, r_1))
-                            #NOTE: Removing the phase factor convention because I think it's causing unintended problems
-                            eig_1 = eig_grid[k, j, i, tau_1, :, s] * np.exp(1j * 
-                                    np.vdot(np.array([i,j,k]) / phonons.mesh, phonons.positions[tau_1,:]))
+                            eig_1 = eig_grid[k, j, i, tau_1, :, s] * np.exp(1j * np.vdot(q_point, r_1))
                             #NOTE: in principle assuming that eig(k) = eig(-k)^* which may NOT be true in future
                             #      particularly when looking at potential topological materials
                             #eig_2 = phonons.eigvecs[tau_2, :, eig_index] * np.exp(1j * np.vdot(q_point, r_2))
-                            eig_2 = eig_grid[k, j, i, tau_2, :, s] * np.exp(1j * 
-                                    np.vdot(np.array([i,j,k]) / phonons.mesh, phonons.positions[tau_2,:]))
-
-                            #np.exp(1j * np.vdot(q_point, r_2))
+                            eig_2 = eig_grid[k, j, i, tau_2, :, s] * np.exp(1j * np.vdot(q_point, r_2))
                             eig_index = qpt_map[k, j, i] * 3 * phonons.natoms + s
-                            #NOTE Added += to this instead of =; can't believe this could be the bug... holy shit
-                            s_fcn[tau_1, tau_2, i, j, k, :] += norm_constant * (np.conj(np.vdot(q_point, eig_1)) * np.vdot(q_point, eig_2)) / \
+                            s_fcn[tau_1, tau_2, i, j, k, :] = norm_constant * (np.conj(np.vdot(q_point, eig_1)) * np.vdot(q_point, eig_2)) / \
                                                               num_cells * get_spectrum([dxdydzdw**-1],
                                                                                        [phonons.frequencies[eig_index]],
                                                                                        delta_e, max_e)
@@ -460,13 +476,16 @@ class Runner:
         q_bin = tuple(np.round((self.q_point % 1) * mesh).astype(np.int))
         print('int of s_qw for q =', self.q_point, 'is =', np.trapz(s_qw[q_bin]) * self.delta_e)
         return s_qw
-#num_overtones = 10
-#delta_e = 0.01
-# units are unfortunately in THz
-#max_e = 300
+    def get_phonons(self):
+        return phonon_lifetimes.Anh_System(self.yaml_file, self.hdf5_file)
 
-#yaml_file = sys.argv[1]
-#hdf5_file = sys.argv[2]
+num_overtones = 1
+delta_e = 0.01
+# units are unfortunately in THz
+max_e = 300
+
+yaml_file = sys.argv[1]
+hdf5_file = sys.argv[2]
 #anh_phonons = phonon_lifetimes.Anh_System(yaml_file, hdf5_file)
 #phonons = anh_phonons.dyn_system
 #phonons = ph.Dyn_System(yaml_file)
