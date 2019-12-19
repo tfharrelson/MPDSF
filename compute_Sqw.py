@@ -339,17 +339,22 @@ def compute_Sqw(phonons, q_point, delta_e, max_e, num_overtones):
                             r_1 = np.dot(phonons.positions[tau_1, :], phonons.lattice)
                             r_2 = np.dot(phonons.positions[tau_2, :], phonons.lattice)
                             #eig_1 = phonons.eigvecs[tau_1, :, eig_index] * np.exp(1j * np.vdot(q_point, r_1))
-                            eig_1 = eig_grid[k, j, i, tau_1, :, s] * np.exp(1j * np.vdot(q_point, r_1))
+                            # NOTE: Removing the phase factor convention because I think it's causing unintended problems
+                            eig_1 = eig_grid[k, j, i, tau_1, :, s] * np.exp(1j *
+                                                                            np.vdot(np.array([i, j, k]) / phonons.mesh,
+                                                                                    phonons.positions[tau_1, :]))
                             #NOTE: in principle assuming that eig(k) = eig(-k)^* which may NOT be true in future
                             #      particularly when looking at potential topological materials
                             #eig_2 = phonons.eigvecs[tau_2, :, eig_index] * np.exp(1j * np.vdot(q_point, r_2))
-                            eig_2 = eig_grid[k, j, i, tau_2, :, s] * np.exp(1j * np.vdot(q_point, r_2))
+                            eig_2 = eig_grid[k, j, i, tau_2, :, s] * np.exp(1j *
+                                                                            np.vdot(np.array([i, j, k]) / phonons.mesh,
+                                                                                    phonons.positions[tau_2, :]))
                             eig_index = qpt_map[k, j, i] * 3 * phonons.natoms + s
-                            s_fcn[tau_1, tau_2, i, j, k, :] = norm_constant * (np.conj(np.vdot(q_point, eig_1)) * np.vdot(q_point, eig_2)) / \
+                            s_fcn[tau_1, tau_2, i, j, k, :] += norm_constant * (np.conj(np.vdot(q_point, eig_1)) * np.vdot(q_point, eig_2)) / \
                                                               num_cells * get_spectrum([dxdydzdw**-1],
                                                                                        [phonons.frequencies[eig_index]],
                                                                                        delta_e, max_e)
-                            s_fcn[tau_2, tau_1, i, j, k, :] = np.conj(s_fcn[tau_1, tau_2, i, j, k, :])
+                            s_fcn[tau_2, tau_1, i, j, k, :] += np.conj(s_fcn[tau_1, tau_2, i, j, k, :])
 
     # now s_fcn is the proper 4-d object of tensors (6-d overall)
     #TODO note that the tensors can be completely decoupled and thus parallelized in future versions!!!
