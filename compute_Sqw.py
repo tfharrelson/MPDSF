@@ -5,9 +5,12 @@ import sys
 import phonon_lifetimes
 import math
 import scipy.constants as const
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import spglib as spg
-from numba import jit
+from phonopy import load
+from phonopy.units import THz, AMU
+AngstromsToMeters = 1e-10
+#from numba import jit
 
 """
 Goal of program is to compute S(q,w) with q-points (as vectors) as user-defined inputs.
@@ -26,6 +29,367 @@ S(q,w) = \sum_ab F_ab * DWF_a * DWF_b
 What happens when you have two degenerate phonon modes (w_i == w_j)
     |(q * u_i) + (q * u_j)|^2 = |q*u_i|^2 + |q*u_j|^2 + conj(q*u_i) * (q*u_j) + c.c.
 """
+
+class DynamicStructureFactor(object):
+    def __init__(self,
+                 poscar_file,
+                 fc_file,
+                 mesh,
+                 supercell,
+                 q_point_list=[],
+                 q_point_shift=[0.0, 0.0, 0.0],
+                 delta_e=0.01,
+                 max_e=30,
+                 num_overtones=10,
+                 temperature=4,
+                 freq_min=1e-3,
+                 scattering_lengths=[],
+                 primitive_flag='F'):
+        self.mesh = mesh
+        self.supercell = supercell
+        self.delta_e = delta_e
+        self.max_e = max_e
+        self.num_overtones = num_overtones
+        self.temperature = temperature
+        self.freq_min = freq_min
+        if type(scattering_lengths) is not dict:
+            #default atom type is Si
+            self.scattering_lengths = {'Si':1.0}
+        else:
+            self.scattering_lengths = scattering_lengths
+
+        # if qpoint list not given, then load from mesh and shift
+        self.qpoint_shift = q_point_shift
+        if len(q_point_list) == 0:
+            self.qpoints = self.get_qpoint_list(self.mesh) + self.qpoint_shift
+        else:
+            self.qpoints = q_point_list
+        self.kernel_qpoints = self.get_qpoint_list(self.mesh)
+        phonon = load(supercell_matrix=supercell,
+                      primitive_matrix=primitive_flag,
+                      unitcell_filename=poscar_file,
+                      force_constants_filename=fc_file)
+        phonon.run_mesh(mesh,
+                        is_mesh_symmetry=False,
+                        with_eigenvectors=True)
+        self.dsf = self.run_dsf(phonon, self.qpoints, self.temperature, scattering_lengths=self.scattering_lengths)
+        self.sqw = []
+        self.exp_DWF = []
+        self.dxdydz = 0.0
+        self.dxdydzdw = 0.0
+        self.skw_kernel = []
+
+    def run_dsf(self,
+            phonon,
+            Qpoints,
+            temperature,
+            atomic_form_factor_func=None,
+            scattering_lengths=None):
+        # Transformation to the Q-points in reciprocal primitive basis vectors
+        Q_prim = np.dot(Qpoints, phonon.primitive_matrix)
+        # Q_prim must be passed to the phonopy dynamical structure factor code.
+        phonon.run_dynamic_structure_factor(
+            Q_prim,
+            temperature,
+            atomic_form_factor_func=atomic_form_factor_func,
+            scattering_lengths=scattering_lengths,
+            freq_min=1e-3)
+        dsf = phonon.dynamic_structure_factor
+        return dsf
+
+    def get_qpoint_list(self, mesh):
+        qpoints = np.zeros([np.prod(mesh), 3])
+        count = 0
+        curr_qx = 0.0
+        curr_qy = 0.0
+        curr_qz = 0.0
+        spacing = 1.0 / np.array(mesh)
+        for z in range(mesh[2]):
+            for y in range(mesh[1]):
+                for x in range(mesh[0]):
+                    qpoints[count, :] = [curr_qx, curr_qy, curr_qz]
+                    count += 1
+                    curr_qx += spacing[0]
+                    if curr_qx > 0.5:
+                        curr_qx -= 1.0
+                curr_qy += spacing[1]
+                if curr_qy > 0.5:
+                    curr_qy -= 1.0
+            curr_qz += spacing[2]
+            if curr_qz > 0.5:
+                curr_qz -= 1.0
+        return qpoints
+
+    def get_outer_eig(self, eigvec, masses, freq, reduced_q, pos):
+        outer_eig = np.zeros([len(masses), len(masses), 3, 3], dtype=np.complex)
+        eigvec = eigvec.reshape(-1, 3)
+        phase = np.exp(-2j * np.pi * np.dot(pos, reduced_q))
+        for i in range(len(masses)):
+            for j in range(i, len(masses)):
+                outer_eig[i, j, :, :] = np.outer(np.conj(eigvec[i, :]), eigvec[j, :]) * const.hbar #* 2 * np.pi
+                outer_eig[i, j, :, :] *= phase[i] * np.conj(phase[j]) / (2 * AMU * np.sqrt(masses[i] * masses[j])) / (2 * np.pi * freq * THz)
+
+                if i is not j:
+                    outer_eig[j, i, :, :] = np.conj(outer_eig[i, j, :, :])
+        return outer_eig
+
+    def get_outer_eigs_at_q(self, q_index):
+        eigvecs = self.dsf._mesh_phonon.eigenvectors[q_index]
+        masses = self.dsf._primitive.masses
+        frequencies = self.dsf._mesh_phonon.frequencies[q_index]
+        qpoint = self.kernel_qpoints[q_index]
+        positions = self.dsf._primitive.get_scaled_positions()
+
+        outer_eig_list = np.zeros([len(masses), len(masses), 3, 3, len(frequencies)], dtype=np.complex)
+        for i, f in enumerate(frequencies):
+            if self.dsf._fmin < f:
+                outer_eig_list[:, :, :, :, i] = self.get_outer_eig(eigvecs[:, i], masses, f, qpoint, positions)
+        return outer_eig_list
+
+    def set_dxdydzdw(self):
+        #dxdydz_matrix = np.empty([3, 3])
+        #for i in range(3):
+        #    dxdydz_matrix[i, :] = dsf._rec_lat[i, :] / mesh[i]
+        #dxdydz = np.abs(np.linalg.det(dxdydz_matrix))
+        #dxdydz = 1 / ((2 * np.pi)**3)
+        dxdydz = 1.0
+        print('dxdydz =', dxdydz)
+        dxdydzdw = dxdydz * delta_e
+        self.dxdydz = dxdydz
+        self.dxdydzdw = dxdydzdw
+
+    def build_skw_kernel(self):
+        q_index = 0
+        freqs = self.dsf._mesh_phonon.frequencies
+        num_atoms = len(self.dsf._primitive.masses)
+        num_bins = int(np.ceil(self.max_e / self.delta_e))
+        skw_kernel = np.zeros(self.mesh + [num_atoms, num_atoms, 3, 3, num_bins], dtype=np.complex)
+        norm_factor = 1 / np.prod(self.mesh)
+        #norm_factor = 1
+        if self.dxdydz == 0:
+            self.set_dxdydzdw()
+
+        for k in range(mesh[2]):
+            for j in range(mesh[1]):
+                for i in range(mesh[0]):
+                    outer_eigs_at_q = self.get_outer_eigs_at_q(q_index)
+                    freqs_at_q = freqs[q_index]
+
+                    q_index += 1
+                    # CURRENTLY HERE, need to figure out how to create the spectral version of outer_eigs_at_q...
+                    for outer_counter in range(outer_eigs_at_q.shape[-1]):
+                        skw_kernel[i, j, k, :, :, :, :, :] += norm_factor * np.tensordot(
+                            outer_eigs_at_q[:, :, :, :, outer_counter].reshape( (1,) + outer_eigs_at_q.shape[:-1]),
+                            self.get_spectrum([self.dxdydz ** -1], [freqs_at_q[outer_counter]]).reshape([1, num_bins]),
+                            axes=[0,0]
+                        )
+        self.skw_kernel = skw_kernel
+
+    def create_delta(self, energy):
+        # units in meV
+        num_bins = int(np.ceil(self.max_e / self.delta_e))
+        delta_fcn = np.zeros(num_bins)
+
+        if energy < 0:
+            return delta_fcn
+
+        e_bin_minus = int(np.floor(energy / self.delta_e))
+        e_bin_plus = int(np.ceil(energy / self.delta_e))
+
+        alpha_minus = np.abs(e_bin_minus * self.delta_e - energy) / self.delta_e
+        alpha_plus = np.abs(e_bin_plus * self.delta_e - energy) / self.delta_e
+
+        delta_fcn[e_bin_minus] = (1 - alpha_minus) / self.delta_e
+        delta_fcn[e_bin_plus] = (1 - alpha_plus) / self.delta_e
+        # if num_bins % 2 == 0:
+        #    # even case
+        #    delta_fcn[num_bins/2] = 1/(2 * delta_e)
+        #    delta_fcn[num_bins/2 - 1] = 1/(2 * delta_e)
+        # else:
+        #    index = int(np.ceil(num_bins/2))
+        #    delta_fcn[index] = 1 / delta_e
+        return delta_fcn
+
+    def create_lorentzian(self, energy, gamma):
+        # create a Lorentzian function instead of a delta function for peaks broadened by anharmonicities
+        # units of energy are THz for compatibility with phono3py
+
+        num_bins = int(np.ceil(self.max_e / self.delta_e))
+        lorentzian = np.zeros(num_bins)
+
+        # check if energy is negative, return zero vector if true
+        if energy < 0:
+            return lorentzian
+
+        # check if gamma is less than resolution of grid, if so return delta fcn instead of lorentzian
+        if gamma < self.delta_e:
+            return create_delta(energy, self.delta_e, self.max_e)
+
+        # in an effort to speed up section
+        n_sigma = 10
+        # x_vals = np.arange(num_bins) * delta_e
+        # lorentzian = np.array([(1 / np.pi * 0.5 * gamma / ((energy - x_val)**2 + (0.5 * gamma)**2))
+        #                       if (x_val < energy + n_sigma * gamma) and (x_val > energy + n_sigma * gamma)
+        #                       else 0.0 for x_val in x_vals])
+        bin_spread = int(np.ceil(n_sigma * gamma / self.delta_e))
+        e_bin = int(np.round(energy / self.delta_e))
+        x_vals = np.arange(e_bin - bin_spread, e_bin + bin_spread + 1) * self.delta_e
+        for i in range(len(x_vals)):
+            lorentzian[i + e_bin - bin_spread] = 1 / np.pi * 0.5 * gamma / (
+                        (energy - x_vals[i]) ** 2 + (0.5 * gamma) ** 2)
+        return lorentzian
+
+    def circ_conv(self, signal, kernel):
+        # purpose is to perform a circular convolution (e.g. signal is periodic) of a 3-dimensional object
+        # in this case, the 3-d object is a function proportional to phonon eigenvector as a function of q in the BZ
+        # TODO Incorporate my own padding to the frequency dimension of the circular convolution; use appropriate tags
+        return np.fft.ifftn(np.fft.fftn(signal) * np.fft.fftn(kernel))
+
+    def convolve_f_i(self, f_i, coh_flag=False):
+        print('TEST: the shape of f_i is =', f_i.shape)
+        # norm_constant = 1 / sum(phonons.weights)
+        norm_constant = 1
+        curr_f = f_i  # / sum(phonons.weights)
+        f_i = f_i * norm_constant
+        total_f_i = curr_f
+        # norm_constant = 1 / 8
+        # norm_constant = 1 / (8 * sum(phonons.weights))
+        for i in range(1, self.num_overtones):
+            print('n ='), print(i + 1)
+            if i > 1:
+                curr_f = curr_f * norm_constant
+            # print('int of curr_f'), print(np.trapz(curr_f) * delta_e)
+            if coh_flag:
+                if i == 1:
+                    curr_f *= 1
+                curr_f = circ_conv(curr_f, f_i) * self.delta_e * self.dxdydz
+            else:
+                curr_f = signal.fftconvolve(curr_f, f_i, mode='full')[:len(f_i)] * self.delta_e
+            # print('int of curr_f'), print(np.trapz(curr_f) * delta_e)
+            # total_f_i += curr_f / (np.sqrt(math.factorial(i + 1)))
+
+            total_f_i += curr_f / float(math.factorial(i + 1))
+        return total_f_i
+
+    def get_spectrum(self, f_ab, frequencies, anh_flag=False, gammas=[]):
+        num_bins = int(np.ceil(self.max_e / self.delta_e))
+        spectrum = np.zeros(num_bins, dtype=np.complex)
+        if anh_flag:
+            # print('using anharmonic gammas')
+            for i in range(len(frequencies)):
+                # print('i =', i)
+                spectrum += f_ab[i] * self.create_lorentzian(frequencies[i], gammas[i])
+        else:
+            for i in range(len(frequencies)):
+                spectrum += f_ab[i] * self.create_delta(frequencies[i])
+        return spectrum
+
+    def test_exp_DWF_at_q(self, q_index):
+        eigvecs = self.dsf._mesh_phonon.eigenvectors
+        weights = self.dsf._mesh_phonon.weights
+        num_bands = eigvecs.shape[1]
+        num_qpts = eigvecs.shape[0]
+
+        q_cart = np.dot(self.qpoints[q_index], self.dsf._rec_lat) * (2 * np.pi / AngstromsToMeters)
+        norm_constant = 1 / np.sum(weights)
+        frequencies = self.dsf._mesh_phonon.frequencies
+        masses = self.dsf._primitive.masses
+        #eigvecs = np.reshape(eigvecs, [num_qpts, num_bands, len(masses), 3])
+        exp_DWF = np.zeros(masses.shape)
+        for m in range(len(masses)):
+            DWF = 0.0
+            for i, eigs_at_k in enumerate(eigvecs):
+                for s, eig in enumerate(eigs_at_k.T):
+                    if frequencies[i, s] > self.dsf._fmin:
+                        eig = np.reshape(eig, [len(masses), 3])
+                        DWF += np.abs(np.dot(q_cart, eig[m, :]))**2 * const.hbar / (4 * np.pi * frequencies[i, s] * THz * masses[m] * AMU)
+            exp_DWF[m] = np.exp(-norm_constant * DWF/2)
+        return exp_DWF
+
+    def compute_exp_DWF_at_q(self, q_index):
+
+        eigvecs = self.dsf._mesh_phonon.eigenvectors
+        weights = self.dsf._mesh_phonon.weights
+        num_bands = eigvecs.shape[1]
+        num_qpts = eigvecs.shape[0]
+
+        q_cart = np.dot(self.qpoints[q_index], self.dsf._rec_lat) * (2 * np.pi / AngstromsToMeters)
+        norm_constant = 1 / np.sum(weights)
+        frequencies = self.dsf._mesh_phonon.frequencies
+        masses = self.dsf._primitive.masses
+        eigvecs = np.reshape(eigvecs, [num_qpts, num_bands, len(masses), 3])
+        # eigvecs now has shape (#qpts, #bands, #atoms, 3)
+        # want to contract q with the cartesian indices, use np.dot
+        q_dot_e = np.dot(eigvecs, q_cart)
+        # find absolute value and square of all numbers in resulting matrix
+        q_dot_e_sq = np.abs(q_dot_e)**2
+        # multiply weights by norm_factor
+        # multiply abs square by weights using transpose and np.multiply
+        weighted_q_dot_e_sq = (weights * q_dot_e_sq.T * norm_constant * const.hbar).T
+        weighted_q_dot_e_sq /= masses * AMU
+        # remove negative frequencies
+        inv_freqs = np.zeros(frequencies.shape)
+        for i, freqs_at_q in enumerate(frequencies):
+            for j, f in enumerate(freqs_at_q):
+                if f > self.dsf._fmin:
+                    inv_freqs[i, j] = 1 / (4 * np.pi * THz * f)
+        weighted_q_dot_e_sq = ( np.reshape(inv_freqs, np.prod(frequencies.shape)) * \
+                              np.reshape(weighted_q_dot_e_sq, [np.prod(frequencies.shape), len(masses)]).T).T
+
+        return np.exp(-1 / 2 * np.sum(weighted_q_dot_e_sq, axis=0))
+
+    def get_exp_DWF(self):
+        for i in range(len(self.qpoints)):
+            #self.exp_DWF.append(self.compute_exp_DWF_at_q(i))
+            self.exp_DWF.append(self.test_exp_DWF_at_q(i))
+
+    def get_coherent_sqw_at_q(self, q_index):
+        if len(self.skw_kernel) is 0:
+            self.build_skw_kernel()
+        s_qw = np.zeros(self.skw_kernel.shape[:3] + (self.skw_kernel.shape[-1],), dtype=np.complex)
+        # dot skw_kernel by q_point
+        q_point = self.qpoints[q_index]
+        q_cart = np.dot(q_point, self.dsf._rec_lat) * 2 * np.pi / AngstromsToMeters
+
+        contracted_kernel = np.tensordot(self.skw_kernel, q_cart, axes=[5, 0])
+        contracted_kernel = np.tensordot(contracted_kernel, q_cart, axes=[5, 0])
+        #problem HERE with tensordot flipping the sign of the outerproducts
+        # now compute full scattering function from convolutions of s_fcn
+        natoms = len(self.dsf._primitive.masses)
+
+        if len(self.exp_DWF) is 0:
+            self.get_exp_DWF()
+
+        norm_factor = self.dsf._unit_convertion_factor / (2 * np.pi * THz) * const.hbar
+        positions = self.dsf._primitive.get_scaled_positions()
+        for tau_1 in range(natoms):
+            for tau_2 in range(natoms):
+                s_qw[:, :, :, :] += self.convolve_f_i(contracted_kernel[:, :, :, tau_1, tau_2, :], coh_flag=True) * \
+                        np.exp(2j * np.pi * np.vdot(q_point, (positions[tau_1] - positions[tau_2]))) \
+                        * self.exp_DWF[q_index][tau_1] * self.exp_DWF[q_index][tau_2] #* norm_factor
+        #TODO: Super worried about units, make sure they are correct, Togo's conversion factors seem wonky to me
+        return s_qw
+
+    def interpolate_sqw(self, sqw, q_point):
+        #TODO save for later, implement actual interpolation scheme, right now will set up for the exact grid points
+        indices = np.array(q_point * self.mesh - self.qpoint_shift).astype(np.int)
+        return sqw[indices[0], indices[1], indices[2], :]
+
+    def get_coherent_sqw(self):
+        for i in range(len(self.qpoints)):
+            self.sqw.append(self.interpolate_sqw(self.get_coherent_sqw_at_q(i), self.qpoints[i]))
+
+    def write_coherent_sqw(self, filename):
+        fw = open(filename, 'w')
+        fw.write('# first column is energy in THz, second column is the value of S(q, w)\n')
+        for i, sqw_at_q in enumerate(self.sqw):
+            fw.write('q-point = {}\n'.format(self.qpoints[i]))
+            energy = 0.0
+            for val in sqw_at_q:
+                fw.write('{:.3f}\t{:.10e}\n'.format(energy, val))
+                energy += self.delta_e
+            fw.write('\n')
+        fw.close()
 
 def create_delta(energy, delta_e, max_e):
     # units in meV
@@ -205,7 +569,7 @@ def get_BZ_map(mesh, lattice, positions, masses, magmoms=[]):
 def get_symm_operations(lattice, positions, masses, magmoms=[]):
     numbers = get_atom_integers(masses)
     if len(magmoms) > 0:
-        cell = (latice, positions, numbers, magmoms)
+        cell = (lattice, positions, numbers, magmoms)
     else:
         cell = (lattice, positions, numbers)
     symm_dataset = spg.get_symmetry(cell)
@@ -233,6 +597,51 @@ def get_eigindex_from_bzmap(address, bzmap, mesh, branch_num, total_branches):
     q_index = get_q_index_from_bzmap(address, bzmap, mesh)
     return q_index * total_branches + branch_num
 
+def rearrange_eigvec(old_pos, new_pos, scrambled_eigvec):
+    eigvec = np.zeros(scrambled_eigvec.shape, dtype=np.complex)
+    for i, opos in enumerate(old_pos):
+        for j, npos in enumerate(new_pos):
+            if (npos == opos).all():
+                eigvec[i, :] = scrambled_eigvec[j, :]
+    return eigvec
+
+def apply_symm_operations(eigvec, positions, q_pt, rots, trans):
+    transformed_set = [eigvec]
+    transformed_qs = [q_pt]
+    print('transformed set =', transformed_set)
+    for i, r in enumerate(rots):
+        q_trans = np.dot(r, q_pt)
+        if (q_pt == q_trans).all():
+            continue
+        else:
+            q_flag = True
+            for q_t in transformed_qs:
+                if (q_t == q_trans).all():
+                    q_flag = False
+                    break
+            if q_flag:
+                transformed_qs.append(q_trans)
+            else:
+                continue
+        scrambled_eigvec_rot = np.array([np.dot(r, eig) for eig in eigvec])
+
+        #print('eigvec_rot =', eigvec_rot)
+
+#        atom_trans = np.array([trans[i] for dummy in range(len(positions))]).T
+
+        positions_rot = np.dot(positions, r)
+        eigvec_rot = rearrange_eigvec(positions, positions_rot, scrambled_eigvec_rot)
+        #NOTE: do not know whether the minus sign in the exponential is correct
+        #NOTE: it comes from the translation operator, but phonopy may have its own phase convention that overrules the "standard" operation
+        #eig_transform = np.empty(eigvec_rot.shape, dtype=np.complex)
+        #exp_fcn = np.exp(-2j * np.pi * np.dot(q_pt, r_trans))
+        #for count, er in enumerate(eigvec_rot):
+        #    eig_transform[count, :] = er * exp_fcn[count]
+        #transformed_set.append(eigvec_rot * np.exp(-1j * np.dot(q_pt, r_trans)))
+        #transformed_set.append(eig_transform)
+        transformed_set.append(eigvec_rot)
+    return transformed_qs, transformed_set
+
 def create_eigvec_grid(eigvecs, bzmap, mesh):
     #grid = np.zeros(mesh)
     #for i, g in enumerate(grid_points):
@@ -249,6 +658,36 @@ def create_eigvec_grid(eigvecs, bzmap, mesh):
     #            eig_grid[:, :, :, kx_id, ky_id, kz_id] = eigvecs[:, :, grid[kx_id, ky_id, kz_id], :]
     return eig_grid
 
+def get_q_index(q_pt, mesh):
+    return np.multiply(q_pt, mesh).astype(int)
+
+#@jit(nopython=True, parallel=True)
+def create_eigvec_grid_symm(q_pts, eigvecs, mesh, positions, lattice, masses, magmoms=[], checkweights=[]):
+    """ This is an improvement of the module above called create_eigvec_grid. The purpose of this function is to create
+    an eigenvector grid that correctly accounts for the symmetry operations present in the unit cell. The problem with
+    the above module is that there are no symmetry operations applied, and no easy way to implement them"""
+    (rots, trans) = get_symm_operations(lattice, positions, masses, magmoms)
+    natoms = eigvecs.shape[0]
+    ncart = eigvecs.shape[1]
+    neigs = eigvecs.shape[3]
+    print('neigs =', neigs)
+    grid_shape = np.concatenate((mesh, [natoms, ncart, neigs]))
+    eig_grid = np.empty(grid_shape, dtype=np.complex)
+    for q_index in range(len(q_pts)):
+        q = q_pts[q_index, :]
+        print('q =', q)
+        for eigvec_index in range(neigs):
+            print('q_index =', q_index)
+            eigvec = eigvecs[:, :, q_index, eigvec_index]
+            (q_trans, eig_trans) = apply_symm_operations(eigvec, positions, q, rots, trans)
+            print('weight check! weight from yaml file =', checkweights[q_index])
+            print('weight from get_symm_operations in code =', len(q_trans))
+            for i, q_t in enumerate(q_trans):
+                q_indices = get_q_index(q_t, mesh)
+                #print('eig_trans =', eig_trans[i][:, :])
+                eig_grid[q_indices[2], q_indices[1], q_indices[0], :, :, eigvec_index] = eig_trans[i][:, :]
+    return eig_grid
+
 def create_qpt_map(bzmap, mesh):
     #bz_grid = np.reshape(bzmap, mesh)
     ir_map = np.unique(bzmap)
@@ -259,7 +698,25 @@ def create_qpt_map(bzmap, mesh):
     qpt_index_list = np.array([np.where(ir_map==g_pt)[0][0] for g_pt in bzmap])
     return np.reshape(qpt_index_list, mesh)
 
-@jit(nopython=True, parallel=True)
+def get_qpt_shifts(mesh, gamma_center=True):
+    #TODO: setup for non-gamma centered grids
+    # Currently only set up for gamma center
+    qpts = []
+    for dim in mesh:
+        spacing = 1.0 / dim
+        curr_q = 0.0
+        if not gamma_center:
+            curr_q += spacing / 2
+        qpts_along_dim = []
+        for i in range(dim):
+            if curr_q > 0.5:
+                curr_q += -1
+            qpts_along_dim.append(curr_q)
+            curr_q += spacing
+        qpts.append(np.array(qpts_along_dim))
+    return np.array(qpts)
+
+#@jit(nopython=True, parallel=True)
 def compute_Sqw(phonons, q_point, delta_e, max_e, num_overtones):
     # plan is to compute s_\tau\tau'(k, w) as presented in eq 22 in notes
     # once this function is constructed, then convolutions begin
@@ -318,8 +775,12 @@ def compute_Sqw(phonons, q_point, delta_e, max_e, num_overtones):
     # NEW PLAN: make this object independent of q to spread with other MPI ranks
     # TODO: speed up code by changing how get_eigindex... code works; it currently uses np.where which appears to be unnecessary and slow
     # TODO: prob want to create code that maps the indices to a grid that makes sense, current mpgrid seems fine
-    eig_grid = create_eigvec_grid(phonons.eigvecs, bz_map, phonons.mesh)
+    #eig_grid = create_eigvec_grid_symm(phonons.eigvecs, bz_map, phonons.mesh)
+    eig_grid = create_eigvec_grid_symm(phonons.qpoints, phonons.eigvecs, phonons.mesh, phonons.positions,
+                                       phonons.lattice, phonons.masses, checkweights=phonons.weights)
     qpt_map = create_qpt_map(bz_map, phonons.mesh)
+    #TODO: include gamma center tag in phonon object class
+    qpt_shifts = get_qpt_shifts(phonons.mesh, gamma_center=True)
     for tau_1 in range(phonons.natoms):
         for tau_2 in range(tau_1, phonons.natoms):
             for s in range(n_eigs):
@@ -336,25 +797,34 @@ def compute_Sqw(phonons, q_point, delta_e, max_e, num_overtones):
 
                             # hopefully eigenvectors are unnormalized at this point
                             # need to remove phonopy phase convention of eigvecs
-                            r_1 = np.dot(phonons.positions[tau_1, :], phonons.lattice)
-                            r_2 = np.dot(phonons.positions[tau_2, :], phonons.lattice)
+                            #r_1 = np.dot(phonons.positions[tau_1, :], phonons.lattice)
+                            #r_2 = np.dot(phonons.positions[tau_2, :], phonons.lattice)
                             #eig_1 = phonons.eigvecs[tau_1, :, eig_index] * np.exp(1j * np.vdot(q_point, r_1))
                             # NOTE: Removing the phase factor convention because I think it's causing unintended problems
-                            eig_1 = eig_grid[k, j, i, tau_1, :, s] * np.exp(1j *
-                                                                            np.vdot(np.array([i, j, k]) / phonons.mesh,
-                                                                                    phonons.positions[tau_1, :]))
+                            eig_1 = eig_grid[k, j, i, tau_1, :, s] * \
+                                    np.exp(1j * np.vdot(np.array([qpt_shifts[0, i], qpt_shifts[1, j], qpt_shifts[2, k]]),
+                                                        phonons.positions[tau_1, :]))
                             #NOTE: in principle assuming that eig(k) = eig(-k)^* which may NOT be true in future
                             #      particularly when looking at potential topological materials
                             #eig_2 = phonons.eigvecs[tau_2, :, eig_index] * np.exp(1j * np.vdot(q_point, r_2))
-                            eig_2 = eig_grid[k, j, i, tau_2, :, s] * np.exp(1j *
-                                                                            np.vdot(np.array([i, j, k]) / phonons.mesh,
-                                                                                    phonons.positions[tau_2, :]))
+                            eig_2 = eig_grid[k, j, i, tau_2, :, s] * \
+                                    np.exp(1j * np.vdot(np.array([qpt_shifts[0, i], qpt_shifts[1, j], qpt_shifts[2, k]]),
+                                                        phonons.positions[tau_2, :]))
                             eig_index = qpt_map[k, j, i] * 3 * phonons.natoms + s
+                            if i==5 and j==0 and k==0:
+                                print('check dot prods...')
+                                print('q dot eig2=', np.vdot(q_point, eig_1))
+                                print('q dot eig1^* =', np.conj(np.vdot(q_point, eig_2)))
+                                print('prod of both =', np.conj(np.vdot(q_point, eig_1)) * np.vdot(q_point, eig_2))
+                                print('frequency =', phonons.frequencies[eig_index])
                             s_fcn[tau_1, tau_2, i, j, k, :] += norm_constant * (np.conj(np.vdot(q_point, eig_1)) * np.vdot(q_point, eig_2)) / \
                                                               num_cells * get_spectrum([dxdydzdw**-1],
                                                                                        [phonons.frequencies[eig_index]],
                                                                                        delta_e, max_e)
-                            s_fcn[tau_2, tau_1, i, j, k, :] += np.conj(s_fcn[tau_1, tau_2, i, j, k, :])
+                            s_fcn[tau_2, tau_1, i, j, k, :] += np.conj(norm_constant * (np.conj(np.vdot(q_point, eig_1)) * np.vdot(q_point, eig_2)) / \
+                                                              num_cells * get_spectrum([dxdydzdw**-1],
+                                                                                       [phonons.frequencies[eig_index]],
+                                                                                       delta_e, max_e))
 
     # now s_fcn is the proper 4-d object of tensors (6-d overall)
     #TODO note that the tensors can be completely decoupled and thus parallelized in future versions!!!
@@ -367,7 +837,7 @@ def compute_Sqw(phonons, q_point, delta_e, max_e, num_overtones):
             r_1 = np.dot(phonons.positions[tau_1, :], phonons.lattice)
             r_2 = np.dot(phonons.positions[tau_2, :], phonons.lattice)
             s_qw += convolve_f_i(s_fcn[tau_1, tau_2, :, :, :, :], num_overtones, delta_e, coh_flag=True, dxdydz=dxdydz) * \
-                    np.exp(1j * np.vdot(-q_point, (r_1 - r_2))) * exp_DWF[tau_1] * exp_DWF[tau_2]
+                    np.exp(1j * np.vdot(q_point, (r_1 - r_2))) * exp_DWF[tau_1] * exp_DWF[tau_2]
     return s_qw
 
 def compute_incoherent_Sqw(phonons, q_point, delta_e, max_e, num_overtones, anh_flag=False, gammas=[0]):
@@ -484,28 +954,40 @@ class Runner:
     def get_phonons(self):
         return phonon_lifetimes.Anh_System(self.yaml_file, self.hdf5_file)
 
-num_overtones = 1
-delta_e = 0.01
-# units are unfortunately in THz
-max_e = 300
 
-yaml_file = sys.argv[1]
-hdf5_file = sys.argv[2]
-#anh_phonons = phonon_lifetimes.Anh_System(yaml_file, hdf5_file)
-#phonons = anh_phonons.dyn_system
-#phonons = ph.Dyn_System(yaml_file)
+if __name__ == '__main__':
+    num_overtones = 10
+    delta_e = 0.01
+    # units are unfortunately in THz
+    max_e = 30
 
-#conv_THz_to_meV = 4.13567
+    #yaml_file = sys.argv[1]
+    #hdf5_file = sys.argv[2]
+    #anh_phonons = phonon_lifetimes.Anh_System(yaml_file, hdf5_file)
+    #phonons = anh_phonons.dyn_system
+    #phonons = ph.Dyn_System(yaml_file)
 
-# test with arbitrary single q-point
-#reduced_qpt = 10 * np.array([0.5, 0.0, 0.0])
-#d_times = np.zeros(3)
+    #conv_THz_to_meV = 4.13567
 
-#mapping, testgrid = get_BZ_map(phonons.mesh, phonons.lattice, phonons.positions, phonons.masses, magmoms=[])
+    # test with arbitrary single q-point
+    reduced_qpt = 1 * np.array([[5/11.0, 0.0, 0.0]])
+    #d_times = np.zeros(3)
 
-#s_qw = compute_Sqw(phonons, reduced_qpt, delta_e, max_e, num_overtones)
-#s_qw = compute_incoherent_Sqw(phonons, reduced_qpt, delta_e, max_e, num_overtones)
-#s_qw, decoherence_time = compute_decoherence_time(phonons, reduced_qpt, delta_e, max_e, num_overtones, anh_phonons.gammas, True)
+    #mapping, testgrid = get_BZ_map(phonons.mesh, phonons.lattice, phonons.positions, phonons.masses, magmoms=[])
+    mesh = [11, 11, 11]
+    supercell = [2, 2, 2]
+    poscar = "/Volumes/GoogleDrive/My Drive/phonon_lifetimes/Si_2x2x2/si_POSCAR"
+    fc = "/Volumes/GoogleDrive/My Drive/phonon_lifetimes/Si_2x2x2/force_constants.hdf5"
+    dynamic_structure_factor = DynamicStructureFactor(poscar, fc, mesh, supercell,
+                                                      q_point_list=reduced_qpt[0, :].reshape(-1, 3),
+                                                      max_e=max_e,
+                                                      delta_e=delta_e,
+                                                      num_overtones=num_overtones)
+    dynamic_structure_factor.get_coherent_sqw()
+    dynamic_structure_factor.write_coherent_sqw('test_output_sqw.txt')
+    #s_qw = compute_Sqw(phonons, reduced_qpt, delta_e, max_e, num_overtones)
+    #s_qw = compute_incoherent_Sqw(phonons, reduced_qpt, delta_e, max_e, num_overtones)
+    #s_qw, decoherence_time = compute_decoherence_time(phonons, reduced_qpt, delta_e, max_e, num_overtones, anh_phonons.gammas, True)
 """#plot slices
 ax = plt.gca()
 ax.pcolormesh(np.squeeze(s_qw[:, 0, 0, :]))

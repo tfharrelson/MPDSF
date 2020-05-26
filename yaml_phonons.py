@@ -214,7 +214,7 @@ class Dyn_System:
             if self.frequencies[i] < 0:
                 #print('NEGATIVE FREQUENCY'), print(self.frequencies[i])
                 #continue
-                freq = -1 * self.frequencies[i]
+                freq = 1e12
             else:
                 freq = self.frequencies[i]
             q_index = int(np.floor(i / num_bands))

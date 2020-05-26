@@ -47,9 +47,12 @@ if rank == 0:
     print('full qpt list =', qpts)
 #for q in qpt_list:
 #    s_qw = compute_Sqw.Runner.get_coherent_spectrum(yaml_filename, hdf5_filename, q, num_overtones=10, delta_e=0.01, max_e=30)
-partial_sqw_list = np.array([compute_Sqw.Runner(yaml_filename,hdf5_filename, q_point=q,
-                                                 num_overtones=1, delta_e=0.01, max_e=30).get_coherent_spectrum()
-                             for q in qpt_list])
+#partial_sqw_list = np.array([compute_Sqw.Runner(yaml_filename,hdf5_filename, q_point=q,
+#                                                 num_overtones=1, delta_e=0.01, max_e=30).get_coherent_spectrum()
+#                             for q in qpt_list])
+dsf = compute_Sqw.DynamicStructureFactor(poscar, fc, mesh, supercell, qpt_list, delta_e=de, max_e=me, num_overtones=no)
+dsf.get_coherent_sqw()
+#dsf.write_coherent_sqw()
 if rank == 0:
     #test_qpts = np.zeros([int(sum(qpt_sizes)/3), 3])
     #rec_sizes = qpt_sizes

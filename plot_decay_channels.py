@@ -143,6 +143,8 @@ def create_decay_spectrum(pp, triplets, triplet_map, grid_points, frequencies, d
     print('frequency 1 =', frequencies[combined_index_1])
     return spectrum
 
+#def compute_dispersive_shifts():
+
 def smear_spectrum(spectrum, sigma, delta_e):
     n_sigma = 10
     num_bins_half = int(np.ceil(n_sigma * sigma / delta_e))
