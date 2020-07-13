@@ -91,8 +91,10 @@ def create_decay_spectrum(pp, triplets, triplet_map, grid_points, frequencies, d
                 combined_index_1 = get_combined_index(q1_index, pp_shape[1] - 1, num_branches)
                 combined_index_2 = get_combined_index(q2_index, b2, num_branches)
                 combined_index_3 = get_combined_index(q3_index, b3, num_branches)
+                #print('pp_shape =', pp.shape)
 
                 for i in range(len(pp_elements)):
+                    combined_index_1 = get_combined_index(q1_index, pp_shape[1] - 1 - i, num_branches)
                     if check_frequencies(frequencies[combined_index_1], frequencies[combined_index_2],
                                          frequencies[combined_index_3], thresh):
                         spectrum += pp_elements[i] / 2 * create_delta(frequencies[combined_index_2], delta_e, max_e) * \
@@ -120,11 +122,11 @@ def create_decay_spectrum(pp, triplets, triplet_map, grid_points, frequencies, d
                                     (-compute_occupation_number(frequencies[combined_index_2], temperature) +
                                      compute_occupation_number(frequencies[combined_index_3]), temperature)
                         print('delta 3 satisfied!')
-                    else:
-                        print('No delta functions satisfied...')
-                        print('frequency1 =', frequencies[combined_index_1])
-                        print('frequency2 =', frequencies[combined_index_2])
-                        print('frequency3 =', frequencies[combined_index_3])
+                    #else:
+                        #print('No delta functions satisfied...')
+                        #print('frequency1 =', frequencies[combined_index_1])
+                        #print('frequency2 =', frequencies[combined_index_2])
+                        #print('frequency3 =', frequencies[combined_index_3])
                 """
                 for i in range(len(pp_elements)):
                     spectrum += pp_elements[i] * create_delta(frequencies[combined_index_2] +
@@ -142,6 +144,8 @@ def create_decay_spectrum(pp, triplets, triplet_map, grid_points, frequencies, d
                 """
     print('frequency 1 =', frequencies[combined_index_1])
     return spectrum
+
+#def create_lifetime_spectrum
 
 #def compute_dispersive_shifts():
 
@@ -178,4 +182,6 @@ print('phonon energy =', 7.6463566 * conv_THz_to_meV)
 plt.plot(np.linspace(0, len(spectrum) * delta_e, len(spectrum)) * conv_THz_to_meV, spectrum)
 plt.xlabel('Energy (meV)')
 plt.xlim([0, 50])
+plt.tight_layout()
+plt.savefig('gaas_decay_channels.eps', dpi=600)
 plt.show()
