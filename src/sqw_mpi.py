@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-import compute_Sqw
-import yaml_phonons as ph
+from src import yaml_phonons as ph, compute_Sqw
 from mpi4py import MPI
 import sys
 import numpy as np

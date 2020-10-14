@@ -1,8 +1,7 @@
 import numpy as np
 from scipy import signal
-import sys
 #import yaml_phonons as ph
-import phonon_lifetimes
+from src import phonon_lifetimes
 import math
 import scipy.constants as const
 #import matplotlib.pyplot as plt
@@ -11,17 +10,9 @@ import spglib as spg
 from phonopy import load
 from phonopy.units import THz, AMU
 from phonopy.interface.vasp import read_vasp
-from phonopy.file_IO import parse_BORN
-from phonopy.units import Bohr, Hartree
-from phonopy.harmonic.force_constants import show_drift_force_constants
-from phono3py.phonon3.fc3 import show_drift_fc3
 from phono3py.api_phono3py import Phono3py
 from phono3py.file_IO import (parse_disp_fc3_yaml,
-                              parse_disp_fc2_yaml,
-                              parse_FORCES_FC2,
-                              parse_FORCES_FC3,
-                              read_fc3_from_hdf5,
-                              read_fc2_from_hdf5)
+                              parse_FORCES_FC3)
 from spglib import get_ir_reciprocal_mesh
 from scipy.interpolate import interp1d
 AngstromsToMeters = 1e-10
@@ -129,7 +120,7 @@ class AnharmonicPhonons(object):
         key = np.round(np.array(qpoint) * np.array(self.mesh)).astype(int) / np.array(self.mesh)
         return self.grid[tuple(key)]
 
-    def get_broadening_function(self, qpoint, band_index):
+    def get_broadening_function(self, qpoint, band_index, max_freq=None):
         #########################################################################################################
         # Method returns a broadening function that will resemble a simple Lorentzian                           #
         # However it is actually a Lorentzian-type function with a frequency-dependent width                    #
@@ -146,6 +137,12 @@ class AnharmonicPhonons(object):
         f_index_minus = np.floor(self.phonon_freqs[gridpoint, band_index] / (freqs[1] - freqs[0])).astype(int)
         avg_gamma_at_freq = (gamma[f_index_minus] + gamma[f_index_minus+1]) / 2
         #print('original integral of broad func =', np.trapz(broadening_func, freqs))
+
+        if max_freq is None:
+            freqs = np.append(freqs, freqs[-1]*1000)
+        else:
+            freqs = np.append(freqs, max_freq + 1.0)
+        broadening_func = np.append(broadening_func, 0.0)
 
         if np.trapz(broadening_func, freqs) < 1.0:
             if avg_gamma_at_freq < freqs[1]-freqs[0]:
@@ -179,15 +176,12 @@ class AnharmonicPhonons(object):
         #          guaranteed to be 1.0, which creates large problems when expanding to higher orders of perturbation.
         # Add large frequency mapped to zero for broad func to ensure no extrapolation errors
 
-        #if np.trapz(broadening_func, freqs) != 0:
-        #    broadening_func /= np.trapz(broadening_func, freqs)
-        #print('adjusted integral of broad func =', np.trapz(broadening_func, freqs))
-        freqs = np.append(freqs, freqs[-1]*1000)
-        broadening_func = np.append(broadening_func, 0.0)
+        # increase interpolation range by adding zeros out to maximum frequency
+        # if no maximum frequency specified, then multiply last frequency by 1000
         #print('after extending, integral equals =', np.trapz(broadening_func, freqs))
-        if gridpoint==0:
+        #if gridpoint==0:
             #print('freq insided anharm code =', self.phonon_freqs[gridpoint, band_index])
-            print('integral at gp0 =', np.trapz(broadening_func, freqs))
+        #print('integral at gp0 =', np.trapz(broadening_func, freqs))
         return interp1d(freqs, broadening_func, kind='linear')
 
     def set_phonon_freqs(self):
@@ -213,6 +207,25 @@ class AnharmonicPhonons(object):
         delta_fcn[e_bin_minus] = (1 - alpha_minus) / delta_e
         delta_fcn[e_bin_plus] = (1 - alpha_plus) / delta_e
         return delta_fcn
+
+    def set_gamma_interpolator(self):
+        from src.Interpolation import Interpolator
+
+        gamma_data, qpts, freqs = self.get_gamma_data()
+        interp = Interpolator(gamma=gamma_data, qpoints=qpts, freqs=freqs)
+
+
+    def get_gamma_data(self, band_index):
+        gamma_data = []
+        q_pts = []
+        for q in self.phono3py.get_phonon_data()[2]:
+            q /= self.phono3py.mesh_numbers
+            freqs, gamma = self.get_imag_self_energy(self.get_gridpoint(q), band_index)
+            #gamma_data += list(gamma)
+            #q_data += [list(q) + [freq] for freq in freqs]
+            q_pts.append(q)
+            gamma_data.append(gamma)
+        return gamma_data, q_pts, freqs
 
 class DynamicStructureFactor(object):
     def __init__(self,
@@ -300,8 +313,10 @@ class DynamicStructureFactor(object):
             atomic_form_factor_func=None,
             scattering_lengths=None):
         # Transformation to the Q-points in reciprocal primitive basis vectors
-        Q_prim = np.dot(Qpoints, phonon.primitive_matrix)
+        #Q_prim = np.dot(Qpoints, phonon.primitive_matrix)
+        Q_prim = Qpoints        # assume user is inputting datapoints for the primitive lattice
         # Q_prim must be passed to the phonopy dynamical structure factor code.
+        print('Q_prim',Q_prim)
         phonon.run_dynamic_structure_factor(
             Q_prim,
             temperature,
@@ -356,6 +371,8 @@ class DynamicStructureFactor(object):
 
         outer_eig_list = np.zeros([len(masses), len(masses), 3, 3, len(frequencies)], dtype=np.complex)
         for i, f in enumerate(frequencies):
+            if q_index == 0 and i < 3:
+                continue
             if self.dsf._fmin < f:
                 outer_eig_list[:, :, :, :, i] = self.get_outer_eig(eigvecs[:, i], masses, f, qpoint, positions)
         return outer_eig_list
@@ -390,10 +407,6 @@ class DynamicStructureFactor(object):
                     freqs_at_q = freqs[q_index]
 
                     for outer_counter in range(outer_eigs_at_q.shape[-1]):
-                        if q_index == 1:
-                            print('band index =', outer_counter)
-                            print('test outer_eigs =', outer_eigs_at_q[:, :, :, :, outer_counter])
-                            print('freq in DSF code =', freqs_at_q[outer_counter])
                         if self.anharmonicities is None:
                             skw_kernel[i, j, k, :, :, :, :, :] += norm_factor * np.tensordot(
                                 outer_eigs_at_q[:, :, :, :, outer_counter].reshape((1,) + outer_eigs_at_q.shape[:-1]),
@@ -446,7 +459,7 @@ class DynamicStructureFactor(object):
         #gridpoint = self.anharmonicities.grid[tuple(self.kernel_qpoints[q_index, :])]
         #print('qpoint =', q_point)
         #print('band_index =', band_index)
-        anh_dist_func = self.anharmonicities.get_broadening_function(q_point, band_index)
+        anh_dist_func = self.anharmonicities.get_broadening_function(q_point, band_index, max_freq=self.max_e)
         return anh_dist_func(freqs)
 
     def create_lorentzian(self, energy, gamma):
@@ -492,22 +505,29 @@ class DynamicStructureFactor(object):
         total_f_i = curr_f
         # norm_constant = 1 / 8
         # norm_constant = 1 / (8 * sum(phonons.weights))
+
         for i in range(1, self.num_overtones):
-            print('overtone ='), print(i + 1)
+            #print('overtone ='), print(i + 1)
             if i > 1:
                 curr_f = curr_f * norm_constant
-            # print('int of curr_f'), print(np.trapz(curr_f) * delta_e)
+            #print('int of curr_f'), print(np.trapz(curr_f[1,0,0,:]) * self.delta_e)
             if coh_flag:
                 if i == 1:
                     curr_f *= 1
-                curr_f = circ_conv(curr_f, f_i) * self.delta_e * self.dxdydz
+                curr_f = self.circ_conv(curr_f, f_i) * self.delta_e * self.dxdydz
             else:
                 curr_f = signal.fftconvolve(curr_f, f_i, mode='full')[:len(f_i)] * self.delta_e
-            # print('int of curr_f'), print(np.trapz(curr_f) * delta_e)
+            #print('int of curr_f'), print(np.trapz(curr_f[1,0,0,:]) * self.delta_e)
             # total_f_i += curr_f / (np.sqrt(math.factorial(i + 1)))
 
             total_f_i += curr_f / float(math.factorial(i + 1))
         return total_f_i
+
+    def circ_conv(self, sig, kernel):
+        # purpose is to perform a circular convolution (e.g. signal is periodic) of a 3-dimensional object
+        # in this case, the 3-d object is a function proportional to phonon eigenvector as a function of q in the BZ
+        # TODO Incorporate my own padding to the frequency dimension of the circular convolution; use appropriate tags
+        return np.fft.ifftn(np.fft.fftn(sig) * np.fft.fftn(kernel))
 
     def get_spectrum(self, f_ab, frequencies, q_point=None, band_index=None):
         num_bins = int(np.ceil(self.max_e / self.delta_e))
@@ -519,12 +539,13 @@ class DynamicStructureFactor(object):
                 #print('integral of broad func in DSF code =', np.trapz(self.create_anharmonic_distribution(q_point, band_index))*0.1)
                 anh_dist = self.create_anharmonic_distribution(q_point, band_index)
                 integral = np.trapz(anh_dist, freqs)
+                #print('integral =', integral)
                 if integral != 0:
                     spectrum += f_ab[i] * anh_dist / integral
         else:
             for i in range(len(frequencies)):
                 spectrum += f_ab[i] * self.create_delta(frequencies[i])
-        print('integral of spectrum =', np.trapz(spectrum, freqs))
+        #print('integral of spectrum =', np.trapz(spectrum, freqs))
         return spectrum
 
     def test_exp_DWF_at_q(self, q_index):
@@ -543,6 +564,8 @@ class DynamicStructureFactor(object):
             DWF = 0.0
             for i, eigs_at_k in enumerate(eigvecs):
                 for s, eig in enumerate(eigs_at_k.T):
+                    if i == 0 and s < 3:
+                        continue
                     if frequencies[i, s] > self.dsf._fmin:
                         eig = np.reshape(eig, [len(masses), 3])
                         DWF += np.abs(np.dot(q_cart, eig[m, :]))**2 * const.hbar / (4 * np.pi * frequencies[i, s] * THz * masses[m] * AMU)
@@ -575,7 +598,7 @@ class DynamicStructureFactor(object):
         for i, freqs_at_q in enumerate(frequencies):
             for j, f in enumerate(freqs_at_q):
                 if f > self.dsf._fmin:
-                    inv_freqs[i, j] = 1 / (4 * np.pi * THz * f)
+                    inv_freqs[i, j] = 1 / (4 * np.pi * THz * f) # Represents 1/2w, where w is the angular frequency
         weighted_q_dot_e_sq = ( np.reshape(inv_freqs, np.prod(frequencies.shape)) * \
                               np.reshape(weighted_q_dot_e_sq, [np.prod(frequencies.shape), len(masses)]).T).T
 
@@ -603,13 +626,13 @@ class DynamicStructureFactor(object):
         if len(self.exp_DWF) is 0:
             self.get_exp_DWF()
 
-        norm_factor = self.dsf._unit_convertion_factor / (2 * np.pi * THz) * const.hbar
+        norm_factor = np.prod(self.mesh)
         positions = self.dsf._primitive.get_scaled_positions()
         for tau_1 in range(natoms):
             for tau_2 in range(natoms):
                 s_qw[:, :, :, :] += self.convolve_f_i(contracted_kernel[:, :, :, tau_1, tau_2, :], coh_flag=True) * \
                         np.exp(2j * np.pi * np.vdot(q_point, (positions[tau_1] - positions[tau_2]))) \
-                        * self.exp_DWF[q_index][tau_1] * self.exp_DWF[q_index][tau_2] #* norm_factor
+                        * self.exp_DWF[q_index][tau_1] * self.exp_DWF[q_index][tau_2] * norm_factor
         #TODO: Super worried about units, make sure they are correct, Togo's conversion factors seem wonky to me
         return s_qw
 
@@ -625,7 +648,7 @@ class DynamicStructureFactor(object):
         for i in range(len(self.qpoints)):
             self.sqw.append(self.interpolate_sqw(self.get_coherent_sqw_at_q(i), self.qpoints[i]))
             print('i = ', i)
-            print('integral of current sqw =', np.trapz(self.sqw[i])*0.1)
+            print('integral of current sqw =', np.trapz(self.sqw[i])*self.delta_e)
 
     def write_coherent_sqw(self, filename, ftype='hdf5'):
         if ftype == 'txt':
@@ -644,6 +667,7 @@ class DynamicStructureFactor(object):
             with h5.File(filename, 'w') as fw:
                 fw['q-points'] = self.qpoints
                 fw['sqw'] = np.abs(np.array(self.sqw))
+                fw['reclat'] = self.dsf._rec_lat * 2 * np.pi
         else:
             print('ERROR: Unrecognized filetype used: ftype =', ftype)
 
@@ -1211,11 +1235,37 @@ class Runner:
         return phonon_lifetimes.Anh_System(self.yaml_file, self.hdf5_file)
 
 
+def set_qpoints(mesh, num_Gpoints=0, q_shift=[0, 0, 0], stride=1, stride_G=1):
+    qpoints = np.zeros([0, 3])
+    count = 0
+    curr_qx = q_shift[0] / mesh[0]
+    curr_qy = q_shift[1] / mesh[1]
+    curr_qz = q_shift[2] / mesh[2]
+    spacing = float(stride) / np.array(mesh)
+    for gz in range(0, num_Gpoints, stride_G):
+        for gy in range(0, num_Gpoints, stride_G):
+            for gx in range(0, num_Gpoints, stride_G):
+                for z in range(0, mesh[2], stride):
+                    for y in range(0, mesh[1], stride):
+                        for x in range(0, mesh[0], stride):
+                            qpoints = np.append(qpoints, [[curr_qx + gx, curr_qy + gy, curr_qz + gz]],axis=0)
+                            count += 1
+                            curr_qx += spacing[0]
+                            if curr_qx > 0.5:
+                                curr_qx -= 1.0
+                        curr_qy += spacing[1]
+                        if curr_qy > 0.5:
+                            curr_qy -= 1.0
+                    curr_qz += spacing[2]
+                    if curr_qz > 0.5:
+                        curr_qz -= 1.0
+    return qpoints
+
 if __name__ == '__main__':
     num_overtones = 2
-    delta_e = 0.1
+    delta_e = 0.2
     # units are unfortunately in THz
-    max_e = 100
+    max_e = 200
 
     #yaml_file = sys.argv[1]
     #hdf5_file = sys.argv[2]
@@ -1226,25 +1276,32 @@ if __name__ == '__main__':
     #conv_THz_to_meV = 4.13567
 
     # test with arbitrary single q-point
-    reduced_qpt = np.outer(np.arange(1,46) / 9.0, np.array([1,0,0])) + 0
+    reduced_qpt = np.outer(np.arange(1, 12) / 23.0, np.array([1,0,0])) + 0
+    reduced_qpts = reduced_qpt
+    reduced_qpts = np.append(reduced_qpts, np.outer(np.arange(3, 4) / 5.0, np.array([1, 1, 1])) + 10, axis=0)
+    reduced_qpts = np.append(reduced_qpts, np.outer(np.arange(3, 4) / 5.0, np.array([1, 1, 1])) + 20, axis=0)
+    reduced_qpts = np.append(reduced_qpts, np.outer(np.arange(3, 4) / 5.0, np.array([1, 1, 1])) + 50, axis=0)
+    # test with entire BZ
 
-    print('reduced_qpoint =', reduced_qpt)
-    #d_times = np.zeros(3)
-
+    #print(qpoints)
     #mapping, testgrid = get_BZ_map(phonons.mesh, phonons.lattice, phonons.positions, phonons.masses, magmoms=[])
-    mesh = [5,5,5]
-    #supercell = [2, 2, 2]
-    supercell = [1, 1, 1]
-    #poscar = "/Volumes/GoogleDrive/My Drive/Cori_backup/GaAs/phono3py/2x2x2/POSCAR"
-    poscar = "/Volumes/GoogleDrive/My Drive/multiphonon/rubrene_POSCAR"
-    #fc = "/Volumes/GoogleDrive/My Drive/Cori_backup/GaAs/phono3py/2x2x2/fc2.hdf5"
-    fc = "/Volumes/GoogleDrive/My Drive/multiphonon/rubrene_FORCE_SETS"
-    #fc3 = "/Volumes/GoogleDrive/My Drive/Cori_backup/GaAs/phono3py/2x2x2/FORCES_FC3"
-    #disp = "/Volumes/GoogleDrive/My Drive/Cori_backup/GaAs/phono3py/2x2x2/disp_fc3.yaml"
-    scattering_lengths = {'C': 1.0, 'H': 1.0}
-    #scattering_lengths = {'Ga': 1.0, 'As': 1.0}
+    mesh = [23,23,23]
+    supercell = [2, 2, 2]
+
+    qpoints = set_qpoints(mesh=mesh, num_Gpoints=50, stride_G=10)
+    print(qpoints)
+    #supercell = [1, 1, 1]
+    poscar = "/Volumes/GoogleDrive/My Drive/Cori_backup/GaAs/phono3py/2x2x2/POSCAR"
+    #poscar = "/Volumes/GoogleDrive/My Drive/multiphonon/rubrene_POSCAR"
+    fc = "/Volumes/GoogleDrive/My Drive/Cori_backup/GaAs/phono3py/2x2x2/fc2.hdf5"
+    #fc = "/Volumes/GoogleDrive/My Drive/multiphonon/rubrene_FORCE_SETS"
+    fc3 = "/Volumes/GoogleDrive/My Drive/Cori_backup/GaAs/phono3py/2x2x2/FORCES_FC3"
+    disp = "/Volumes/GoogleDrive/My Drive/Cori_backup/GaAs/phono3py/2x2x2/disp_fc3.yaml"
+    #scattering_lengths = {'C': 1.0, 'H': 1.0}
+    scattering_lengths = {'Ga': 1.0, 'As': 1.0}
     dynamic_structure_factor = DynamicStructureFactor(poscar, fc, mesh, supercell,
                                                       #q_point_list=reduced_qpt[0, :].reshape(-1, 3),
+                                                      #q_point_list=qpoints[1:,:],
                                                       q_point_list=reduced_qpt,
                                                       max_e=max_e,
                                                       delta_e=delta_e,
@@ -1253,7 +1310,7 @@ if __name__ == '__main__':
                                                       #disp_file=disp,
                                                       scattering_lengths=scattering_lengths)
     dynamic_structure_factor.get_coherent_sqw()
-    dynamic_structure_factor.write_coherent_sqw('q0_anh_output_sqw.hdf5')
+    dynamic_structure_factor.write_coherent_sqw('q2_test23_harm.hdf5')
     #s_qw = compute_Sqw(phonons, reduced_qpt, delta_e, max_e, num_overtones)
     #s_qw = compute_incoherent_Sqw(phonons, reduced_qpt, delta_e, max_e, num_overtones)
     #s_qw, decoherence_time = compute_decoherence_time(phonons, reduced_qpt, delta_e, max_e, num_overtones, anh_phonons.gammas, True)

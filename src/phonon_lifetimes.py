@@ -1,5 +1,5 @@
 import numpy as np
-import yaml_phonons
+from src import yaml_phonons
 import h5py
 
 class Anh_System:
