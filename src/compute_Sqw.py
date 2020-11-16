@@ -243,7 +243,9 @@ class DynamicStructureFactor(object):
                  temperature=4,
                  freq_min=1e-3,
                  scattering_lengths=[],
-                 primitive_flag='auto'):
+                 primitive_flag='auto',
+                 scalar_mediator_flag=True,
+                 dark_photon_flag=False):
         self.mesh = mesh
         self.supercell = supercell
         self.delta_e = delta_e
@@ -287,6 +289,7 @@ class DynamicStructureFactor(object):
         self.dxdydzdw = 0.0
         self.skw_kernel = []
         self.anharmonicities = None
+        self._scalar_mediator_flag = scalar_mediator_flag
         if fc3_file is not None and disp_file is not None:
             self.set_anharmonicities(poscar=poscar_file,
                                      fc3_file=fc3_file,
@@ -378,12 +381,12 @@ class DynamicStructureFactor(object):
         return outer_eig_list
 
     def set_dxdydzdw(self):
-        #dxdydz_matrix = np.empty([3, 3])
-        #for i in range(3):
-        #    dxdydz_matrix[i, :] = dsf._rec_lat[i, :] / mesh[i]
-        #dxdydz = np.abs(np.linalg.det(dxdydz_matrix))
+        dxdydz_matrix = np.empty([3, 3])
+        for i in range(3):
+            dxdydz_matrix[i, :] = 2 * np.pi * self.dsf._rec_lat[i, :] / self.mesh[i]
+        dxdydz = np.abs(np.linalg.det(dxdydz_matrix))
         #dxdydz = 1 / ((2 * np.pi)**3)
-        dxdydz = 1.0
+        #dxdydz = 1.0
         print('dxdydz =', dxdydz)
         dxdydzdw = dxdydz * delta_e
         self.dxdydz = dxdydz
@@ -523,12 +526,6 @@ class DynamicStructureFactor(object):
             total_f_i += curr_f / float(math.factorial(i + 1))
         return total_f_i
 
-    def circ_conv(self, sig, kernel):
-        # purpose is to perform a circular convolution (e.g. signal is periodic) of a 3-dimensional object
-        # in this case, the 3-d object is a function proportional to phonon eigenvector as a function of q in the BZ
-        # TODO Incorporate my own padding to the frequency dimension of the circular convolution; use appropriate tags
-        return np.fft.ifftn(np.fft.fftn(sig) * np.fft.fftn(kernel))
-
     def get_spectrum(self, f_ab, frequencies, q_point=None, band_index=None):
         num_bins = int(np.ceil(self.max_e / self.delta_e))
         spectrum = np.zeros(num_bins, dtype=np.complex)
@@ -621,6 +618,7 @@ class DynamicStructureFactor(object):
         contracted_kernel = np.tensordot(contracted_kernel, q_cart, axes=[[5], [0]])
         #problem HERE with tensordot flipping the sign of the outerproducts
         # now compute full scattering function from convolutions of s_fcn
+        masses = self.dsf._primitive.masses
         natoms = len(self.dsf._primitive.masses)
 
         if len(self.exp_DWF) is 0:
@@ -630,9 +628,12 @@ class DynamicStructureFactor(object):
         positions = self.dsf._primitive.get_scaled_positions()
         for tau_1 in range(natoms):
             for tau_2 in range(natoms):
-                s_qw[:, :, :, :] += self.convolve_f_i(contracted_kernel[:, :, :, tau_1, tau_2, :], coh_flag=True) * \
+                factor = self.convolve_f_i(contracted_kernel[:, :, :, tau_1, tau_2, :], coh_flag=True) * \
                         np.exp(2j * np.pi * np.vdot(q_point, (positions[tau_1] - positions[tau_2]))) \
                         * self.exp_DWF[q_index][tau_1] * self.exp_DWF[q_index][tau_2] * norm_factor
+                if self._scalar_mediator_flag is True:
+                    factor *= masses[tau_1] * masses[tau_2]
+                s_qw[:, :, :, :] += factor
         #TODO: Super worried about units, make sure they are correct, Togo's conversion factors seem wonky to me
         return s_qw
 
@@ -648,7 +649,7 @@ class DynamicStructureFactor(object):
         for i in range(len(self.qpoints)):
             self.sqw.append(self.interpolate_sqw(self.get_coherent_sqw_at_q(i), self.qpoints[i]))
             print('i = ', i)
-            print('integral of current sqw =', np.trapz(self.sqw[i])*self.delta_e)
+            print('integral of current sqw =', np.trapz(self.sqw[i])*self.dxdydzdw)
 
     def write_coherent_sqw(self, filename, ftype='hdf5'):
         if ftype == 'txt':
@@ -668,6 +669,9 @@ class DynamicStructureFactor(object):
                 fw['q-points'] = self.qpoints
                 fw['sqw'] = np.abs(np.array(self.sqw))
                 fw['reclat'] = self.dsf._rec_lat * 2 * np.pi
+                fw['frequencies'] = self.get_frequencies()
+                fw['delta_w'] = self.delta_e
+                fw['dxdydz'] = self.dxdydz
         else:
             print('ERROR: Unrecognized filetype used: ftype =', ftype)
 
@@ -1235,7 +1239,7 @@ class Runner:
         return phonon_lifetimes.Anh_System(self.yaml_file, self.hdf5_file)
 
 
-def set_qpoints(mesh, num_Gpoints=0, q_shift=[0, 0, 0], stride=1, stride_G=1):
+def set_qpoints(mesh, num_Gpoints=1, q_shift=[0, 0, 0], stride=1, stride_G=1):
     qpoints = np.zeros([0, 3])
     count = 0
     curr_qx = q_shift[0] / mesh[0]
@@ -1263,9 +1267,9 @@ def set_qpoints(mesh, num_Gpoints=0, q_shift=[0, 0, 0], stride=1, stride_G=1):
 
 if __name__ == '__main__':
     num_overtones = 2
-    delta_e = 0.2
+    delta_e = 0.1
     # units are unfortunately in THz
-    max_e = 200
+    max_e = 100
 
     #yaml_file = sys.argv[1]
     #hdf5_file = sys.argv[2]
@@ -1285,10 +1289,10 @@ if __name__ == '__main__':
 
     #print(qpoints)
     #mapping, testgrid = get_BZ_map(phonons.mesh, phonons.lattice, phonons.positions, phonons.masses, magmoms=[])
-    mesh = [23,23,23]
+    mesh = [9, 9, 9]
     supercell = [2, 2, 2]
 
-    qpoints = set_qpoints(mesh=mesh, num_Gpoints=50, stride_G=10)
+    qpoints = set_qpoints(mesh=mesh)#, num_Gpoints=50, stride_G=10)
     print(qpoints)
     #supercell = [1, 1, 1]
     poscar = "/Volumes/GoogleDrive/My Drive/Cori_backup/GaAs/phono3py/2x2x2/POSCAR"
@@ -1301,74 +1305,16 @@ if __name__ == '__main__':
     scattering_lengths = {'Ga': 1.0, 'As': 1.0}
     dynamic_structure_factor = DynamicStructureFactor(poscar, fc, mesh, supercell,
                                                       #q_point_list=reduced_qpt[0, :].reshape(-1, 3),
-                                                      #q_point_list=qpoints[1:,:],
-                                                      q_point_list=reduced_qpt,
+                                                      q_point_list=qpoints[1:, :],
+                                                      #q_point_list=reduced_qpt,
                                                       max_e=max_e,
                                                       delta_e=delta_e,
                                                       num_overtones=num_overtones,
-                                                      #fc3_file=fc3,
-                                                      #disp_file=disp,
+                                                      fc3_file=fc3,
+                                                      disp_file=disp,
                                                       scattering_lengths=scattering_lengths)
     dynamic_structure_factor.get_coherent_sqw()
-    dynamic_structure_factor.write_coherent_sqw('q2_test23_harm.hdf5')
+    dynamic_structure_factor.write_coherent_sqw('sqw_mass_weighted_full_BZ_m999.hdf5')
     #s_qw = compute_Sqw(phonons, reduced_qpt, delta_e, max_e, num_overtones)
     #s_qw = compute_incoherent_Sqw(phonons, reduced_qpt, delta_e, max_e, num_overtones)
     #s_qw, decoherence_time = compute_decoherence_time(phonons, reduced_qpt, delta_e, max_e, num_overtones, anh_phonons.gammas, True)
-"""#plot slices
-ax = plt.gca()
-ax.pcolormesh(np.squeeze(s_qw[:, 0, 0, :]))
-plt.xlabel('qx')
-plt.ylabel('omega')
-plt.show()
-
-plt.figure()
-ax = plt.gca()
-ax.pcolormesh(np.squeeze(s_qw[0, :, 0, :]))
-plt.xlabel('qy')
-plt.ylabel('omega')
-plt.show()
-
-plt.figure()
-ax = plt.gca()
-ax.pcolormesh(np.squeeze(s_qw[0, 0, :, :]))
-plt.xlabel('qz')
-plt.ylabel('omega')
-plt.show()
-"""
-
-"""
-for i in range(3):
-#s_qw = compute_incoherent_Sqw(phonons, reduced_qpt, delta_e, max_e, num_overtones, True, anh_phonons.gammas)
-    if i == 0:
-        s_qw, decoherence_time = compute_decoherence_time(phonons, reduced_qpt, delta_e, max_e, num_overtones,
-                                                          anh_phonons.gammas, True)
-    else:
-        s_qw, decoherence_time = compute_decoherence_time(phonons, reduced_qpt, delta_e, max_e, num_overtones,
-                                                      anh_phonons.gammas, False)
-    s_qw = smear_spectrum(s_qw, 0.5 / conv_THz_to_meV, delta_e)
-    #g_s_qw = smear_spectrum(g_s_qw, 0.5 / conv_THz_to_meV, delta_e)
-    print(s_qw)
-    print('integral of s')
-    print(np.trapz(s_qw) * delta_e)
-
-    print('sum of weights = ')
-    print(sum(phonons.weights))
-
-    norm_constant = 1 #/ np.amax(s_qw)
-    plt.plot(np.linspace(0, max_e, len(s_qw)) * conv_THz_to_meV, s_qw * norm_constant, label=('q = ' + str(reduced_qpt[0])))
-    d_times[i] = decoherence_time
-    reduced_qpt *= 100
-    #plt.plot(np.linspace(0, max_e, len(s_qw)) * conv_THz_to_meV, g_s_qw)
-#plt.xlim([15000, 20000])
-plt.xlabel('Energy (meV)')
-print('predicted average excitation energy = ')
-print(const.hbar**2 * np.linalg.norm(np.dot(reduced_qpt, phonons.rlattice) * 10**10)**2 /
-      (1.602*10**-19 * 2 * const.atomic_mass * np.average(phonons.masses)))
-plt.xlim([0, 100])
-plt.show()
-plt.legend()
-plt.yscale('log')
-
-print('decoherence times =', d_times)
-"""
-
