@@ -101,8 +101,7 @@ class AnharmonicPhonons(object):
         #########################################################################################################
         irr_gp = self.mapping[gridpoint]
         grid_index = self.irr_BZ_gridpoints[irr_gp]
-        return self.phono3py._frequency_points[grid_index][0], self.phono3py._imag_self_energy[grid_index][0][0, :,
-                                                               band_index]
+        return self.phono3py._frequency_points, self.phono3py._gammas[grid_index][0][0, band_index, :]
 
     def get_imag_self_energy_interpolator(self, gridpoint, band_index):
         #########################################################################################################
@@ -121,7 +120,7 @@ class AnharmonicPhonons(object):
                 shift = np.ceil(q).astype(np.int)
                 qpoint[i] = q - shift
             elif q < -0.5:
-                shift = np.floor(q).astyp(np.int)
+                shift = np.floor(q).astype(np.int)
                 qpoint[i] = q - shift
         # make sure qpoint is exactly a key
         key = np.round(np.array(qpoint) * np.array(self.mesh)).astype(int) / np.array(self.mesh)
@@ -251,7 +250,6 @@ class DynamicStructureFactor(object):
                  num_overtones=10,
                  temperature=4,
                  freq_min=1e-3,
-                 scattering_lengths=[],
                  primitive_flag='auto',
                  is_nac=False,
                  born_file=None,
@@ -265,11 +263,6 @@ class DynamicStructureFactor(object):
         self.temperature = temperature
         self.freq_min = freq_min
         self.is_nac = is_nac
-        if type(scattering_lengths) is not dict:
-            # default atom type is Si
-            self.scattering_lengths = {'Si': 1.0}
-        else:
-            self.scattering_lengths = scattering_lengths
 
         # if qpoint list not given, then load from mesh and shift
         self.qpoint_shift = q_point_shift
@@ -277,7 +270,7 @@ class DynamicStructureFactor(object):
             self.qpoints = self.get_qpoint_list(self.mesh)[1:] + self.qpoint_shift
         else:
             self.qpoints = q_point_list
-        self.kernel_qpoints = self.get_qpoint_list(self.mesh)
+        #self.kernel_qpoints = self.get_qpoint_list(self.mesh)
         if fc_file[-4:] == 'hdf5' or fc_file[-15:] == 'FORCE_CONSTANTS' or fc_file[-3:] == 'FC2':
             phonon = load(supercell_matrix=supercell,
                           primitive_matrix=primitive_flag,
@@ -295,12 +288,14 @@ class DynamicStructureFactor(object):
         else:
             print(fc_file, 'is not a recognized filetype!\nProgram exiting...')
             raise FileNotFoundError
-        phonon.run_mesh(mesh,
-                        is_mesh_symmetry=False,
-                        with_eigenvectors=True,
-                        is_gamma_center=True)
-        self.dsf = self.run_dsf(phonon, self.qpoints, self.temperature, scattering_lengths=self.scattering_lengths)
         self.phonon = phonon
+        self.eigenvectors = None
+        self.frequencies = None
+        self.weights = None
+        self.kernel_qpoints = None
+        self.run_mesh()
+        self.rec_lat = np.linalg.inv(self.phonon.primitive.get_cell())
+
         self.sqw = []
         self.exp_DWF = []
         self.dxdydz = 0.0
@@ -319,6 +314,18 @@ class DynamicStructureFactor(object):
                                      fc3_file=fc3_file,
                                      disp_file=disp_file)
 
+    def run_mesh(self):
+        self.phonon.run_mesh(self.mesh,
+                             shift=self.qpoint_shift,
+                             is_mesh_symmetry=False,
+                             with_eigenvectors=True,
+                             is_gamma_center=True)
+        mesh_dict = self.phonon.get_mesh_dict()
+        self.eigenvectors = mesh_dict['eigenvectors']
+        self.frequencies = mesh_dict['frequencies']
+        self.weights = mesh_dict['weights']
+        self.kernel_qpoints = mesh_dict['qpoints']
+
     def set_born_charges(self):
         self.born_charges = self.phonon.nac_params['born']
 
@@ -335,29 +342,9 @@ class DynamicStructureFactor(object):
                                                  )
         self.anharmonicities.set_self_energies()
 
-    def get_frequencies(self):
+    def get_bin_energies(self):
         num_bins = int(np.ceil(self.max_e / self.delta_e))
         return np.arange(num_bins) * self.delta_e
-
-    def run_dsf(self,
-                phonon,
-                Qpoints,
-                temperature,
-                atomic_form_factor_func=None,
-                scattering_lengths=None):
-        # Transformation to the Q-points in reciprocal primitive basis vectors
-        # Q_prim = np.dot(Qpoints, phonon.primitive_matrix)
-        Q_prim = Qpoints  # assume user is inputting datapoints for the primitive lattice
-        # Q_prim must be passed to the phonopy dynamical structure factor code.
-        print('Q_prim', Q_prim)
-        phonon.run_dynamic_structure_factor(
-            Q_prim,
-            temperature,
-            atomic_form_factor_func=atomic_form_factor_func,
-            scattering_lengths=scattering_lengths,
-            freq_min=self.freq_min)
-        dsf = phonon.dynamic_structure_factor
-        return dsf
 
     def get_qpoint_list(self, mesh):
         qpoints = np.zeros([np.prod(mesh), 3])
@@ -401,24 +388,24 @@ class DynamicStructureFactor(object):
         return outer_eig
 
     def get_outer_eigs_at_q(self, q_index):
-        eigvecs = self.dsf._mesh_phonon.eigenvectors[q_index]
-        masses = self.dsf._primitive.masses
-        frequencies = self.dsf._mesh_phonon.frequencies[q_index]
+        eigvecs = self.eigenvectors[q_index]
+        masses = self.phonon.masses
+        frequencies = self.frequencies[q_index]
         qpoint = self.kernel_qpoints[q_index]
-        positions = self.dsf._primitive.get_scaled_positions()
+        positions = self.phonon.primitive.get_scaled_positions()
 
         outer_eig_list = np.zeros([len(masses), len(masses), 3, 3, len(frequencies)], dtype=np.complex)
         for i, f in enumerate(frequencies):
             if q_index == 0 and i < 3:
                 continue
-            if self.dsf._fmin < f:
+            if self.freq_min < f:
                 outer_eig_list[:, :, :, :, i] = self.get_outer_eig(eigvecs[:, i], masses, f, qpoint, positions)
         return outer_eig_list
 
     def set_dxdydzdw(self):
         dxdydz_matrix = np.empty([3, 3])
         for i in range(3):
-            dxdydz_matrix[i, :] = 2 * np.pi * self.dsf._rec_lat[i, :] / self.mesh[i]
+            dxdydz_matrix[i, :] = 2 * np.pi * self.rec_lat[i, :] / self.mesh[i]
         dxdydz = np.abs(np.linalg.det(dxdydz_matrix))
         # dxdydz = 1 / ((2 * np.pi)**3)
         # dxdydz = 1.0
@@ -429,8 +416,8 @@ class DynamicStructureFactor(object):
 
     def build_skw_kernel(self):
         q_index = 0
-        freqs = self.dsf._mesh_phonon.frequencies
-        num_atoms = len(self.dsf._primitive.masses)
+        freqs = self.frequencies
+        num_atoms = len(self.phonon.primitive.masses)
         num_bins = int(np.ceil(self.max_e / self.delta_e))
         skw_kernel = np.zeros(self.mesh + [num_atoms, num_atoms, 3, 3, num_bins], dtype=np.complex)
         norm_factor = 1 / np.prod(self.mesh)
@@ -491,7 +478,7 @@ class DynamicStructureFactor(object):
         return delta_fcn
 
     def create_anharmonic_distribution(self, q_point, band_index):
-        freqs = self.get_frequencies()
+        freqs = self.get_bin_energies()
         # print('qindex =', q_index)
         # print('kernel q =', self.kernel_qpoints[q_index].shape)
         # print('kernel q shape =', self.kernel_qpoints.shape)
@@ -565,7 +552,7 @@ class DynamicStructureFactor(object):
     def get_spectrum(self, f_ab, frequencies, q_point=None, band_index=None):
         num_bins = int(np.ceil(self.max_e / self.delta_e))
         spectrum = np.zeros(num_bins, dtype=np.complex)
-        freqs = self.get_frequencies()
+        freqs = self.get_bin_energies()
         if q_point is not None:
             # print('using anharmonic gammas')
             for i in range(len(frequencies)):
@@ -582,15 +569,15 @@ class DynamicStructureFactor(object):
         return spectrum
 
     def test_exp_DWF_at_q(self, q_index):
-        eigvecs = self.dsf._mesh_phonon.eigenvectors
-        weights = self.dsf._mesh_phonon.weights
+        eigvecs = self.eigenvectors
+        weights = self.weights
         num_bands = eigvecs.shape[1]
         num_qpts = eigvecs.shape[0]
 
-        q_cart = np.dot(self.qpoints[q_index], self.dsf._rec_lat) * (2 * np.pi / AngstromsToMeters)
+        q_cart = np.dot(self.qpoints[q_index], self.rec_lat) * (2 * np.pi / AngstromsToMeters)
         norm_constant = 1 / np.sum(weights)
-        frequencies = self.dsf._mesh_phonon.frequencies
-        masses = self.dsf._primitive.masses
+        frequencies = self.frequencies
+        masses = self.phonon.primitive.masses
         # eigvecs = np.reshape(eigvecs, [num_qpts, num_bands, len(masses), 3])
         exp_DWF = np.zeros(masses.shape)
         for m in range(len(masses)):
@@ -599,7 +586,7 @@ class DynamicStructureFactor(object):
                 for s, eig in enumerate(eigs_at_k.T):
                     if i == 0 and s < 3:
                         continue
-                    if frequencies[i, s] > self.dsf._fmin:
+                    if frequencies[i, s] > self.freq_min:
                         eig = np.reshape(eig, [len(masses), 3])
                         DWF += np.abs(np.dot(q_cart, eig[m, :])) ** 2 * const.hbar / (
                                 4 * np.pi * frequencies[i, s] * THz * masses[m] * AMU)
@@ -608,15 +595,15 @@ class DynamicStructureFactor(object):
 
     def compute_exp_DWF_at_q(self, q_index):
 
-        eigvecs = self.dsf._mesh_phonon.eigenvectors
-        weights = self.dsf._mesh_phonon.weights
+        eigvecs = self.eigenvectors
+        weights = self.weights
         num_bands = eigvecs.shape[1]
         num_qpts = eigvecs.shape[0]
 
-        q_cart = np.dot(self.qpoints[q_index], self.dsf._rec_lat) * (2 * np.pi / AngstromsToMeters)
+        q_cart = np.dot(self.qpoints[q_index], self.rec_lat) * (2 * np.pi / AngstromsToMeters)
         norm_constant = 1 / np.sum(weights)
-        frequencies = self.dsf._mesh_phonon.frequencies
-        masses = self.dsf._primitive.masses
+        frequencies = self.frequencies
+        masses = self.phonon.primitive.masses
         eigvecs = np.reshape(eigvecs, [num_qpts, num_bands, len(masses), 3])
         # eigvecs now has shape (#qpts, #bands, #atoms, 3)
         # want to contract q with the cartesian indices, use np.dot
@@ -631,7 +618,7 @@ class DynamicStructureFactor(object):
         inv_freqs = np.zeros(frequencies.shape)
         for i, freqs_at_q in enumerate(frequencies):
             for j, f in enumerate(freqs_at_q):
-                if f > self.dsf._fmin:
+                if f > self.freq_min:
                     inv_freqs[i, j] = 1 / (4 * np.pi * THz * f)  # Represents 1/2w, where w is the angular frequency
         weighted_q_dot_e_sq = (np.reshape(inv_freqs, np.prod(frequencies.shape)) * \
                                np.reshape(weighted_q_dot_e_sq, [np.prod(frequencies.shape), len(masses)]).T).T
@@ -649,10 +636,10 @@ class DynamicStructureFactor(object):
         s_qw = np.zeros(self.skw_kernel.shape[:3] + (self.skw_kernel.shape[-1],), dtype=np.complex)
         # dot skw_kernel by q_point
         q_point = self.qpoints[q_index]
-        q_cart = np.dot(q_point, self.dsf._rec_lat) * 2 * np.pi / AngstromsToMeters
+        q_cart = np.dot(q_point, self.rec_lat) * 2 * np.pi / AngstromsToMeters
 
-        masses = self.dsf._primitive.masses
-        natoms = len(self.dsf._primitive.masses)
+        masses = self.phonon.primitive.masses
+        natoms = len(masses)
 
         contracted_kernel = np.tensordot(self.skw_kernel, q_cart, axes=[[5], [0]])
         contracted_kernel = np.tensordot(contracted_kernel, q_cart, axes=[[5], [0]])
@@ -663,7 +650,7 @@ class DynamicStructureFactor(object):
             self.get_exp_DWF()
 
         norm_factor = np.prod(self.mesh)
-        positions = self.dsf._primitive.get_scaled_positions()
+        positions = self.phonon.primitive.get_scaled_positions()
         for tau_1 in range(natoms):
             for tau_2 in range(natoms):
                 factor = self.convolve_f_i(contracted_kernel[:, :, :, tau_1, tau_2, :], coh_flag=True) * \
@@ -722,8 +709,8 @@ class DynamicStructureFactor(object):
             with h5.File(filename, 'w') as fw:
                 fw['q-points'] = self.qpoints
                 fw['sqw'] = np.abs(np.array(self.sqw))
-                fw['reclat'] = self.dsf._rec_lat * 2 * np.pi
-                fw['frequencies'] = self.get_frequencies()
+                fw['reclat'] = self.rec_lat * 2 * np.pi
+                fw['frequencies'] = self.get_bin_energies()
                 fw['delta_w'] = self.delta_e
                 fw['dxdydz'] = self.dxdydz
         else:
@@ -903,7 +890,7 @@ if __name__ == '__main__':
 
     # print(qpoints)
     # mapping, testgrid = get_BZ_map(phonons.mesh, phonons.lattice, phonons.positions, phonons.masses, magmoms=[])
-    mesh = [9, 9, 9]
+    mesh = [3, 3, 3]
     supercell = [2, 2, 2]
 
     qpoints = set_qpoints(mesh=mesh)  # , num_Gpoints=10)#, num_Gpoints=300, stride_G=50)
@@ -918,8 +905,6 @@ if __name__ == '__main__':
     #fc3 = None
     #disp = None
     born = "/Volumes/GoogleDrive/My Drive/Cori_backup/GaAs/phono3py/2x2x2/BORN"
-    # scattering_lengths = {'C': 1.0, 'H': 1.0}
-    scattering_lengths = {'Ga': 1.0, 'As': 1.0}
 
     dynamic_structure_factor = DynamicStructureFactor(poscar,
                                                       fc,
@@ -933,7 +918,6 @@ if __name__ == '__main__':
                                                       num_overtones=num_overtones,
                                                       fc3_file=fc3,
                                                       disp_file=disp,
-                                                      scattering_lengths=scattering_lengths,
                                                       is_nac=True,
                                                       born_file=born,
                                                       scalar_mediator_flag=False,

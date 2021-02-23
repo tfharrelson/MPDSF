@@ -347,6 +347,7 @@ class ImaginarySelfEnergy(BrillouinZoneProperty):
         #self.temperature = temperature
         # self.phono3py.run_imag_self_energy(np.unique(self.mapping), temperatures=temperature)
         self.imag_self_energy = {}
+        self.freqs = None
         self.set_self_energies()
         self.set_property_dict()
 
@@ -380,7 +381,7 @@ class ImaginarySelfEnergy(BrillouinZoneProperty):
         #########################################################################################################
         irr_gp = self._brillouinzone.mapping[gridpoint]
         grid_index = self._brillouinzone.irr_BZ_gridpoints[irr_gp]
-        return self.manager.phono3py._frequency_points[grid_index], self.manager.phono3py._gammas[grid_index][0][0, :, :]
+        return self.manager.phono3py._frequency_points, self.manager.phono3py._gammas[grid_index][0][0, :, :]
 
     def get_imag_self_energies_at_q(self, qpoint):
         gridpoint = self._brillouinzone.grid[tuple(qpoint)]
@@ -392,7 +393,7 @@ class ImaginarySelfEnergy(BrillouinZoneProperty):
             # i is the gridpoint index
             # q is the qpoint vector
             self.freqs, band_of_ise = self._get_imag_self_energies_from_gp(i)
-            # loop over bands which are the last index of 'bands_of_ise' matrix
+            # loop over bands which are the 2nd to last index of 'bands_of_ise' matrix
             for band_index in range(band_of_ise.shape[-2]):
                 #key = tuple(q)
                 #key += (band_index,)

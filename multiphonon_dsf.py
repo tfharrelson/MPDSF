@@ -5,27 +5,7 @@ import yaml
 from yaml import SafeLoader
 
 class MPDSF:
-    def __init__(self,
-                 poscar='POSCAR',
-                 fc2='FORCE_SETS',
-                 fc3=None,
-                 disp='phonopy_disp.yaml',
-                 mesh=[5, 5, 5],
-                 supercell=[2, 2, 2],
-                 max_energy=100.,
-                 delta_e=1.,
-                 overtones=2,
-                 output='sqw_output.hdf5',
-                 numG=0,
-                 strideQ=1,
-                 maxq=None,
-                 stride=[0, 0, 0],
-                 input=None,
-                 mpi=False,
-                 born=None,
-                 scalar_mediator=False,
-                 dark_photon=False
-                 ):
+    def __init__(self):
         parser = argparse.ArgumentParser()
         parser.add_argument("-p", "--poscar", help='VASP poscar file of unit cell.', default='POSCAR')
         parser.add_argument("-fc3", "--fc3", help='Third order force constants file in hdf5 format.',
