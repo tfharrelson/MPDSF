@@ -8,7 +8,7 @@ fc2 = '../data/GaAs/fc2.hdf5'
 fc3 = '../data/GaAs/FORCES_FC3'
 disp = '../data/GaAs/disp_fc3.yaml'
 mesh = [5, 5, 5]
-supercell = np.diag([2, 2, 2])
+supercell = [2, 2, 2]
 
 # instantiate manager to expedite tests
 #inputs = Phono3pyInputs(poscar=poscar, fc3_file=fc3, disp_file=disp, mesh=mesh, supercell=supercell)

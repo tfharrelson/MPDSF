@@ -1,6 +1,10 @@
 import numpy as np
 from phonopy.interface.vasp import read_vasp
+from phonopy.file_IO import parse_BORN
+from phonopy.units import Bohr, Hartree
+from phonopy.phonon.group_velocity import GroupVelocity
 from phono3py.api_phono3py import Phono3py
+from phono3py.api_isotope import Phono3pyIsotope
 from phono3py.file_IO import (parse_disp_fc3_yaml,
                               parse_FORCES_FC3)
 from spglib import get_ir_reciprocal_mesh
@@ -23,20 +27,26 @@ class Phono3pyInputs:
     def __init__(self,
                  poscar='POSCAR',
                  fc3_file='FORCES_FC3',
+                 fc2_file='FORCE_SETS',
                  disp_file='disp.yaml',
                  mesh=[5, 5, 5],
                  shift=[0., 0., 0.],
                  supercell=[2, 2, 2],
-                 nac='False',
-                 temperature=0.):
+                 nac=False,
+                 born_file=None,
+                 temperature=0.,
+                 isotope_flag=False):
         self.poscar = poscar
+        self.fc2_file = fc2_file
         self.fc3_file = fc3_file
         self.disp_file = disp_file
         self.mesh = mesh
         self.shift = shift
         self.supercell = supercell
         self.nac = nac
+        self.born_file = born_file
         self.temperature = temperature
+        self.isotope_flag = isotope_flag
         pass
 
 
@@ -212,6 +222,7 @@ class BrillouinZone(MPGrid):
         self.cell = read_vasp(poscar)
         self.mapping = None
         self.grid = None
+        self.inverse_grid = None
         self.irr_BZ_gridpoints = None
         self.phonon_freqs = None
         self.temperature = temperature
@@ -220,8 +231,24 @@ class BrillouinZone(MPGrid):
     def set_irr_BZ_gridpoints(self):
         self.mapping, grid = get_ir_reciprocal_mesh(mesh=self.mesh, cell=self.cell)
         self.grid = {tuple(k / self.mesh): v for (v, k) in enumerate(grid)}
+        self.inverse_grid = {v: tuple(k / self.mesh) for (v, k) in enumerate(grid)}
         irr_BZ_gridpoints = np.unique(self.mapping)
         self.irr_BZ_gridpoints = {k: v for v, k in enumerate(irr_BZ_gridpoints)}
+
+    def get_gridpoint(self, qpoint):
+        for i, q in enumerate(qpoint):
+            if q > 0.5:
+                shift = np.ceil(q).astype(np.int)
+                qpoint[i] = q - shift
+            elif q < -0.5:
+                shift = np.floor(q).astyp(np.int)
+                qpoint[i] = q - shift
+        # make sure qpoint is exactly a key
+        key = np.round(np.array(qpoint) * np.array(self.mesh)).astype(int) / np.array(self.mesh)
+        return self.grid[tuple(key)]
+
+    def get_qpoint(self, gridpoint):
+        return self.inverse_grid[gridpoint]
 
 class Phono3pyManager:
     def __init__(self,
@@ -239,7 +266,7 @@ class Phono3pyManager:
         self.cell = read_vasp(self.inputs.poscar)
         #self.mesh = mesh
         self.phono3py = Phono3py(self.cell,
-                                 supercell_matrix=self.inputs.supercell,
+                                 supercell_matrix=np.diag(self.inputs.supercell),
                                  primitive_matrix='auto',
                                  mesh=self.inputs.mesh,
                                  log_level=1)
@@ -249,6 +276,12 @@ class Phono3pyManager:
             self.phono3py.produce_fc3(self.fc3_data,
                                       displacement_dataset=self.disp_data,
                                       symmetrize_fc3r=True)
+        self.nac_params = None
+        if inputs.nac is True:
+            primitive = self.phono3py.get_phonon_primitive()
+            self.nac_params = parse_BORN(primitive, filename=inputs.born_file)
+            self.nac_params['factor'] = Hartree * Bohr
+            self.phono3py.nac_params = self.nac_params
         ## initialize phonon-phonon interaction instance
         self.phono3py.init_phph_interaction()
         # initialize bands, eigvecs, ise, and qpoints
@@ -256,6 +289,11 @@ class Phono3pyManager:
         self.eigvecs = None
         self.imag_self_energy = None
         self.qpoints = None
+        if self.inputs.isotope_flag:
+            primitive = self.phono3py.get_phonon_primitive()
+            self.isotopes = Phono3pyIsotope(self.inputs.mesh, primitive, cutoff_frequency=1.e-4)
+        else:
+            self.isotopes = None
 
     def set_phonons(self):
         self.phono3py.run_phonon_solver()
@@ -342,7 +380,7 @@ class ImaginarySelfEnergy(BrillouinZoneProperty):
         #########################################################################################################
         irr_gp = self._brillouinzone.mapping[gridpoint]
         grid_index = self._brillouinzone.irr_BZ_gridpoints[irr_gp]
-        return self.manager.phono3py._frequency_points[grid_index][0], self.manager.phono3py._imag_self_energy[grid_index][0][0, :, :]
+        return self.manager.phono3py._frequency_points[grid_index], self.manager.phono3py._gammas[grid_index][0][0, :, :]
 
     def get_imag_self_energies_at_q(self, qpoint):
         gridpoint = self._brillouinzone.grid[tuple(qpoint)]
@@ -355,19 +393,11 @@ class ImaginarySelfEnergy(BrillouinZoneProperty):
             # q is the qpoint vector
             self.freqs, band_of_ise = self._get_imag_self_energies_from_gp(i)
             # loop over bands which are the last index of 'bands_of_ise' matrix
-            for band_index in range(band_of_ise.shape[-1]):
+            for band_index in range(band_of_ise.shape[-2]):
                 #key = tuple(q)
                 #key += (band_index,)
                 key = self.set_key(q, band_index)
-                self.property_dict[key] = band_of_ise[:, band_index]
-"""
-    def get_imag_self_energy(self, qpoint, band_index):
-        if len(self.imag_self_energy) == 0:
-            self.set_ise_dict()
-        key = tuple(qpoint)
-        key += (band_index,)
-        return self.imag_self_energy[key]
-"""
+                self.property_dict[key] = band_of_ise[band_index, :]
 
 
 class PhononEigenvalues(BrillouinZoneProperty):
@@ -384,14 +414,6 @@ class PhononEigenvalues(BrillouinZoneProperty):
                 #key += (band_index,)
                 key = self.set_key(q, band_index)
                 self.property_dict[key] = eig
-"""
-    def get_eigenvalue(self, qpoint, band_index):
-        if len(self.eigenvalues) == 0:
-            self.set_eig_dict()
-        key = tuple(qpoint)
-        key += (band_index,)
-        return self.eigenvalues[key]
-"""
 
 
 class PhononEigenvectors(BrillouinZoneProperty):
@@ -412,15 +434,61 @@ class PhononEigenvectors(BrillouinZoneProperty):
         for i, q in enumerate(self._brillouinzone.qpoints):
             for band_index, eigvec in enumerate(self.manager.eigvecs[i].T):
                 # impossible to know which index is actually the eigenvector b/c it is a square matrix
-                #key = tuple(q)
-                #key += (band_index,)
                 key = self.set_key(q, band_index)
                 self.property_dict[key] = eigvec
-"""
-    def get_eigenvector(self, qpoint, band_index):
-        if len(self.eigenvectors) == 0:
-            self.set_eigvec_dict()
-        key = tuple(qpoint)
-        key += (band_index,)
-        return self.eigenvectors[key]
-"""
+
+
+class GroupVelocities(BrillouinZoneProperty):
+    def __init__(self, inputs: Phono3pyInputs):
+        super().__init__(inputs)
+        self.group_velocities = {}
+        self.set_property_dict()
+
+    def set_property_dict(self):
+        self.manager.phono3py.init_phph_interaction()
+        group_vels = GroupVelocity(self.manager.phono3py.dynamical_matrix)
+
+        group_vels.run(self._brillouinzone.qpoints)
+
+        for q, gvs_at_q in zip(self._brillouinzone.qpoints, group_vels.group_velocities):
+            for branch_index, gv in enumerate(gvs_at_q):
+                key = self.set_key(qpoint=q, band_index=branch_index)
+                self.property_dict[key] = gv
+
+
+
+class IsotopicImagSelfEnergy(BrillouinZoneProperty):
+    def __init__(self, inputs: Phono3pyInputs):
+        super().__init__(inputs)
+        self.ise = None
+        self.units = 'THz = 1 / (4pi * tau)'
+        self.imag_self_energy = {}
+        self.set_self_energies()
+        self.set_property_dict()
+
+    def set_self_energies(self):
+        '''
+        Set isotopic self energies using PHono3pyIsotope class. The self energies are stored in
+        self.manager.isotope.gamma with units of THz
+        :return:
+        '''
+        # init dynamical matrix
+        self.manager.isotopes.init_dynamical_matrix(fc2=self.manager.phono3py.fc2,
+                                                    supercell=self.manager.phono3py.supercell,
+                                                    primitive=self.manager.phono3py.primitive,
+                                                    nac_params=self.manager.nac_params)
+        if self._brillouinzone.mapping is None:
+            self._brillouinzone.set_irr_BZ_gridpoints()
+        gridpoints = [self._brillouinzone.get_gridpoint(q) for q in self._brillouinzone.qpoints]
+        self.manager.isotopes.run(gridpoints)
+
+    def set_property_dict(self):
+        for i, q in enumerate(self._brillouinzone.qpoints):
+            # i is the gridpoint index
+            # q is the qpoint vector
+            for band_index in range(np.array(self.manager.isotopes.gamma).shape[-1]):
+                key = self.set_key(q, band_index)
+                gridpoint = self._brillouinzone.get_gridpoint(q)
+                # gamma matrix has three indices: (# sigmas, # gridpoints, # bands)
+                # There is always only one sigma for these objects
+                self.property_dict[key] = self.manager.isotopes.gamma[0][gridpoint][band_index]
