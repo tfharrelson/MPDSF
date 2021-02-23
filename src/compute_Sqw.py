@@ -69,8 +69,8 @@ class AnharmonicPhonons(object):
         # self.phono3py.run_imag_self_energy(np.unique(self.mapping), temperatures=temperature)
 
     def set_irr_BZ_gridpoints(self):
-        self.mapping, grid = get_ir_reciprocal_mesh(mesh=mesh, cell=self.cell)
-        self.grid = {tuple(k / mesh): v for (v, k) in enumerate(grid)}
+        self.mapping, grid = get_ir_reciprocal_mesh(mesh=self.mesh, cell=self.cell)
+        self.grid = {tuple(k / self.mesh): v for (v, k) in enumerate(grid)}
         irr_BZ_gridpoints = np.unique(self.mapping)
         self.irr_BZ_gridpoints = {k: v for v, k in enumerate(irr_BZ_gridpoints)}
 
@@ -407,10 +407,7 @@ class DynamicStructureFactor(object):
         for i in range(3):
             dxdydz_matrix[i, :] = 2 * np.pi * self.rec_lat[i, :] / self.mesh[i]
         dxdydz = np.abs(np.linalg.det(dxdydz_matrix))
-        # dxdydz = 1 / ((2 * np.pi)**3)
-        # dxdydz = 1.0
-        print('dxdydz =', dxdydz)
-        dxdydzdw = dxdydz * delta_e
+        dxdydzdw = dxdydz * self.delta_e
         self.dxdydz = dxdydz
         self.dxdydzdw = dxdydzdw
 
@@ -425,9 +422,9 @@ class DynamicStructureFactor(object):
         if self.dxdydz == 0:
             self.set_dxdydzdw()
 
-        for k in range(mesh[2]):
-            for j in range(mesh[1]):
-                for i in range(mesh[0]):
+        for k in range(self.mesh[2]):
+            for j in range(self.mesh[1]):
+                for i in range(self.mesh[0]):
                     outer_eigs_at_q = self.get_outer_eigs_at_q(q_index)
                     freqs_at_q = freqs[q_index]
 
