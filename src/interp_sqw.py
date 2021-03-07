@@ -5,7 +5,7 @@ import sys
 import pickle
 
 filename = sys.argv[1]
-
+print(filename)
 with h5py.File(filename, 'r') as f1:
 
     s1 = np.array([sqw_at_q for sqw_at_q in f1['sqw']])

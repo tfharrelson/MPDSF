@@ -3,6 +3,8 @@ import numpy as np
 from src.compute_Sqw import DynamicStructureFactor
 import yaml
 from yaml import SafeLoader
+import h5py
+import os
 
 class MPDSF:
     def __init__(self):
@@ -11,7 +13,7 @@ class MPDSF:
         parser.add_argument("-fc3", "--fc3", help='Third order force constants file in hdf5 format.',
                             default=None)
         parser.add_argument('-fc2', '--fc2', help='Second order force constants file in FORCE_SETS format.',
-                            default='FORCE_SETS')
+                            default=None)
         parser.add_argument('-d', '--disp', help='Disp.yaml file that comes with phono3py fc3 calculations.',
                             default='phonopy_disp.yaml')
         parser.add_argument('-m', '--mesh',
@@ -200,14 +202,14 @@ class MPDSF:
         return self.qpoints
 
     def run(self, start_q_index=None, stop_q_index=None):
-        self.dsf = DynamicStructureFactor(self.poscar,
-                                          self.fc2,
-                                          self.mesh,
-                                          self.supercell,
-                                          self.qpoints,
-                                          self.shift,
-                                          self.fc3,
-                                          disp_file=self.disp,
+        self.dsf = DynamicStructureFactor(poscar_file=self.poscar,
+                                          fc_file=self.fc2,
+                                          mesh=self.mesh,
+                                          supercell=self.supercell,
+                                          q_point_list=self.qpoints,
+                                          q_point_shift=self.shift,
+                                          fc3_file=self.fc3,
+                                          fc3_disp=self.disp,
                                           delta_e=self.delta_e,
                                           max_e=self.max_e,
                                           num_overtones=self.overtones,
@@ -234,6 +236,10 @@ if __name__ == '__main__':
         comm = MPI.COMM_WORLD
         rank = comm.Get_rank()
         size = comm.Get_size()
+        # Make copy of originally intended output file
+        output = mpdsf.output
+        # set temporary file name for each rank
+        mpdsf.output = 'tmp_' + str(rank) + '_' + mpdsf.output
         num_qpts_per_rank = np.ceil(len(mpdsf.qpoints) / size).astype(int)
         start_q_index = int(rank * num_qpts_per_rank)
         stop_q_index = int((rank + 1) * num_qpts_per_rank)
@@ -244,20 +250,38 @@ if __name__ == '__main__':
         # Place barrier to make sure all MPI processes wait for each other
         comm.Barrier()
 
-        full_sqw_list = np.zeros([len(mpdsf.qpoints), len(mpdsf.sqw[0])])
+        full_sqw_list = np.zeros([len(mpdsf.qpoints), len(mpdsf.dsf.sqw[0])])
         # Find rec sizes, in which the last rank may have a different number of q-points
         rec_sizes = np.array(int(size) * [num_qpts_per_rank])
         rec_sizes[-1] = len(mpdsf.qpoints) % num_qpts_per_rank
-        rec_sizes *= len(mpdsf.sqw[0])
+        rec_sizes *= len(mpdsf.dsf.sqw[0])
 
         # Find the rec displacements, and we don't want to skip any data, so a cumsum will work
         rec_disp = np.insert(np.cumsum(rec_sizes), 0, 0)[0:-1]
 
         # Gather all objects into rank 0 in full_sqw_list
-        comm.Gatherv(np.abs(mpdsf.sqw), [full_sqw_list, rec_sizes, rec_disp, MPI.DOUBLE], root=0)
+        #comm.Gatherv(np.abs(mpdsf.dsf.sqw), [full_sqw_list, rec_sizes, rec_disp, MPI.DOUBLE], root=0)
+        mpdsf.save_data()
         if rank == 0:
-            mpdsf.sqw = full_sqw_list
-            mpdsf.save_data()
+            with h5py.File(output, 'w') as final_output:
+                final_qpoints = []
+                final_sqw = []
+                for i in range(size):
+                    with h5py.File('tmp_' + str(i) + '_' + output, 'r') as tmp_output:
+                        if 'reclat' not in final_output.keys():
+                            final_output['reclat'] = np.array(tmp_output['reclat'])
+                            final_output['frequencies'] = np.array(tmp_output['frequencies'])
+                            final_output['delta_w'] = np.array(tmp_output['delta_w'])
+                            final_output['dxdydz'] = np.array(tmp_output['dxdydz'])
+                        final_qpoints += list(tmp_output['q-points'])
+                        final_sqw += list(tmp_output['sqw'])
+                final_output['sqw'] = np.array(final_sqw)
+                final_output['q-points'] = np.array(final_qpoints)
+            for i in range(size):
+                os.remove('tmp_' + str(i) + '_' + output)
+            #if rank == 0:
+            #    mpdsf.dsf.sqw = full_sqw_list
+            #    mpdsf.save_data()
     else:
         mpdsf.run()
         mpdsf.save_data()

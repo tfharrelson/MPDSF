@@ -239,9 +239,9 @@ class AnharmonicPhonons(object):
 class DynamicStructureFactor(object):
     def __init__(self,
                  poscar_file,
-                 fc_file,
                  mesh,
                  supercell,
+                 fc_file=None,
                  q_point_list=[],
                  q_point_shift=[0.0, 0.0, 0.0],
                  fc2_disp=None,
@@ -268,7 +268,7 @@ class DynamicStructureFactor(object):
 
         self.disp_data = parse_disp_fc3_yaml(filename=fc3_disp)
         self.fc3_data = parse_FORCES_FC3(self.disp_data, filename=fc3_file)
-        phono3py = Phono3py(read_vasp(poscar),
+        phono3py = Phono3py(read_vasp(poscar_file),
                             supercell_matrix=np.diag(supercell),
                             primitive_matrix='auto',
                             mesh=mesh,
@@ -282,31 +282,35 @@ class DynamicStructureFactor(object):
         else:
             self.qpoints = q_point_list
         #self.kernel_qpoints = self.get_qpoint_list(self.mesh)
-        if fc_file[-4:] == 'hdf5' or fc_file[-15:] == 'FORCE_CONSTANTS':
-            phonon = load(supercell_matrix=supercell,
-                          primitive_matrix=primitive_flag,
-                          unitcell_filename=poscar_file,
-                          force_constants_filename=fc_file,
-                          is_nac=is_nac,
-                          born_filename=born_file)
-        elif fc_file[-10:] == 'FORCE_SETS' or fc_file[-3:] == 'FC2':
-            nac_params = parse_BORN(phono3py.get_phonon_primitive(), filename=born_file)
-            nac_params['factor'] = Hartree * Bohr
-            phonon = Phonopy(read_vasp(poscar),
-                             supercell_matrix=supercell,
-                             primitive_matrix=primitive_flag,
-                             nac_params=nac_params)
-            #phonon = load(supercell_matrix=supercell,
-            #              primitive_matrix=primitive_flag,
-            #              unitcell_filename=poscar_file,
-            #              #force_sets_filename=fc_file,
-            #              is_nac=is_nac,
-            #              born_filename=born_file)
-            fc2 = phono3py.get_fc2()
-            phonon.force_constants = fc2
+        if fc_file is not None:
+            if fc_file[-4:] == 'hdf5' or fc_file[-15:] == 'FORCE_CONSTANTS':
+                phonon = load(supercell_matrix=supercell,
+                              primitive_matrix=primitive_flag,
+                              unitcell_filename=poscar_file,
+                              force_constants_filename=fc_file,
+                              is_nac=is_nac,
+                              born_filename=born_file)
+            elif fc_file[-10:] == 'FORCE_SETS' or fc_file[-3:] == 'FC2' or fc_file is None:
+                phonon = load(supercell_matrix=supercell,
+                              primitive_matrix=primitive_flag,
+                              unitcell_filename=poscar_file,
+                              force_sets_filename=fc_file,
+                              is_nac=is_nac,
+                              born_filename=born_file)
+            else:
+                print(fc_file, 'is not a recognized filetype!\nProgram exiting...')
+                raise FileNotFoundError
         else:
-            print(fc_file, 'is not a recognized filetype!\nProgram exiting...')
-            raise FileNotFoundError
+                nac_params = parse_BORN(phono3py.get_phonon_primitive(), filename=born_file)
+                nac_params['factor'] = Hartree * Bohr
+                phonon = Phonopy(read_vasp(poscar_file),
+                                 supercell_matrix=supercell,
+                                 primitive_matrix=primitive_flag,
+                                 nac_params=nac_params)
+
+                fc2 = phono3py.get_fc2()
+                phonon.force_constants = fc2
+
         self.phonon = phonon
         self.eigenvectors = None
         self.frequencies = None
@@ -711,7 +715,7 @@ class DynamicStructureFactor(object):
             else:
                 self.sqw.append(self.interpolate_sqw(self.get_coherent_sqw_at_q(i), self.qpoints[i]))
             print('i = ', i)
-            print('integral of current sqw =', np.trapz(self.sqw[i]) * self.dxdydzdw)
+#            print('integral of current sqw =', np.trapz(self.sqw[i]) * self.dxdydzdw)
 
     def write_coherent_sqw(self, filename, ftype='hdf5'):
         if ftype == 'txt':
