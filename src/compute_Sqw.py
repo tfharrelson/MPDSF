@@ -7,8 +7,9 @@ import scipy.constants as const
 # import matplotlib.pyplot as plt
 import h5py as h5
 import spglib as spg
-from phonopy import load
-from phonopy.units import THz, AMU
+from phonopy import load, Phonopy
+from phonopy.file_IO import parse_BORN
+from phonopy.units import THz, AMU, Hartree, Bohr
 from phonopy.interface.vasp import read_vasp
 from phono3py.api_phono3py import Phono3py
 from phono3py.file_IO import (parse_disp_fc3_yaml,
@@ -243,8 +244,9 @@ class DynamicStructureFactor(object):
                  supercell,
                  q_point_list=[],
                  q_point_shift=[0.0, 0.0, 0.0],
+                 fc2_disp=None,
                  fc3_file=None,
-                 disp_file=None,
+                 fc3_disp=None,
                  delta_e=0.01,
                  max_e=30,
                  num_overtones=10,
@@ -264,6 +266,15 @@ class DynamicStructureFactor(object):
         self.freq_min = freq_min
         self.is_nac = is_nac
 
+        self.disp_data = parse_disp_fc3_yaml(filename=fc3_disp)
+        self.fc3_data = parse_FORCES_FC3(self.disp_data, filename=fc3_file)
+        phono3py = Phono3py(read_vasp(poscar),
+                            supercell_matrix=np.diag(supercell),
+                            primitive_matrix='auto',
+                            mesh=mesh,
+                            log_level=1)
+        phono3py.produce_fc3(self.fc3_data, self.disp_data)
+
         # if qpoint list not given, then load from mesh and shift
         self.qpoint_shift = q_point_shift
         if len(q_point_list) == 0:
@@ -271,20 +282,28 @@ class DynamicStructureFactor(object):
         else:
             self.qpoints = q_point_list
         #self.kernel_qpoints = self.get_qpoint_list(self.mesh)
-        if fc_file[-4:] == 'hdf5' or fc_file[-15:] == 'FORCE_CONSTANTS' or fc_file[-3:] == 'FC2':
+        if fc_file[-4:] == 'hdf5' or fc_file[-15:] == 'FORCE_CONSTANTS':
             phonon = load(supercell_matrix=supercell,
                           primitive_matrix=primitive_flag,
                           unitcell_filename=poscar_file,
                           force_constants_filename=fc_file,
                           is_nac=is_nac,
                           born_filename=born_file)
-        elif fc_file[-10:] == 'FORCE_SETS':
-            phonon = load(supercell_matrix=supercell,
-                          primitive_matrix=primitive_flag,
-                          unitcell_filename=poscar_file,
-                          force_sets_filename=fc_file,
-                          is_nac=is_nac,
-                          born_filename=born_file)
+        elif fc_file[-10:] == 'FORCE_SETS' or fc_file[-3:] == 'FC2':
+            nac_params = parse_BORN(phono3py.get_phonon_primitive(), filename=born_file)
+            nac_params['factor'] = Hartree * Bohr
+            phonon = Phonopy(read_vasp(poscar),
+                             supercell_matrix=supercell,
+                             primitive_matrix=primitive_flag,
+                             nac_params=nac_params)
+            #phonon = load(supercell_matrix=supercell,
+            #              primitive_matrix=primitive_flag,
+            #              unitcell_filename=poscar_file,
+            #              #force_sets_filename=fc_file,
+            #              is_nac=is_nac,
+            #              born_filename=born_file)
+            fc2 = phono3py.get_fc2()
+            phonon.force_constants = fc2
         else:
             print(fc_file, 'is not a recognized filetype!\nProgram exiting...')
             raise FileNotFoundError
@@ -309,10 +328,10 @@ class DynamicStructureFactor(object):
             self.set_dielectric()
         self._scalar_mediator_flag = scalar_mediator_flag
         self._dark_photon_flag = dark_photon_flag
-        if fc3_file is not None and disp_file is not None:
+        if fc3_file is not None and fc3_disp is not None:
             self.set_anharmonicities(poscar=poscar_file,
                                      fc3_file=fc3_file,
-                                     disp_file=disp_file)
+                                     disp_file=fc3_disp)
 
     def run_mesh(self):
         self.phonon.run_mesh(self.mesh,
@@ -685,7 +704,12 @@ class DynamicStructureFactor(object):
             stop_q_index = len(self.qpoints)
         print('testing qpoints =', self.qpoints)
         for i in range(start_q_index, stop_q_index):
-            self.sqw.append(self.interpolate_sqw(self.get_coherent_sqw_at_q(i), self.qpoints[i]))
+            if np.linalg.norm(self.qpoints[i]) == 0.:
+                if len(self.skw_kernel) is 0:
+                    self.build_skw_kernel()
+                self.sqw.append(np.zeros(self.skw_kernel.shape[:3] + (self.skw_kernel.shape[-1],), dtype=np.complex))
+            else:
+                self.sqw.append(self.interpolate_sqw(self.get_coherent_sqw_at_q(i), self.qpoints[i]))
             print('i = ', i)
             print('integral of current sqw =', np.trapz(self.sqw[i]) * self.dxdydzdw)
 
@@ -906,7 +930,7 @@ if __name__ == '__main__':
     poscar = "/Users/tfharrelson/PycharmProjects/compute_Sqw/data/CsI/POSCAR"
     fc = "/Users/tfharrelson/PycharmProjects/compute_Sqw/data/CsI/FORCES_FC2"
     fc3 = "/Users/tfharrelson/PycharmProjects/compute_Sqw/data/CsI/FORCES_FC3"
-    disp = "/Users/tfharrelson/PycharmProjects/compute_Sqw/data/CsI/phono3py_disp.yaml"
+    disp = "/Users/tfharrelson/PycharmProjects/compute_Sqw/data/CsI/disp_fc3.yaml"
     # fc3 = None
     # disp = None
     born = "/Users/tfharrelson/PycharmProjects/compute_Sqw/data/CsI/BORN"
@@ -915,19 +939,19 @@ if __name__ == '__main__':
                                                       mesh,
                                                       supercell,
                                                       # q_point_list=reduced_qpt[0, :].reshape(-1, 3),
-                                                      q_point_list=qpoints[1:, :],
+                                                      q_point_list=qpoints,
                                                       # q_point_list=reduced_qpt,
                                                       max_e=max_e,
                                                       delta_e=delta_e,
                                                       num_overtones=num_overtones,
                                                       fc3_file=fc3,
-                                                      disp_file=disp,
+                                                      fc3_disp=disp,
                                                       is_nac=True,
                                                       born_file=born,
                                                       scalar_mediator_flag=False,
                                                       dark_photon_flag=True)
     dynamic_structure_factor.get_coherent_sqw()
-    dynamic_structure_factor.write_coherent_sqw('gaas_darkphoton_sqw_m999_anh.hdf5')
+    dynamic_structure_factor.write_coherent_sqw('csi_darkphoton_sqw_m999_anh.hdf5')
     # s_qw = compute_Sqw(phonons, reduced_qpt, delta_e, max_e, num_overtones)
     # s_qw = compute_incoherent_Sqw(phonons, reduced_qpt, delta_e, max_e, num_overtones)
     # s_qw, decoherence_time = compute_decoherence_time(phonons, reduced_qpt, delta_e, max_e, num_overtones, anh_phonons.gammas, True)
