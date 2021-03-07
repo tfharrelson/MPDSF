@@ -1,7 +1,7 @@
 import numpy as np
 from phonopy import load
 from src.utils import BrillouinZoneProperty, PhononEigenvalues, Phono3pyInputs, ImaginarySelfEnergy, \
-    IsotopicImagSelfEnergy, GroupVelocities
+    IsotopicImagSelfEnergy, GroupVelocities, Gamma
 import scipy.constants as const
 
 '''
@@ -316,6 +316,9 @@ class CompositeKernel(IntegrationKernel):
                         kernel_2: IntegrationKernel):
         self.kernel_matrix = kernel_1.kernel_matrix + kernel_2.kernel_matrix
 
+    def add_kernel(self, kernel: IntegrationKernel):
+        self.kernel_matrix += kernel.kernel_matrix
+
 
 class DiagonalKernel(IntegrationKernel):
     def __init__(self,
@@ -386,6 +389,7 @@ class DecayDistribution(BrillouinZoneProperty):
                  bins: PropertyBins,
                  min_freq=0.01,
                  temperature=1.,
+                 gammas:Gamma=None,
                  sigma=None):
         '''
         Class that calculates the decay distribution of a phonon. Usage is to (1) instantiate the object, then (2)
@@ -407,6 +411,11 @@ class DecayDistribution(BrillouinZoneProperty):
         self.bins = bins
         self.min_freq = min_freq
         self.temperature = temperature
+
+        # auxiliary functions for finding avg lifetimes
+        self.gammas = gammas
+        self.max_gamma = 1e-12
+        self.gamma_spectrum = None
 
     def get_decay_distribution_at_q(self, qpoint, branch_index):
         # Get gridpoint from qpoint
@@ -467,6 +476,8 @@ class DecayDistribution(BrillouinZoneProperty):
         decay_rate = 0.
         pp_shape = self.pp.shape
         min_factor = 1e-4 / self.bins.num_bins
+        if self.gammas is not None:
+            property_spectrum = np.zeros(self.bins.num_bins)
         for tr in range(pp_shape[0]):
             for b2 in range(pp_shape[2]):
                 for b3 in range(pp_shape[3]):
@@ -474,18 +485,23 @@ class DecayDistribution(BrillouinZoneProperty):
                     pp_element = self.pp[tr, branch_index, b2, b3]
                     triplet = self.triplets[tr, :]
 
-                    gp1_index = self.triplet_map[triplet[0]]
                     gp2_index = self.triplet_map[triplet[1]]
                     gp3_index = self.triplet_map[triplet[2]]
 
                     qpoint2 = self._brillouinzone.get_qpoint(gp2_index)
                     qpoint3 = self._brillouinzone.get_qpoint(gp3_index)
 
-                    # combined_index_1 = get_combined_index(q1_index, pp_shape[1] - 1, num_branches)
-                    # combined_index_2 = get_combined_index(q2_index, b2, num_branches)
-                    # combined_index_3 = get_combined_index(q3_index, b3, num_branches)
-                    # print('pp_shape =', pp.shape)
-                    # if self.frequencies[combined_index_2] < min_freq:
+                    if self.gammas is not None:
+                        if self.gammas.get_property_value(qpoint2, b2) == 0:
+                            property_2 = self.max_gamma
+                        else:
+                            property_2 = (4 * np.pi * self.gammas.get_property_value(qpoint2, b2))
+
+                        if self.gammas.get_property_value(qpoint3, b3) == 0:
+                            property_3 = self.max_gamma
+                        else:
+                            property_3 = (4 * np.pi * self.gammas.get_property_value(qpoint3, b3))
+
                     if self.frequencies.get_property_value(qpoint=qpoint2, band_index=b2) < min_freq:
                         continue
                     # if self.frequencies[combined_index_3] < min_freq:
@@ -496,54 +512,64 @@ class DecayDistribution(BrillouinZoneProperty):
                     frequency3 = self.frequencies.get_property_value(qpoint3, b3)
 
                     frequency1 = self.frequencies.get_property_value(qpoint, branch_index)
-                    # combined_index_1 = get_combined_index(q1_index, pp_shape[1] - 1 - i, num_branches)
-                    # if check_frequencies(frequencies[combined_index_1], frequencies[combined_index_2],
-                    #                     frequencies[combined_index_3], thresh):
                     int_factor = self.gaussian(frequency1 - frequency2 - frequency3)
                     gaussian2 = self.create_gaussian(frequency2)
                     gaussian3 = self.create_gaussian(frequency3)
                     if int_factor > min_factor:
-                        spectrum += self.weights[tr] * pp_element * gaussian2 * \
+                        contribution_b2 = self.weights[tr] * pp_element * gaussian2 * \
                                     (self.compute_occupation_number(frequency2) +
                                      self.compute_occupation_number(frequency3) + 1) * int_factor
-                        spectrum += self.weights[tr] * pp_element * gaussian3 * \
+                        spectrum += contribution_b2
+                        contribution_b3 = self.weights[tr] * pp_element * gaussian3 * \
                                     (self.compute_occupation_number(frequency2) +
                                      self.compute_occupation_number(frequency3) + 1) * int_factor
+                        spectrum += contribution_b3
                         decay_rate += self.weights[tr] * pp_element * \
                                       (self.compute_occupation_number(frequency2) +
                                        self.compute_occupation_number(frequency3) + 1) * int_factor
+                        if self.gammas is not None:
+                            property_spectrum += contribution_b2 * property_2
+                            property_spectrum += contribution_b3 * property_3
 
                     int_factor = self.gaussian(frequency1 + frequency2 - frequency3)
                     if int_factor > min_factor:
-                        spectrum += self.weights[tr] * pp_element * gaussian2 * \
+                        contribution_b2 = self.weights[tr] * pp_element * gaussian2 * \
                                     (self.compute_occupation_number(frequency2) -
                                      self.compute_occupation_number(frequency3)) * int_factor
-                        spectrum += self.weights[tr] * pp_element * gaussian3 * \
+                        spectrum += contribution_b2
+                        contribution_b3 = self.weights[tr] * pp_element * gaussian3 * \
                                     (self.compute_occupation_number(frequency2) -
                                      self.compute_occupation_number(frequency3)) * int_factor
+                        spectrum += contribution_b3
                         decay_rate += self.weights[tr] * pp_element * \
                                       (self.compute_occupation_number(frequency2) -
                                        self.compute_occupation_number(frequency3)) * int_factor
+                        if self.gammas is not None:
+                            property_spectrum += contribution_b2 * property_2
+                            property_spectrum += contribution_b3 * property_3
 
                     int_factor = self.gaussian(frequency1 - frequency2 + frequency3)
                     if int_factor > min_factor:
-                        spectrum += self.weights[tr] * pp_element * gaussian2 * \
+                        contribution_b2 = self.weights[tr] * pp_element * gaussian2 * \
                                     (-self.compute_occupation_number(frequency2) +
                                      self.compute_occupation_number(frequency3)) * int_factor
-                        spectrum += self.weights[tr] * pp_element * gaussian3 * \
+                        spectrum += contribution_b2
+                        contribution_b3 = self.weights[tr] * pp_element * gaussian3 * \
                                     (-self.compute_occupation_number(frequency2) +
                                      self.compute_occupation_number(frequency3)) * int_factor
+                        spectrum += contribution_b3
                         decay_rate += self.weights[tr] * pp_element * \
                                       (-self.compute_occupation_number(frequency2) +
                                        self.compute_occupation_number(frequency3)) * int_factor
+                        if self.gammas is not None:
+                            property_spectrum += contribution_b2 * property_2
+                            property_spectrum += contribution_b3 * property_3
         # Convert from eV**2 THz to THz
         conv_factor = 18 * np.pi / const.hbar ** 2 * const.e ** 2 * (10 ** -12) ** 2 / ((2 * np.pi) ** 2)
-        self.decay_distribution = spectrum * conv_factor
-        # Find the decay rate by integrating the decay distribution
-        # IMPORTANT: need to divide the conversion factor by 2 to get appropriate decay rate b/c we are assuming that
-        #            all decays go from 1 phonon into 2 phonons.
-        # self.decay_rate = np.trapz(spectrum, self.bins.bin_energies) * conv_factor / 2
-        self.decay_rate = decay_rate * conv_factor
+        self.decay_distribution = spectrum * conv_factor * 4 * np.pi
+        self.decay_rate = decay_rate * conv_factor * 4 * np.pi
+        if self.gammas is not None:
+            self.gamma_spectrum = property_spectrum / (np.trapz(spectrum) * self.bins.bin_width)
 
 
 # How to put it together???
@@ -559,7 +585,7 @@ if __name__ == '__main__':
     fc3 = predir + 'FORCES_FC3'
     disp = predir + 'disp_fc3.yaml'
     born_file = predir + 'BORN'
-    mesh = [7, 7, 7]
+    mesh = [9, 9, 9]
     supercell = [2, 2, 2]
     nac = True
     sigma=0.3
@@ -580,6 +606,16 @@ if __name__ == '__main__':
     # Now set up PropertyBins
     bins = PropertyBins(eigs)
 
+    # Define some specific device characteristics
+    # area_tes_abs = 7.5 * 0.200        # units of mm^2
+    # area_tes_abs *= 10**14          # unit conversion from mm^2 to Angstrom^2
+    vol_target = 50.  # unit is cm^3
+    vol_target *= 10 ** 24
+    # Redefine area in terms of volume according to Matt Pyle's paper
+    # Paper indicates that 2.7% of surface area covered by fins
+    surface_coverage = 0.027
+    area_tes_abs = 6 * vol_target ** (2 / 3) * surface_coverage  # units in Angstrom^2
+
     # Also get DOS
     dos_obj = DensityOfStates(gaas_inputs)
     dos = dos_obj.get_total_DOS()
@@ -593,7 +629,8 @@ if __name__ == '__main__':
     # Use ISE to build decay and channel kernels
     # Need the channel distribution, which is similar to what we get from the method in 'plot_decay_channels.py'
     # In order to get this, we need to get the pp object, the triplets, and the triplet map
-    decay_channel_dist = DecayDistribution(gaas_inputs, bins=bins, sigma=sigma)
+    gammas = Gamma(gaas_inputs)
+    decay_channel_dist = DecayDistribution(gaas_inputs, bins=bins, sigma=sigma, gammas=gammas)
     decay_channel_dist.get_decay_distribution_at_q(qpoint=[0, 0, 0], branch_index=5)
 
     # Use bins to create non-eq distribution
@@ -604,7 +641,9 @@ if __name__ == '__main__':
     q = [0, 0, 0]
     branch_index = 5
     noneq_energy = eigs.get_property_value(q, branch_index)
-    noneq_dist.initialize_distribution(noneq_energy, 1.)
+    weight = 1 / (vol_target * interpolator(noneq_energy) / unitcell_vol)
+    #weight = 1 / (interpolator(noneq_energy) / unitcell_vol)
+    noneq_dist.initialize_distribution(noneq_energy, weight=weight)
 
     # Bin isotopic gamma
     iso_inputs = Phono3pyInputs(poscar=poscar,
@@ -629,9 +668,9 @@ if __name__ == '__main__':
     gv_binner.bin_property()
     gv_binner.average_property_bins()
 
-    # Create interaction kernels
+    # Create interaction kernels; multiply all Gamma parameters by 4pi b/c of funny Phonopy conventions
     isotope_kernel = DiagonalKernel(bins=bins,
-                                    diag_elements=-0. * iso_binner.avg_binned_property)
+                                    diag_elements=-0. * 4 * np.pi * iso_binner.avg_binned_property)
     decay_channel_kernel = DecayChannelKernel(bins=bins,
                                               decay_energy=noneq_energy,
                                               channel_vec=decay_channel_dist.decay_distribution,
@@ -639,21 +678,28 @@ if __name__ == '__main__':
     combined_kernel = CompositeKernel(bins)
     combined_kernel.combine_kernels(isotope_kernel, decay_channel_kernel)
 
+    gamma_binner = PropertyBinner(gammas, eigs, sigma=sigma)
+    gamma_binner.bin_property()
+    gamma_binner.average_property_bins()
+    gamma_binner.avg_binned_property[bins.get_bin_index(noneq_energy)] = 0.
+
+    avg_secondary_gammas = decay_channel_dist.gamma_spectrum
+    #anharm_kernel = DiagonalKernel(bins=bins,
+    #                               diag_elements=-0. * 4 * np.pi * gamma_binner.avg_binned_property)
+    anharm_kernel = DiagonalKernel(bins=bins,
+                                   diag_elements=-1. * avg_secondary_gammas)
+    combined_kernel.add_kernel(anharm_kernel)
+
     # Create flux kernel describing flux across interface
-    # First define some specific device characteristics
-    area_tes_abs = 7.5 * 0.200        # units of mm^2
-    area_tes_abs *= 10**14          # unit conversion from mm^2 to Angstrom^2
-    vol_target = 50.                # unit is cm^3
-    vol_target *= 10**24
+    #flux_rate_dist = 1 / 4 * gv_binner.avg_binned_property * dos_on_bins * area_tes_abs * unitcell_vol / vol_target
+    flux_rate_dist = 1 / 8 * gv_binner.avg_binned_property * area_tes_abs / vol_target
+    flux_kernel = DiagonalKernel(bins=bins, diag_elements=-1. * flux_rate_dist)
 
-    flux_rate_dist = 1 / 4 * gv_binner.avg_binned_property * dos_on_bins * area_tes_abs / vol_target
-    flux_kernel = DiagonalKernel(bins=bins, diag_elements=-1. * flux_rate_dist * bins.bin_width)
-
-    combined_kernel.combine_kernels(combined_kernel, flux_kernel)
+    combined_kernel.add_kernel(flux_kernel)
 
     # Create integrator
-    time_step = 1000000.
-    num_steps = 10000
+    time_step = 1e4
+    num_steps = int(1e5)
     integrator = NoneqDistributionIntegrator(distribution=noneq_dist,
                                              method='back_euler',
                                              time_step=time_step,
@@ -663,7 +709,7 @@ if __name__ == '__main__':
 
     # Create temperature model
     # Create power time series, converting bin_energies to 1/s, yielding units of J / ps
-    power_time_series = [np.trapz(flux_rate_dist * const.h * bins.bin_energies * 10**12 * g) for g in noneq_dist.past_g]
+    power_time_series = [np.trapz(vol_target * flux_rate_dist * dos_on_bins * const.h * bins.bin_energies * 10**12 * g, bins.bin_energies) for g in noneq_dist.past_g]
     power_time_series = np.array(power_time_series)
 
     # Define more device constants

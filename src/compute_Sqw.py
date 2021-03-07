@@ -887,7 +887,7 @@ if __name__ == '__main__':
 
     # print(qpoints)
     # mapping, testgrid = get_BZ_map(phonons.mesh, phonons.lattice, phonons.positions, phonons.masses, magmoms=[])
-    mesh = [3, 3, 3]
+    mesh = [9, 9, 9]
     supercell = [2, 2, 2]
 
     qpoints = set_qpoints(mesh=mesh)  # , num_Gpoints=10)#, num_Gpoints=300, stride_G=50)
@@ -903,6 +903,13 @@ if __name__ == '__main__':
     #disp = None
     born = "/Volumes/GoogleDrive/My Drive/Cori_backup/GaAs/phono3py/2x2x2/BORN"
 
+    poscar = "/Users/tfharrelson/PycharmProjects/compute_Sqw/data/CsI/POSCAR"
+    fc = "/Users/tfharrelson/PycharmProjects/compute_Sqw/data/CsI/FORCES_FC2"
+    fc3 = "/Users/tfharrelson/PycharmProjects/compute_Sqw/data/CsI/FORCES_FC3"
+    disp = "/Users/tfharrelson/PycharmProjects/compute_Sqw/data/CsI/phono3py_disp.yaml"
+    # fc3 = None
+    # disp = None
+    born = "/Users/tfharrelson/PycharmProjects/compute_Sqw/data/CsI/BORN"
     dynamic_structure_factor = DynamicStructureFactor(poscar,
                                                       fc,
                                                       mesh,

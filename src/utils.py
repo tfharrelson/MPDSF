@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.interpolate import interp1d
 from phonopy.interface.vasp import read_vasp
 from phonopy.file_IO import parse_BORN
 from phonopy.units import Bohr, Hartree
@@ -493,3 +494,24 @@ class IsotopicImagSelfEnergy(BrillouinZoneProperty):
                 # gamma matrix has three indices: (# sigmas, # gridpoints, # bands)
                 # There is always only one sigma for these objects
                 self.property_dict[key] = self.manager.isotopes.gamma[0][gridpoint][band_index]
+
+
+class Gamma(BrillouinZoneProperty):
+    '''
+    This class is similar to ImaginarySelfEnergy, but evaluates the ISE at the phonon frequency only
+    '''
+    def __init__(self, inputs: Phono3pyInputs, f_min=1e-3):
+        super().__init__(inputs)
+        self.ise = ImaginarySelfEnergy(inputs)
+        self.eigs = PhononEigenvalues(inputs)
+        self.f_min = f_min
+        self.set_property_dict()
+
+    def set_property_dict(self):
+        for key, ise_at_key in self.ise.property_dict.items():
+            eig_at_key = self.eigs.property_dict[key]
+            if eig_at_key < self.f_min:
+                self.property_dict[key] = 0.
+                continue
+            interp = interp1d(self.ise.freqs, ise_at_key)
+            self.property_dict[key] = interp(eig_at_key)

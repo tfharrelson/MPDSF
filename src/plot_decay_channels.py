@@ -64,7 +64,7 @@ def get_gridpoints(triplet_map):
     return np.unique(triplet_map)
 
 def gaussian(x, sigma):
-    return 1 / (2 * np.pi) * np.exp(-1.0 * x**2 / (2 * sigma**2))
+    return 1 / np.sqrt(2 * np.pi * sigma ** 2) * np.exp(-1.0 * x ** 2 / (2 * sigma ** 2))
 
 def create_gaussian(mu, sigma, delta_e, max_e):
     num_bins = int(np.ceil(max_e / delta_e))
@@ -140,12 +140,12 @@ def create_decay_spectrum(pp,
                     if gammas[0, q2_index, b2] == 0:
                         property_2 = max_lifetime
                     else:
-                        property_2 = 1 / (2 * gammas[0, q2_index, b2])
+                        property_2 = 1 / (4 * np.pi * gammas[0, q2_index, b2])
 
                     if gammas[0, q3_index, b3] == 0:
                         property_3 = max_lifetime
                     else:
-                        property_3 = 1 / (2 * gammas[0, q3_index, b3])
+                        property_3 = 1 / (4 * np.pi * gammas[0, q3_index, b3])
 
                     if mode_vels is not None:
                         property_2 *= np.linalg.norm(mode_vels[q2_index, b2, :])
@@ -244,9 +244,13 @@ def smear_spectrum(spectrum, sigma, delta_e):
     gaussian = [1 / np.sqrt(2 * np.pi * sigma**2) * np.exp(-e**2 / (2 * sigma**2)) for e in e_vals]
     return signal.fftconvolve(spectrum, gaussian, mode='full')[num_bins_half:(num_bins_half + len(spectrum))] * delta_e
 
-yaml_file = sys.argv[1]
-pp_file = sys.argv[2]
-ir_grid_file = sys.argv[3]
+#yaml_file = sys.argv[1]
+#pp_file = sys.argv[2]
+#ir_grid_file = sys.argv[3]
+#gamma_file = '/Volumes/GoogleDrive/My Drive/Python Scripts/si_232323_kappa_T4K.hdf5'
+yaml_file = '/Volumes/GoogleDrive/My Drive/multiphonon/Si_files/si_232323_mesh.yaml'
+pp_file = '/Volumes/GoogleDrive/My Drive/multiphonon/Si_files/si-pp-gamma.hdf5'
+ir_grid_file = '/Volumes/GoogleDrive/My Drive/multiphonon/Si_files/si_232323_grid.yaml'
 gamma_file = '/Volumes/GoogleDrive/My Drive/Python Scripts/si_232323_kappa_T4K.hdf5'
 
 gaas_gamma = '/Volumes/GoogleDrive/My Drive/multiphonon/GaAs_files/gaas_kappa_232323_4K.hdf5'
@@ -262,6 +266,7 @@ temperature = 4.0
 labels = ['GaAs', 'Si']
 
 #plt.style.use('tableau-colorblind10')
+spectra = []
 
 for yaml_file, pp_file, ir_grid_file, gamma_file, label in zip(yaml_files, pp_files, ir_grid_files, gamma_files, labels):
 
@@ -281,8 +286,8 @@ for yaml_file, pp_file, ir_grid_file, gamma_file, label in zip(yaml_files, pp_fi
     # get imaginary self-energies from new file
     #gamma_file = '/Volumes/GoogleDrive/My Drive/multiphonon/GaAs_files/gaas_kappa_232323_4K.hdf5'
     gamma_h5 = h5py.File(gamma_file, 'r')
-    #gammas = np.array(gamma_h5['gamma'])
-    gammas=None
+    gammas = np.array(gamma_h5['gamma'])
+    #gammas=None
     mode_vels = np.array(gamma_h5['group_velocity'])
     #mode_vels = None
     spectrum = create_decay_spectrum(pp, triplets, triplet_map, phonons.frequencies, delta_e, temperature,
@@ -293,12 +298,13 @@ for yaml_file, pp_file, ir_grid_file, gamma_file, label in zip(yaml_files, pp_fi
     print('phonon energy =', 7.6463566 * conv_THz_to_meV)
     plt.plot(np.linspace(0, len(spectrum) * delta_e, len(spectrum)) * conv_THz_to_meV, spectrum / conv_THz_to_meV,
              label=label)
+    spectra.append(spectrum)
 plt.xlabel('Energy (meV)')
 plt.xlim([0, 60])
 plt.yscale('log')
-plt.ylim([1e-6, 1])
+plt.ylim([1e-2, 1e10])
 #plt.ylim([0, 0.16])
 plt.legend()
 plt.tight_layout()
-plt.savefig('/Volumes/GoogleDrive/My Drive/Manuscripts/multiphonon/Figures/combined_decay_channels_vg.eps', dpi=600)
+plt.savefig('/Volumes/GoogleDrive/My Drive/Manuscripts/multiphonon/Figures/combined_decay_channels_mfp.eps', dpi=600)
 plt.show()
