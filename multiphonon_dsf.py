@@ -1,10 +1,11 @@
 import argparse
+import os
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
 import numpy as np
 from src.compute_Sqw import DynamicStructureFactor
 import yaml
 from yaml import SafeLoader
 import h5py
-import os
 
 class MPDSF:
     def __init__(self):
