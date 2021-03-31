@@ -87,7 +87,8 @@ class PropertyBinner:
     def __init__(self,
                  property: BrillouinZoneProperty,
                  energies: PhononEigenvalues,
-                 sigma=None):
+                 sigma=None,
+                 bin_width=None):
         '''
         :param property: An BrillouinZoneProperty object of property values for each phonon branch and k-point index in the BZ.
         :param energies: An PhononEigenvalues of the phonon energy eigenvalues for each phonon branch and k-point index in the BZ.
@@ -96,7 +97,7 @@ class PropertyBinner:
         self.energies = energies
         self.binned_property = None
         self.avg_binned_property = None
-        self.bins = PropertyBins(energies)
+        self.bins = PropertyBins(energies, bin_width=bin_width)
         self.sigma = sigma
 
     def bin_property(self, bin_width=None):
@@ -124,7 +125,7 @@ class PropertyBinner:
         # Loop over binned_property and average appropriately
         for i, bp_vec in enumerate(self.binned_property):
             if len(bp_vec) == 0:
-                self.avg_binned_property[i] = 0
+                self.avg_binned_property[i] += 0
             elif norm:
                 if np.array(bp_vec).ndim > 1:
                     avg_binned_property = np.mean(np.linalg.norm(bp_vec, axis=1))
@@ -134,7 +135,8 @@ class PropertyBinner:
                 if self.sigma is None:
                     self.avg_binned_property[i] = avg_binned_property
                 else:
-                    self.avg_binned_property += avg_binned_property * self.create_gaussian(self.bins.bin_energies[i])
+                    self.avg_binned_property += avg_binned_property * self.create_gaussian(self.bins.bin_energies[i]) *\
+                                                self.bins.bin_width
             else:
                 # code not set up for averages that don't find the norm of a vector quantity first.
                 # I don't currently know what would be most useful, so here's a snarky error message.
@@ -175,10 +177,12 @@ class PropertyBins:
         :return: Nothing; the relevant values are stored as fields in the PropertyBinner object
         '''
         # Reshape the energies into a 1-D list and find its max
-        max_e = max(self.energies.property_dict.values())
+        max_e = 1.1 * max(self.energies.property_dict.values())
 
         # Use the max energy and the bin_width to find the number of bins and set the bins
-        if bin_width is not None:
+        if bin_width is not None or self.bin_width is not None:
+            if bin_width is None:
+                bin_width = self.bin_width
             self.num_bins = np.ceil(max_e / bin_width).astype(int)
             self.bin_width = bin_width
         else:
@@ -417,7 +421,7 @@ class DecayDistribution(BrillouinZoneProperty):
         self.max_gamma = 1e-12
         self.gamma_spectrum = None
 
-    def get_decay_distribution_at_q(self, qpoint, branch_index):
+    def get_decay_distribution_at_q(self, qpoint, branch_index, sigma=None):
         # Get gridpoint from qpoint
 
         gridpoint = self._brillouinzone.get_gridpoint(qpoint)
@@ -434,7 +438,7 @@ class DecayDistribution(BrillouinZoneProperty):
         self.triplets, self.weights, self.triplet_map, ir_map_at_q = pp.get_triplets_at_q()
 
         # Use the results to calculate the decay distribution
-        self.create_decay_spectrum(qpoint, branch_index)
+        self.create_decay_spectrum(qpoint, branch_index, sigma=sigma)
 
     def get_gridpoints(self):
         return np.unique(self.triplet_map)
@@ -442,17 +446,44 @@ class DecayDistribution(BrillouinZoneProperty):
     def compute_occupation_number(self, frequency):
         return (np.exp(const.hbar * frequency * 10 ** 12 / (const.Boltzmann * self.temperature)) - 1) ** -1
 
-    def gaussian(self, x):
-        return 1 / np.sqrt(2 * np.pi * self.sigma ** 2) * np.exp(-1.0 * x ** 2 / (2 * self.sigma ** 2))
+    def gaussian(self, x, sigma=None):
+        if sigma is None:
+            return 1 / np.sqrt(2 * np.pi * self.sigma ** 2) * np.exp(-1.0 * x ** 2 / (2 * self.sigma ** 2))
+        else:
+            return 1 / np.sqrt(2 * np.pi * sigma ** 2) * np.exp(-1.0 * x ** 2 / (2 * sigma ** 2))
 
     def create_gaussian(self, mu):
         frequencies = self.bins.bin_energies
-        return self.gaussian(frequencies - mu)
+        if self.sigma is not None:
+            return self.gaussian(frequencies - mu)
+        else:
+            return self.create_delta(mu)
+
+    def create_delta(self, energy):
+        # units in meV
+        num_bins = self.bins.num_bins
+        delta_fcn = np.zeros(num_bins)
+
+        if energy < 0:
+            return delta_fcn
+
+        #e_bin_minus = int(np.floor(energy / self.bins.bin_width))
+        #e_bin_plus = int(np.ceil(energy / self.bins.bin_width))
+        e_bin = self.bins.get_bin_index(energy)
+
+        #alpha_minus = np.abs(e_bin_minus * self.bins.bin_width - energy) / self.bins.bin_width
+        #alpha_plus = np.abs(e_bin_plus * self.bins.bin_width - energy) / self.bins.bin_width
+
+        #delta_fcn[e_bin_minus] = (1 - alpha_minus) / self.bins.bin_width
+        #delta_fcn[e_bin_plus] = (1 - alpha_plus) / self.bins.bin_width
+        delta_fcn[e_bin] = 1 / self.bins.bin_width
+        return delta_fcn
 
     def create_decay_spectrum(self,
                               qpoint,
                               branch_index,
-                              min_freq=0.01):
+                              min_freq=0.01,
+                              sigma=None):
         """
 
         :param pp: A set of phonon-phonon interaction parameters (equal to |matrix element|^2) for a specific grid-point
@@ -512,7 +543,7 @@ class DecayDistribution(BrillouinZoneProperty):
                     frequency3 = self.frequencies.get_property_value(qpoint3, b3)
 
                     frequency1 = self.frequencies.get_property_value(qpoint, branch_index)
-                    int_factor = self.gaussian(frequency1 - frequency2 - frequency3)
+                    int_factor = self.gaussian(frequency1 - frequency2 - frequency3, sigma=sigma)
                     gaussian2 = self.create_gaussian(frequency2)
                     gaussian3 = self.create_gaussian(frequency3)
                     if int_factor > min_factor:
@@ -531,7 +562,7 @@ class DecayDistribution(BrillouinZoneProperty):
                             property_spectrum += contribution_b2 * property_2
                             property_spectrum += contribution_b3 * property_3
 
-                    int_factor = self.gaussian(frequency1 + frequency2 - frequency3)
+                    int_factor = self.gaussian(frequency1 + frequency2 - frequency3, sigma=sigma)
                     if int_factor > min_factor:
                         contribution_b2 = self.weights[tr] * pp_element * gaussian2 * \
                                     (self.compute_occupation_number(frequency2) -
@@ -548,7 +579,7 @@ class DecayDistribution(BrillouinZoneProperty):
                             property_spectrum += contribution_b2 * property_2
                             property_spectrum += contribution_b3 * property_3
 
-                    int_factor = self.gaussian(frequency1 - frequency2 + frequency3)
+                    int_factor = self.gaussian(frequency1 - frequency2 + frequency3, sigma=sigma)
                     if int_factor > min_factor:
                         contribution_b2 = self.weights[tr] * pp_element * gaussian2 * \
                                     (-self.compute_occupation_number(frequency2) +
@@ -585,10 +616,10 @@ if __name__ == '__main__':
     fc3 = predir + 'FORCES_FC3'
     disp = predir + 'disp_fc3.yaml'
     born_file = predir + 'BORN'
-    mesh = [9, 9, 9]
+    mesh = [15, 15, 15]
     supercell = [2, 2, 2]
     nac = True
-    sigma=0.3
+    sigma = None
 
     gaas_inputs = Phono3pyInputs(poscar=poscar,
                                  fc2_file=fc2,
@@ -604,17 +635,24 @@ if __name__ == '__main__':
     ise = ImaginarySelfEnergy(gaas_inputs)
 
     # Now set up PropertyBins
-    bins = PropertyBins(eigs)
+    #bins = PropertyBins(eigs, bin_width=0.1 * sigma)
+    bin_width = 0.05
+    bins = PropertyBins(eigs, bin_width=bin_width)
 
     # Define some specific device characteristics
     # area_tes_abs = 7.5 * 0.200        # units of mm^2
     # area_tes_abs *= 10**14          # unit conversion from mm^2 to Angstrom^2
-    vol_target = 50.  # unit is cm^3
+    vol_target = 50.   # unit is cm^3
     vol_target *= 10 ** 24
     # Redefine area in terms of volume according to Matt Pyle's paper
     # Paper indicates that 2.7% of surface area covered by fins
     surface_coverage = 0.027
+    # define a thickness for film calculations
+    thickness = 0.001 * 1e8     # Units of Angstrom
+    # Area of cube
     area_tes_abs = 6 * vol_target ** (2 / 3) * surface_coverage  # units in Angstrom^2
+    # Area of film
+    #area_tes_abs = (2 * vol_target / thickness + 4 * thickness * np.sqrt(vol_target / thickness)) * surface_coverage
 
     # Also get DOS
     dos_obj = DensityOfStates(gaas_inputs)
@@ -622,7 +660,13 @@ if __name__ == '__main__':
     # Interpolate dos onto bins
     from scipy.interpolate import interp1d
 
-    interpolator = interp1d(dos[0], dos[1], kind='linear')
+    if dos[0][-1] < bins.bin_energies[-1]:
+        dos_energies = np.append(dos[0], 1.1 * bins.bin_energies[-1])
+        dos_values = np.append(dos[1], 0.)
+    else:
+        dos_energies = dos[0]
+        dos_values = dos[1]
+    interpolator = interp1d(dos_energies, dos_values, kind='linear')
     unitcell_vol = np.linalg.det(eigs.manager.phono3py.primitive.cell)
     dos_on_bins = interpolator(bins.bin_energies) / unitcell_vol
 
@@ -631,7 +675,7 @@ if __name__ == '__main__':
     # In order to get this, we need to get the pp object, the triplets, and the triplet map
     gammas = Gamma(gaas_inputs)
     decay_channel_dist = DecayDistribution(gaas_inputs, bins=bins, sigma=sigma, gammas=gammas)
-    decay_channel_dist.get_decay_distribution_at_q(qpoint=[0, 0, 0], branch_index=5)
+    decay_channel_dist.get_decay_distribution_at_q(qpoint=[0, 0, 0], branch_index=5, sigma=0.1)
 
     # Use bins to create non-eq distribution
     noneq_dist = NonEqDistribution(bins)
@@ -641,8 +685,8 @@ if __name__ == '__main__':
     q = [0, 0, 0]
     branch_index = 5
     noneq_energy = eigs.get_property_value(q, branch_index)
-    weight = 1 / (vol_target * interpolator(noneq_energy) / unitcell_vol)
-    #weight = 1 / (interpolator(noneq_energy) / unitcell_vol)
+    #weight = 1 / (vol_target * dos_on_bins[bins.get_bin_index(noneq_energy)] * bins.bin_width)
+    weight = 1 / (vol_target * bins.bin_width)
     noneq_dist.initialize_distribution(noneq_energy, weight=weight)
 
     # Bin isotopic gamma
@@ -656,7 +700,7 @@ if __name__ == '__main__':
                                 born_file=born_file,
                                 isotope_flag=True)
     iso_gamma = IsotopicImagSelfEnergy(inputs=iso_inputs)
-    iso_binner = PropertyBinner(iso_gamma, eigs, sigma=sigma)
+    iso_binner = PropertyBinner(iso_gamma, eigs, sigma=sigma, bin_width=bin_width)
     # Bin the isotopes
     iso_binner.bin_property()
     # average over binned values
@@ -664,7 +708,7 @@ if __name__ == '__main__':
 
     # Bin Group velocities, repeat procedure above
     group_vels = GroupVelocities(inputs=gaas_inputs)
-    gv_binner = PropertyBinner(group_vels, eigs, sigma=sigma)
+    gv_binner = PropertyBinner(group_vels, eigs, sigma=sigma, bin_width=bin_width)
     gv_binner.bin_property()
     gv_binner.average_property_bins()
 
@@ -673,12 +717,12 @@ if __name__ == '__main__':
                                     diag_elements=-0. * 4 * np.pi * iso_binner.avg_binned_property)
     decay_channel_kernel = DecayChannelKernel(bins=bins,
                                               decay_energy=noneq_energy,
-                                              channel_vec=decay_channel_dist.decay_distribution,
+                                              channel_vec=decay_channel_dist.decay_distribution * bins.bin_width,
                                               decay_weight=-1 * decay_channel_dist.decay_rate)
     combined_kernel = CompositeKernel(bins)
     combined_kernel.combine_kernels(isotope_kernel, decay_channel_kernel)
 
-    gamma_binner = PropertyBinner(gammas, eigs, sigma=sigma)
+    gamma_binner = PropertyBinner(gammas, eigs, sigma=sigma, bin_width=bin_width)
     gamma_binner.bin_property()
     gamma_binner.average_property_bins()
     gamma_binner.avg_binned_property[bins.get_bin_index(noneq_energy)] = 0.
@@ -687,7 +731,7 @@ if __name__ == '__main__':
     #anharm_kernel = DiagonalKernel(bins=bins,
     #                               diag_elements=-0. * 4 * np.pi * gamma_binner.avg_binned_property)
     anharm_kernel = DiagonalKernel(bins=bins,
-                                   diag_elements=-1. * avg_secondary_gammas)
+                                   diag_elements=-1. * avg_secondary_gammas * bins.bin_width)
     combined_kernel.add_kernel(anharm_kernel)
 
     # Create flux kernel describing flux across interface
@@ -709,7 +753,10 @@ if __name__ == '__main__':
 
     # Create temperature model
     # Create power time series, converting bin_energies to 1/s, yielding units of J / ps
-    power_time_series = [np.trapz(vol_target * flux_rate_dist * dos_on_bins * const.h * bins.bin_energies * 10**12 * g, bins.bin_energies) for g in noneq_dist.past_g]
+    #power_time_series = [np.trapz(vol_target * flux_rate_dist * dos_on_bins * const.h * bins.bin_energies * 10**12 * g, bins.bin_energies) for g in noneq_dist.past_g]
+    power_time_series = [
+        np.trapz(vol_target * flux_rate_dist * const.h * bins.bin_energies * 10 ** 12 * g,
+                 bins.bin_energies) for g in noneq_dist.past_g]
     power_time_series = np.array(power_time_series)
 
     # Define more device constants
