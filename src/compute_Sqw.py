@@ -301,15 +301,18 @@ class DynamicStructureFactor(object):
                 print(fc_file, 'is not a recognized filetype!\nProgram exiting...')
                 raise FileNotFoundError
         else:
+            if self.is_nac:
                 nac_params = parse_BORN(phono3py.get_phonon_primitive(), filename=born_file)
                 nac_params['factor'] = Hartree * Bohr
-                phonon = Phonopy(read_vasp(poscar_file),
-                                 supercell_matrix=supercell,
-                                 primitive_matrix=primitive_flag,
-                                 nac_params=nac_params)
+            else:
+                nac_params=None
+            phonon = Phonopy(read_vasp(poscar_file),
+                             supercell_matrix=supercell,
+                             primitive_matrix=primitive_flag,
+                             nac_params=nac_params)
 
-                fc2 = phono3py.get_fc2()
-                phonon.force_constants = fc2
+            fc2 = phono3py.get_fc2()
+            phonon.force_constants = fc2
 
         self.phonon = phonon
         self.eigenvectors = None
