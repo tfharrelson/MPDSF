@@ -341,12 +341,6 @@ class ImaginarySelfEnergy(BrillouinZoneProperty):
         :param temperature: Temperature for phonon calculations (type=float)
         """
         super().__init__(inputs)
-        # get Phono3py manager to help
-        #self.mapping = None
-        #self.grid = None
-        #self.irr_BZ_gridpoints = None
-        #self.temperature = temperature
-        # self.phono3py.run_imag_self_energy(np.unique(self.mapping), temperatures=temperature)
         self.imag_self_energy = {}
         self.freqs = None
         self.set_self_energies()

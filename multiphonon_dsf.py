@@ -59,6 +59,9 @@ class MPDSF:
                                                       'calculations', action='store_true')
         parser.add_argument('--dark_photon', help='Flag specifying if S(q,w) to be calculated for dark-photon '
                                                   'calculations', action='store_true')
+        parser.add_argument('--param_lorentzian', help='Flag specifying to use a constant Lorentzian linewidth instead '
+                                                       'of the default frequency-dependent linewidth.',
+                            action='store_true')
 
 
         args = parser.parse_args()
@@ -66,15 +69,15 @@ class MPDSF:
         self.fc2 = args.fc2
         self.fc3 = args.fc3
         self.disp = args.disp
-        self.mesh = np.array(args.mesh.split(',')).astype(np.int)
-        self.supercell = np.array(args.supercell.split(',')).astype(np.int)
+        self.mesh = np.array(args.mesh.split(',')).astype(int)
+        self.supercell = np.array(args.supercell.split(',')).astype(int)
         self.max_e = args.max_energy
         self.delta_e = args.delta_e
         self.overtones = args.overtones
         self.output = args.output
         self.numG = args.numG
         self.strideQ = args.strideQ
-        self.shift = np.array(args.shift.split(',')).astype(np.float)
+        self.shift = np.array(args.shift.split(',')).astype(float)
         #TODO decide whether implementing a stride in G is worth it
         self.strideG = 1
         self.qmax = args.qmax
@@ -98,6 +101,7 @@ class MPDSF:
                       'PHOTON VARIANT OF THE CODE. YOU\'D LIKELY BE BETTER OFF RUNNING A DIFFERENT CODE IN THIS CASE...'
                       'For example, see https://github.com/tanner-trickle/dm-phonon-scatter')
         self.scalar_mediator_flag = args.scalar_mediator
+        self.param_flag = args.param_lorentzian
 
         if self.input is not None:
             self.parse_input_file(self.input)
@@ -164,6 +168,8 @@ class MPDSF:
                       'For example, see https://github.com/tanner-trickle/dm-phonon-scatter')
         if 'scalar_mediator' in config_dict.keys():
             self.scalar_mediator_flag = config_dict['scalar_mediator']
+        if 'param_lorentzian' in config_dict.keys():
+            self.param_flag = config_dict['param_lorentzian']
 
     def set_qpoints(self):
         self.qpoints = np.zeros([0, 3])

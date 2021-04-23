@@ -16,6 +16,7 @@ from phono3py.file_IO import (parse_disp_fc3_yaml,
                               parse_FORCES_FC3)
 from spglib import get_ir_reciprocal_mesh
 from scipy.interpolate import interp1d
+from .utils import Gamma, Phono3pyInputs
 
 AngstromsToMeters = 1e-10
 # from numba import jit
@@ -46,9 +47,12 @@ class AnharmonicPhonons(object):
                  disp_file,
                  mesh,
                  supercell,
-                 temperature=0):
+                 born=None,
+                 temperature=0,
+                 param_flag=False):
         self.cell = read_vasp(poscar)
         self.mesh = mesh
+        self.born = born
         self.phono3py = Phono3py(self.cell,
                                  supercell_matrix=np.diag(supercell),
                                  primitive_matrix='auto',
@@ -59,7 +63,7 @@ class AnharmonicPhonons(object):
         self.phono3py.produce_fc3(self.fc3_data,
                                   displacement_dataset=self.disp_data,
                                   symmetrize_fc3r=True)
-        #TODO: Add BORN conditional statement here
+
         ## initialize phonon-phonon interaction instance
         self.phono3py.init_phph_interaction()
         self.mapping = None
@@ -68,6 +72,25 @@ class AnharmonicPhonons(object):
         self.phonon_freqs = None
         self.temperature = temperature
         # self.phono3py.run_imag_self_energy(np.unique(self.mapping), temperatures=temperature)
+        if self.born is not None:
+            primitive = self.phono3py.get_phonon_primitive()
+            nac_params = parse_BORN(primitive, filename=born)
+            nac_params['factor'] = Hartree * Bohr
+            self.phono3py.set_phph_interaction(nac_params=nac_params)
+        if param_flag:
+            if self.born is None:
+                nac = False
+            else:
+                nac = True
+            self.inputs = Phono3pyInputs(poscar=poscar,
+                                         fc3_file=fc3,
+                                         disp_file=disp,
+                                         mesh=mesh,
+                                         supercell=supercell,
+                                         nac=nac,
+                                         born_file=born
+                                         )
+            self.gamma = Gamma(self.inputs)
 
     def set_irr_BZ_gridpoints(self):
         self.mapping, grid = get_ir_reciprocal_mesh(mesh=self.mesh, cell=self.cell)
@@ -140,6 +163,9 @@ class AnharmonicPhonons(object):
         self.set_phonon_freqs()
         gridpoint = self.get_gridpoint(qpoint)
         freqs, gamma = self.get_imag_self_energy(gridpoint, band_index)
+        if self.param_flag:
+            gamma = self.gamma.get_property_value(qpoint, band_index)
+
         broadening_func = gamma / (np.pi * ((self.phonon_freqs[gridpoint, band_index] - freqs) ** 2 + gamma ** 2))
         f_index_minus = np.floor(self.phonon_freqs[gridpoint, band_index] / (freqs[1] - freqs[0])).astype(int)
         avg_gamma_at_freq = (gamma[f_index_minus] + gamma[f_index_minus + 1]) / 2
@@ -338,7 +364,8 @@ class DynamicStructureFactor(object):
         if fc3_file is not None and fc3_disp is not None:
             self.set_anharmonicities(poscar=poscar_file,
                                      fc3_file=fc3_file,
-                                     disp_file=fc3_disp)
+                                     disp_file=fc3_disp,
+                                     born=born_file)
 
     def run_mesh(self):
         self.phonon.run_mesh(self.mesh,
@@ -358,13 +385,14 @@ class DynamicStructureFactor(object):
     def set_dielectric(self):
         self.dielectric = self.phonon.nac_params['dielectric']
 
-    def set_anharmonicities(self, poscar, fc3_file, disp_file):
+    def set_anharmonicities(self, poscar, fc3_file, disp_file, born):
         self.anharmonicities = AnharmonicPhonons(poscar=poscar,
                                                  fc3_file=fc3_file,
                                                  disp_file=disp_file,
                                                  mesh=self.mesh,
                                                  supercell=self.supercell,
-                                                 temperature=self.temperature
+                                                 temperature=self.temperature,
+                                                 born=born
                                                  )
         self.anharmonicities.set_self_energies()
 
@@ -585,6 +613,10 @@ class DynamicStructureFactor(object):
                 # print('integral =', integral)
                 if integral != 0:
                     spectrum += f_ab[i] * anh_dist / integral
+                else:
+                    if frequencies[i] > self.freq_min:
+                        # Add delta in case there is a purely harmonic mode that has a positive frequency (very rare)
+                        spectrum += f_ab[i] * self.create_delta(frequencies[i])
         else:
             for i in range(len(frequencies)):
                 spectrum += f_ab[i] * self.create_delta(frequencies[i])
@@ -922,7 +954,8 @@ if __name__ == '__main__':
     supercell = [2, 2, 2]
 
     qpoints = set_qpoints(mesh=mesh)  # , num_Gpoints=10)#, num_Gpoints=300, stride_G=50)
-    print(qpoints[:10, :])
+    qpoints = qpoints[:10]
+    print(qpoints)
     # supercell = [1, 1, 1]
     poscar = "/Volumes/GoogleDrive/My Drive/Cori_backup/GaAs/phono3py/2x2x2/POSCAR"
     # poscar = "/Volumes/GoogleDrive/My Drive/multiphonon/rubrene_POSCAR"
@@ -958,7 +991,7 @@ if __name__ == '__main__':
                                                       scalar_mediator_flag=False,
                                                       dark_photon_flag=True)
     dynamic_structure_factor.get_coherent_sqw()
-    dynamic_structure_factor.write_coherent_sqw('csi_darkphoton_sqw_m999_anh.hdf5')
+    #dynamic_structure_factor.write_coherent_sqw('csi_darkphoton_sqw_m999_anh.hdf5')
     # s_qw = compute_Sqw(phonons, reduced_qpt, delta_e, max_e, num_overtones)
     # s_qw = compute_incoherent_Sqw(phonons, reduced_qpt, delta_e, max_e, num_overtones)
     # s_qw, decoherence_time = compute_decoherence_time(phonons, reduced_qpt, delta_e, max_e, num_overtones, anh_phonons.gammas, True)
