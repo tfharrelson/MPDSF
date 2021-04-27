@@ -223,7 +223,8 @@ class MPDSF:
                                           is_nac=self.is_nac,
                                           born_file=self.born,
                                           scalar_mediator_flag=self.scalar_mediator_flag,
-                                          dark_photon_flag=self.dark_photon_flag)
+                                          dark_photon_flag=self.dark_photon_flag,
+                                          param_flag=self.param_flag)
         self.dsf.get_coherent_sqw(start_q_index=start_q_index, stop_q_index=stop_q_index)
 
     def save_data(self):

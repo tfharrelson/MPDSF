@@ -83,14 +83,15 @@ class AnharmonicPhonons(object):
             else:
                 nac = True
             self.inputs = Phono3pyInputs(poscar=poscar,
-                                         fc3_file=fc3,
-                                         disp_file=disp,
+                                         fc3_file=fc3_file,
+                                         disp_file=disp_file,
                                          mesh=mesh,
                                          supercell=supercell,
                                          nac=nac,
                                          born_file=born
                                          )
             self.gamma = Gamma(self.inputs)
+        self.param_flag = param_flag
 
     def set_irr_BZ_gridpoints(self):
         self.mapping, grid = get_ir_reciprocal_mesh(mesh=self.mesh, cell=self.cell)
@@ -282,7 +283,9 @@ class DynamicStructureFactor(object):
                  is_nac=False,
                  born_file=None,
                  scalar_mediator_flag=True,
-                 dark_photon_flag=False):
+                 dark_photon_flag=False,
+                 param_flag=False):
+        self.param_flag = param_flag
         self.mesh = mesh
         self.supercell = supercell
         self.delta_e = delta_e
@@ -392,7 +395,8 @@ class DynamicStructureFactor(object):
                                                  mesh=self.mesh,
                                                  supercell=self.supercell,
                                                  temperature=self.temperature,
-                                                 born=born
+                                                 born=born,
+                                                 param_flag=self.param_flag
                                                  )
         self.anharmonicities.set_self_energies()
 
