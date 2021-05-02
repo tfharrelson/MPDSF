@@ -288,9 +288,11 @@ class DynamicStructureFactor(object):
                  born_file=None,
                  scalar_mediator_flag=True,
                  dark_photon_flag=False,
+                 param_flag=False,
                  fold_BZ=True,
                  lowq_scaling=False,
                  scaling_qpoints=None):
+        self.param_flag = param_flag
         self.mesh = mesh
         self.qpoints = q_point_list
         self.supercell = supercell

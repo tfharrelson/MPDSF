@@ -287,6 +287,7 @@ class MPDSF:
                                           born_file=self.born,
                                           scalar_mediator_flag=self.scalar_mediator_flag,
                                           dark_photon_flag=self.dark_photon_flag,
+                                          param_flag=self.param_flag,
                                           fold_BZ=fold_BZ,
                                           lowq_scaling=self.lowq_scaling,
                                           scaling_qpoints=scaling_qpoints)
