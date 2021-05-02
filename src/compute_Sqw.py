@@ -169,7 +169,10 @@ class AnharmonicPhonons(object):
 
         broadening_func = gamma / (np.pi * ((self.phonon_freqs[gridpoint, band_index] - freqs) ** 2 + gamma ** 2))
         f_index_minus = np.floor(self.phonon_freqs[gridpoint, band_index] / (freqs[1] - freqs[0])).astype(int)
-        avg_gamma_at_freq = (gamma[f_index_minus] + gamma[f_index_minus + 1]) / 2
+        if self.param_flag:
+            avg_gamma_at_freq = gamma
+        else:
+            avg_gamma_at_freq = (gamma[f_index_minus] + gamma[f_index_minus + 1]) / 2
         # print('original integral of broad func =', np.trapz(broadening_func, freqs))
 
         if max_freq is None:
