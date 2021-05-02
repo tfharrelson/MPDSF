@@ -182,6 +182,11 @@ class BrillouinZoneProperty:
         # freqs is important to track for properties that have frequency dependence
         # if NoneType, then the property has no frequency dependence
         self.freqs = None
+        self._interpolator = None
+
+    def _set_interpolator(self):
+        from src.Interpolation import Interpolator
+        self._interpolator = Interpolator(phonon_property=self)
 
     def assign_value(self, key, value):
         self.property[key] = value
@@ -206,10 +211,22 @@ class BrillouinZoneProperty:
     def get_property_value(self, qpoint, band_index):
         if len(self.property_dict) == 0:
             self.set_property_dict()
-        #key = tuple(self._shift_q_to_1stBZ(qpoint))
-        #key += (band_index,)
         key = self.set_key(self._shift_q_to_1stBZ(qpoint), band_index)
-        return self.property_dict[key]
+        try:
+            # try to find property at grid q-point and mode index
+            return self.property_dict[key]
+        except:
+            # use interpolator
+            if self._interpolator is None:
+                self._set_interpolator()
+            if self.freqs is None:
+                return self._interpolator.interpolate(band_index, *qpoint)
+            else:
+                # prepare frequency dep inputs
+                args = np.array([list(qpoint) + [f] for f in self.freqs]).T
+                # pass the args into the interpolator
+                return self._interpolator(band_index, *args)
+
 
     def set_property_dict(self):
         pass
@@ -227,14 +244,22 @@ class BrillouinZone(MPGrid):
         self.irr_BZ_gridpoints = None
         self.phonon_freqs = None
         self.temperature = temperature
-        # self.phono3py.run_imag_self_energy(np.unique(self.mapping), temperatures=temperature)
+        self.irr_BZ_qpoints = None
+        self.weights = None
+        self._init_BZ()
 
-    def set_irr_BZ_gridpoints(self):
+    def _init_BZ(self):
         self.mapping, grid = get_ir_reciprocal_mesh(mesh=self.mesh, cell=self.cell)
         self.grid = {tuple(k / self.mesh): v for (v, k) in enumerate(grid)}
         self.inverse_grid = {v: tuple(k / self.mesh) for (v, k) in enumerate(grid)}
         irr_BZ_gridpoints = np.unique(self.mapping)
         self.irr_BZ_gridpoints = {k: v for v, k in enumerate(irr_BZ_gridpoints)}
+
+        # Create a dict of irreducible q-points; key is a q-point in full grid, and value is the irreducible q-point
+        self.irr_BZ_qpoints = {k: self.get_qpoint(self.mapping[gp]) for k, gp in self.grid.items()}
+        # Create dictionary of weights for each irred q-point
+        self.weights = {self.get_qpoint(irred_gp): list(self.mapping).count(irred_gp)
+                        for irred_gp in irr_BZ_gridpoints}
 
     def get_gridpoint(self, qpoint):
         for i, q in enumerate(qpoint):

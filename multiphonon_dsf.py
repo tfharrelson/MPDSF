@@ -34,8 +34,8 @@ class MPDSF:
                             help='Name of the output file that stores the dynamic structure factor information '
                                  'in hdf5 format. Default is sqw_output.hdf5',
                             default='sqw_output.hdf5')
-        parser.add_argument('--numG', type=int, help='Number of reciprocal lattice vectors to include in q-point list.',
-                            default=1)
+        parser.add_argument('--Gmesh', help='Number of reciprocal lattice vectors to include in q-point list.',
+                            default='1,1,1')
         parser.add_argument('--strideQ', type=int,
                             help='Number of q-points to skip on the MP grid; still in testing so '
                                  'prepare for error messages :/... This really only works with certain'
@@ -62,7 +62,14 @@ class MPDSF:
         parser.add_argument('--param_lorentzian', help='Flag specifying to use a constant Lorentzian linewidth instead '
                                                        'of the default frequency-dependent linewidth.',
                             action='store_true')
-
+        parser.add_argument('--nofold_BZ', help='Flag specifying to unfold the irred Brillouin zone into the full BZ.'
+                                                'This means that weights are  not printed in the output file.',
+                            action='store_true')
+        parser.add_argument('--lowq_scaling', help='Flag specifying to find the low-q scaling of the DSF. Since the low'
+                                                   'q scaling points do not live on the mesh grid, a single phonon'
+                                                   'approximation is used for these points (no contact interation). '
+                                                   'Anharmonicities can still be calculated through interpolation. ',
+                            action='store_true')
 
         args = parser.parse_args()
         self.poscar = args.poscar
@@ -75,13 +82,14 @@ class MPDSF:
         self.delta_e = args.delta_e
         self.overtones = args.overtones
         self.output = args.output
-        self.numG = args.numG
+        self.meshG = np.array(args.Gmesh.split(',')).astype(int)
         self.strideQ = args.strideQ
         self.shift = np.array(args.shift.split(',')).astype(float)
         #TODO decide whether implementing a stride in G is worth it
         self.strideG = 1
         self.qmax = args.qmax
         self.qpoints = None
+        self.scaling_qpoints = None
         #TODO Implement code that transforms qpoints into irreducible qpoints depending on the symmetry of the lattice
         self.weights = None
 
@@ -102,9 +110,12 @@ class MPDSF:
                       'For example, see https://github.com/tanner-trickle/dm-phonon-scatter')
         self.scalar_mediator_flag = args.scalar_mediator
         self.param_flag = args.param_lorentzian
+        self.nofold_BZ = args.nofold_BZ
+        self.lowq_scaling = args.lowq_scaling
 
         if self.input is not None:
             self.parse_input_file(self.input)
+        self._weights = None
         self.set_qpoints()
         print('final qpoints are', self.qpoints)
 
@@ -132,8 +143,8 @@ class MPDSF:
             self.overtones = config_dict['overtones']
         if 'output' in config_dict.keys():
             self.output = config_dict['output']
-        if 'numG' in config_dict.keys():
-            self.numG = config_dict['numG']
+        if 'Gmesh' in config_dict.keys():
+            self.meshG = config_dict['Gmesh']
         if 'strideQ' in config_dict.keys():
             self.strideQ = config_dict['strideQ']
         if 'shift' in config_dict.keys():
@@ -170,17 +181,49 @@ class MPDSF:
             self.scalar_mediator_flag = config_dict['scalar_mediator']
         if 'param_lorentzian' in config_dict.keys():
             self.param_flag = config_dict['param_lorentzian']
+        if 'nofold_BZ' in config_dict.keys():
+            self.nofold_BZ = config_dict['nofold_BZ']
+        if 'lowq_scaling' in config_dict.keys():
+            self.lowq_scaling = config_dict['lowq_scaling']
 
     def set_qpoints(self):
+        if self.nofold_BZ:
+            self.set_qpoints_full()
+        else:
+            self.set_qpoints_folded()
+
+    def set_qpoints_folded(self):
+        from src.utils import BrillouinZone
+        combined_mesh = np.array(self.mesh) * np.array(self.meshG)
+        combined_shift = np.array(self.shift) / np.array(self.meshG)
+        combined_BZ = BrillouinZone(mesh=combined_mesh, poscar=self.poscar, shift=combined_shift)
+        q_points_dict_keys, weights = [], []
+        for q, w in combined_BZ.weights.items():
+            q_points_dict_keys.append(q)
+            weights.append(w)
+        self._weights = np.array(list(weights))
+        self.qpoints = np.array(list(q_points_dict_keys)) * np.array(self.meshG)
+        # If scaling flag is true need to set some things
+        if self.lowq_scaling:
+            scaling_BZ = BrillouinZone(mesh=self.mesh, poscar=self.poscar)
+            self.scaling_qpoints = list(scaling_BZ.weights.keys())
+
+
+    def set_qpoints_full(self):
         self.qpoints = np.zeros([0, 3])
         count = 0
         curr_qx = self.shift[0] / self.mesh[0]
         curr_qy = self.shift[1] / self.mesh[1]
         curr_qz = self.shift[2] / self.mesh[2]
-        spacing = float(self.strideG) / np.array(self.mesh)
-        for gz in range(0, self.numG, self.strideG):
-            for gy in range(0, self.numG, self.strideG):
-                for gx in range(0, self.numG, self.strideG):
+        # initialize G-vector components
+        curr_gx = 0
+        curr_gy = 0
+        curr_gz = 0
+        spacing = 1. / np.array(self.mesh)
+        g_spacing = float(self.strideG)
+        for gz in range(0, self.meshG[2], self.strideG):
+            for gy in range(0, self.meshG[1], self.strideG):
+                for gx in range(0, self.meshG[0], self.strideG):
                     for z in range(0, self.mesh[2], self.strideQ):
                         for y in range(0, self.mesh[1], self.strideQ):
                             for x in range(0, self.mesh[0], self.strideQ):
@@ -188,11 +231,15 @@ class MPDSF:
                                     if np.abs(curr_qx) <= self.qmax and np.abs(curr_qy) <= self.qmax and np.abs(
                                             curr_qz) <= self.qmax:
                                         self.qpoints = np.append(self.qpoints,
-                                                                 [[curr_qx + gx, curr_qy + gy, curr_qz + gz]],
+                                                                 [[curr_qx + curr_gx,
+                                                                   curr_qy + curr_gy,
+                                                                   curr_qz + curr_gz]],
                                                                  axis=0)
                                 else:
                                     self.qpoints = np.append(self.qpoints,
-                                                             [[curr_qx + gx, curr_qy + gy, curr_qz + gz]],
+                                                             [[curr_qx + curr_gx,
+                                                               curr_qy + curr_gy,
+                                                               curr_qz + curr_gz]],
                                                              axis=0)
                                 count += 1
                                 curr_qx += spacing[0]
@@ -204,16 +251,32 @@ class MPDSF:
                         curr_qz += spacing[2]
                         if curr_qz > 0.5:
                             curr_qz -= 1.0
+                    curr_gx += g_spacing
+                    if curr_gx > self.meshG[0] / 2.:
+                        curr_gx -= self.meshG[0]
+                curr_gy += g_spacing
+                if curr_gy > self.meshG[1] / 2.:
+                    curr_gy -= self.meshG[1]
+            curr_gz += g_spacing
+            if curr_gz > self.meshG[2] / 2.:
+                curr_gz -= self.meshG[2]
         # Remove the first point, which is at gamma (q = [0, 0, 0]) because it doesn't do anything
         self.qpoints = self.qpoints[1:]
         return self.qpoints
 
-    def run(self, start_q_index=None, stop_q_index=None):
+    def run(self, start_q_index=0, stop_q_index=None, start_scale_index=None, stop_scale_index=None):
+        fold_BZ = not self.nofold_BZ
+        if stop_q_index is None:
+            stop_q_index = len(self.qpoints)
+        if start_scale_index is None:
+            scaling_qpoints = None
+        else:
+            scaling_qpoints = self.scaling_qpoints[start_scale_index:stop_scale_index]
         self.dsf = DynamicStructureFactor(poscar_file=self.poscar,
                                           fc_file=self.fc2,
                                           mesh=self.mesh,
                                           supercell=self.supercell,
-                                          q_point_list=self.qpoints,
+                                          q_point_list=self.qpoints[start_q_index:stop_q_index],
                                           q_point_shift=self.shift,
                                           fc3_file=self.fc3,
                                           fc3_disp=self.disp,
@@ -223,8 +286,11 @@ class MPDSF:
                                           is_nac=self.is_nac,
                                           born_file=self.born,
                                           scalar_mediator_flag=self.scalar_mediator_flag,
-                                          dark_photon_flag=self.dark_photon_flag)
-        self.dsf.get_coherent_sqw(start_q_index=start_q_index, stop_q_index=stop_q_index)
+                                          dark_photon_flag=self.dark_photon_flag,
+                                          fold_BZ=fold_BZ,
+                                          lowq_scaling=self.lowq_scaling,
+                                          scaling_qpoints=scaling_qpoints)
+        self.dsf.get_coherent_sqw()
 
     def save_data(self):
         if self.dsf is None:
@@ -252,7 +318,19 @@ if __name__ == '__main__':
         stop_q_index = int((rank + 1) * num_qpts_per_rank)
         if stop_q_index > len(mpdsf.qpoints):
             stop_q_index = len(mpdsf.qpoints)
-        mpdsf.run(start_q_index=start_q_index, stop_q_index=stop_q_index)
+        if mpdsf.lowq_scaling:
+            num_scaling_qpts_per_rank = np.ceil(len(mpdsf.scaling_qpoints) / size).astype(int)
+            start_scale = int(rank * num_scaling_qpts_per_rank)
+            stop_scale = int((rank + 1) * num_scaling_qpts_per_rank)
+            if stop_q_index > len(mpdsf.scaling_qpoints):
+                stop_q_index = len(mpdsf.scaling_qpoints)
+        else:
+            start_scale = None
+            stop_scale = None
+        mpdsf.run(start_q_index=start_q_index,
+                  stop_q_index=stop_q_index,
+                  start_scale_index=start_scale,
+                  stop_scale_index=stop_scale)
 
         # Place barrier to make sure all MPI processes wait for each other
         comm.Barrier()

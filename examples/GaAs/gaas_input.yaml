@@ -1,9 +1,9 @@
 ---
- poscar: 'data/GaAs/POSCAR'
- fc2: 'data/GaAs/fc2.hdf5'
- fc3: 'data/GaAs/FORCES_FC3'
- born: 'data/GaAs/BORN'
- disp: 'data/GaAs/disp_fc3.yaml'
+ poscar: '../../data/GaAs/POSCAR'
+ fc2: '../../data/GaAs/fc2.hdf5'
+ fc3: '../../data/GaAs/FORCES_FC3'
+ born: '../../data/GaAs/BORN'
+ disp: '../../data/GaAs/disp_fc3.yaml'
  mesh: [ 3, 3, 3 ]
  supercell: [ 2, 2, 2 ]
  max_energy: 100.0
@@ -11,4 +11,5 @@
  overtones: 2
  scalar_mediator: True
  dark_photon: False
- output: test_gaas_scalarmediator
+ output: test_gaas_scalarmediator.hdf5
+ lowq_scaling: True
