@@ -889,7 +889,7 @@ class DynamicStructureFactor(object):
             with h5.File(filename, 'w') as fw:
                 fw['q-points'] = self.qpoints
                 if self.fold_BZ:
-                    fw['weights'] = [self.weights[tuple(q)] for q in self.qpoints]
+                    fw['weights'] = [self.weights[tuple(self._brillouinzone.shift_q_to_1stBZ(q))] for q in self.qpoints]
                 else:
                     if self.weights is None:
                         self.weights = np.ones(len(self.qpoints))

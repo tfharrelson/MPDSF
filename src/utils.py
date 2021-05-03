@@ -276,6 +276,17 @@ class BrillouinZone(MPGrid):
     def get_qpoint(self, gridpoint):
         return self.inverse_grid[gridpoint]
 
+    def shift_q_to_1stBZ(self, qpoint):
+        shifted_qpoint = []
+        for q in qpoint:
+            sq = q % 1.
+            if sq <= -0.5:
+                sq += 1.
+            elif sq > 0.5:
+                sq -= 1.
+            shifted_qpoint.append(sq)
+        return np.array(shifted_qpoint)
+
 class Phono3pyManager:
     def __init__(self,
                  inputs: Phono3pyInputs):
