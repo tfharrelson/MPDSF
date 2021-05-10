@@ -453,6 +453,11 @@ class DynamicStructureFactor(object):
 
         # Loop over scaling qpoints
         for sq_index, qpoint in enumerate(self._scaling_qpoints):
+            # Test if qpoint is [0, 0, 0]
+            if np.linalg.norm(qpoint) == 0.:
+                scaling_sqw_at_q = np.zeros(self._num_bins, dtype=np.complex)
+                self.scaling_sqw.append(scaling_sqw_at_q)
+                continue
             # initialize scaling_sqw_at_q
             if self.anharmonicities is None:
                 scaling_sqw_at_q = 0.
@@ -901,7 +906,7 @@ class DynamicStructureFactor(object):
                 fw['delta_w'] = self.delta_e
                 fw['dxdydz'] = self.dxdydz
                 if self.lowq_scaling or self._scaling_qpoints is not None:
-                    fw['scaling_sqw'] = self.scaling_sqw
+                    fw['scaling_sqw'] = np.abs(self.scaling_sqw)
                     fw['scaling_q-points'] = self._scaling_qpoints
                     if self.fold_BZ:
                         if self.weights is None:

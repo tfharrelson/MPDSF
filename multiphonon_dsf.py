@@ -90,6 +90,7 @@ class MPDSF:
         self.qmax = args.qmax
         self.qpoints = None
         self.scaling_qpoints = None
+        self.scaling_weights = None
         #TODO Implement code that transforms qpoints into irreducible qpoints depending on the symmetry of the lattice
         self.weights = None
 
@@ -206,8 +207,12 @@ class MPDSF:
         # If scaling flag is true need to set some things
         if self.lowq_scaling:
             scaling_BZ = BrillouinZone(mesh=self.mesh, poscar=self.poscar)
-            self.scaling_qpoints = list(scaling_BZ.weights.keys())
-
+            scaling_qpts, scaling_weights = [], []
+            for q, w in scaling_BZ.weights.items():
+                scaling_qpts.append(np.array(q) / self.mesh)
+                scaling_weights.append(w)
+            self.scaling_qpoints = np.array(list(scaling_qpts))
+            self.scaling_weights = np.array(list(scaling_weights))
 
     def set_qpoints_full(self):
         self.qpoints = np.zeros([0, 3])
@@ -352,17 +357,36 @@ if __name__ == '__main__':
             with h5py.File(output, 'w') as final_output:
                 final_qpoints = []
                 final_sqw = []
+                final_weights = []
+                if mpdsf.lowq_scaling:
+                    scaling_qpoints = []
+                    scaling_sqw = []
+                    scaling_weights = []
                 for i in range(size):
                     with h5py.File('tmp_' + str(i) + '_' + output, 'r') as tmp_output:
                         if 'reclat' not in final_output.keys():
+                            # Write core features
                             final_output['reclat'] = np.array(tmp_output['reclat'])
                             final_output['frequencies'] = np.array(tmp_output['frequencies'])
                             final_output['delta_w'] = np.array(tmp_output['delta_w'])
                             final_output['dxdydz'] = np.array(tmp_output['dxdydz'])
+                            # check for lowqscaling
+                            if 'scaling_dxdydz' in tmp_output.keys():
+                                final_output['scaling_dxdydz'] = np.array(tmp_output['scaling_dxdydz'])
+                        final_weights += list(tmp_output['weights'])
                         final_qpoints += list(tmp_output['q-points'])
                         final_sqw += list(tmp_output['sqw'])
+                        if mpdsf.lowq_scaling:
+                            scaling_weights += list(tmp_output['scaling_weights'])
+                            scaling_qpoints += list(tmp_output['scaling_q-points'])
+                            scaling_sqw += list(tmp_output['scaling_sqw'])
                 final_output['sqw'] = np.array(final_sqw)
                 final_output['q-points'] = np.array(final_qpoints)
+                final_output['weights'] = np.array(final_weights)
+                if mpdsf.lowq_scaling:
+                    final_output['scaling_sqw'] = np.array(scaling_sqw)
+                    final_output['scaling_q-points'] = np.array(scaling_qpoints)
+                    final_output['scaling_weights'] = np.array(scaling_weights)
             for i in range(size):
                 os.remove('tmp_' + str(i) + '_' + output)
             #if rank == 0:
