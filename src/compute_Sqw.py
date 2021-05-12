@@ -16,7 +16,7 @@ from phono3py.file_IO import (parse_disp_fc3_yaml,
                               parse_FORCES_FC3)
 from spglib import get_ir_reciprocal_mesh
 from scipy.interpolate import interp1d
-from src.utils import Gamma, Phono3pyInputs, BrillouinZone
+from src.utils import Gamma, Phono3pyInputs, BrillouinZone, ImaginarySelfEnergy, PhononEigenvalues
 #from .utils import Gamma, Phono3pyInputs, BrillouinZone
 
 AngstromsToMeters = 1e-10
@@ -81,21 +81,25 @@ class AnharmonicPhonons(object):
             #TODO Test diffferent directions to see what happens
             nac_q_direction = [1, 0, 0]
             self.phono3py.init_phph_interaction(nac_q_direction=nac_q_direction)
+        if self.born is None:
+            nac = False
+        else:
+            nac = True
+        self.inputs = Phono3pyInputs(poscar=poscar,
+                                     fc3_file=fc3_file,
+                                     disp_file=disp_file,
+                                     mesh=mesh,
+                                     supercell=supercell,
+                                     nac=nac,
+                                     born_file=born
+                                     )
         if param_flag:
-            if self.born is None:
-                nac = False
-            else:
-                nac = True
-            self.inputs = Phono3pyInputs(poscar=poscar,
-                                         fc3_file=fc3,
-                                         disp_file=disp,
-                                         mesh=mesh,
-                                         supercell=supercell,
-                                         nac=nac,
-                                         born_file=born
-                                         )
             self.gamma = Gamma(self.inputs)
+        else:
+            self.gamma = ImaginarySelfEnergy(self.inputs)
         self.param_flag = param_flag
+        # set freqs, and prepare to remove the set_freqs() method
+        self.phonon_freqs = PhononEigenvalues(self.inputs)
 
     def set_irr_BZ_gridpoints(self):
         self.mapping, grid = get_ir_reciprocal_mesh(mesh=self.mesh, cell=self.cell)
@@ -155,7 +159,7 @@ class AnharmonicPhonons(object):
         key = np.round(np.array(qpoint) * np.array(self.mesh)).astype(int) / np.array(self.mesh)
         return self.grid[tuple(key)]
 
-    def get_broadening_function(self, qpoint, band_index, max_freq=None):
+    def get_broadening_function(self, qpoint, band_index, max_freq=None, phonon_frequency=None):
         #########################################################################################################
         # Method returns a broadening function that will resemble a simple Lorentzian                           #
         # However it is actually a Lorentzian-type function with a frequency-dependent width                    #
@@ -165,15 +169,28 @@ class AnharmonicPhonons(object):
         #       which primarily means they are not normalized. This creates problems further down the pipeline  #
         # Normalize the integral by adding in a delta function with the remaining weight                        #
         #########################################################################################################
-        self.set_phonon_freqs()
-        gridpoint = self.get_gridpoint(qpoint)
-        freqs, gamma = self.get_imag_self_energy(gridpoint, band_index)
+        #self.set_phonon_freqs()
+        #gridpoint = self.get_gridpoint(qpoint)
+        #freqs, gamma = self.get_imag_self_energy(gridpoint, band_index)
         if self.param_flag:
             gamma = self.gamma.get_property_value(qpoint, band_index)
+        else:
+            gamma = self.gamma.get_property_value(qpoint, band_index)
+        freqs = self.gamma.freqs
+        if freqs is None:
+            gridpoint = self.get_gridpoint(qpoint)
+            freqs, _ = self.get_imag_self_energy(gridpoint, band_index)
+        # Old way:
+        #phonon_freq = self.phonon_freqs[gridpoint, band_index]
+        # New way
+        phonon_freq = self.phonon_freqs.get_property_value(qpoint, band_index)
 
-        broadening_func = gamma / (np.pi * ((self.phonon_freqs[gridpoint, band_index] - freqs) ** 2 + gamma ** 2))
-        f_index_minus = np.floor(self.phonon_freqs[gridpoint, band_index] / (freqs[1] - freqs[0])).astype(int)
-        avg_gamma_at_freq = (gamma[f_index_minus] + gamma[f_index_minus + 1]) / 2
+        broadening_func = gamma / (np.pi * ((phonon_freq - freqs) ** 2 + gamma ** 2))
+        f_index_minus = np.floor(phonon_freq / (freqs[1] - freqs[0])).astype(int)
+        if not self.param_flag:
+            avg_gamma_at_freq = (gamma[f_index_minus] + gamma[f_index_minus + 1]) / 2
+        else:
+            avg_gamma_at_freq = gamma
         # print('original integral of broad func =', np.trapz(broadening_func, freqs))
 
         if max_freq is None:
@@ -186,7 +203,7 @@ class AnharmonicPhonons(object):
             if avg_gamma_at_freq < freqs[1] - freqs[0]:
                 # Case: the width is small, and the area is underestimated
                 # Solution: add a delta function
-                broadening_func += self.create_delta(self.phonon_freqs[gridpoint, band_index],
+                broadening_func += self.create_delta(phonon_freq,
                                                      len(freqs),
                                                      freqs[1] - freqs[0]) * \
                                    (1.0 - np.trapz(broadening_func, freqs))
@@ -199,7 +216,7 @@ class AnharmonicPhonons(object):
                 # Case: width is too small to be resolved, area is overestimated by tails
                 # Solution: subtract a delta function
                 # Note: form is exactly the same as above because the (1-integral) term is now negative
-                broadening_func += self.create_delta(self.phonon_freqs[gridpoint, band_index],
+                broadening_func += self.create_delta(phonon_freq,
                                                      len(freqs),
                                                      freqs[1] - freqs[0]) * \
                                    (1.0 - np.trapz(broadening_func, freqs))
@@ -515,7 +532,8 @@ class DynamicStructureFactor(object):
                                                  mesh=self.mesh,
                                                  supercell=self.supercell,
                                                  temperature=self.temperature,
-                                                 born=born
+                                                 born=born,
+                                                 param_flag=self.param_flag
                                                  )
         self.anharmonicities.set_self_energies()
 
@@ -565,8 +583,6 @@ class DynamicStructureFactor(object):
         return outer_eig
 
     def get_outer_eigs_at_q(self, q_index):
-        print(np.array(self.eigenvectors).shape)
-        print(self.qpoints)
         eigvecs = self.eigenvectors[q_index]
         masses = self.phonon.masses
         frequencies = self.frequencies[q_index]

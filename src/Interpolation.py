@@ -100,7 +100,7 @@ class Interpolator:
 
     def convert_freq_dep_property(self, band_index):
         data = []
-        for q in self.phase_space.qpoints:
+        for q in self.phase_space.get_padded_qpoints():
             prop_func = self.property.get_property_value(q, band_index)
             # frequencies change the fastest in the list of phase-space values, so a simple append works here
             data += list(prop_func)
@@ -115,11 +115,12 @@ class Interpolator:
             qpts = self.phase_space.qpoints
 
         for q in qpts:
+            q_1stBZ = self.property._shift_q_to_1stBZ(q)
             if vector_index is None:
                 # Scalar mode
-                prop_func = self.property.get_property_value(q, band_index)
+                prop_func = self.property.get_property_value(q_1stBZ, band_index)
             else:
-                prop_func = self.property.get_property_value(q, band_index)[vector_index]
+                prop_func = self.property.get_property_value(q_1stBZ, band_index)[vector_index]
             # frequencies change the fastest in the list of phase-space values, so a simple append works here
             data.append(prop_func)
         return data
@@ -132,10 +133,10 @@ class Interpolator:
         :param args: arguments for interpolator in a list [qx, qy, qz] or [qx, qy, qz, w] for freq dep properties
         :return:
         """
-        print('args =', np.array(args[0]).shape)
+        args = list(args)
         if len(np.array(args).shape) > 1:
             new_args = []
-            for arg in args[0]:
+            for arg in args:
                 new_args.append(list(self.property._shift_q_to_1stBZ(arg[:3])) + list(arg[3:]))
             args = [new_args]
         else:

@@ -403,7 +403,7 @@ class DecayDistribution(BrillouinZoneProperty):
         :param min_freq: The minimum phonon frequency allowed -> avoids counting negative freq modes.
         '''
         super().__init__(inputs=inputs)
-        self._brillouinzone.set_irr_BZ_gridpoints()
+        #self._brillouinzone.set_irr_BZ_gridpoints()
         self.decay_distribution = None
         self.decay_rate = None
         self.pp = None

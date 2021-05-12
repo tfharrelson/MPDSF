@@ -203,8 +203,14 @@ class BrillouinZoneProperty:
 
     def set_key(self, qpoint, band_index):
         key = []
+        thresh = 1e-3
         for q, s, m in zip(qpoint, self.shift, self.mesh):
-            key.append(np.round((q - s) * m).astype(int))
+            key_index = (q - s) * m
+            rounded_key_index = np.round(key_index).astype(int)
+            if np.abs(rounded_key_index - key_index) < thresh:
+                key.append(np.round(key_index).astype(int))
+            else:
+                key.append(key_index)
         key.append(band_index)
         return tuple(key)
 
@@ -223,9 +229,9 @@ class BrillouinZoneProperty:
                 return self._interpolator.interpolate(band_index, *qpoint)
             else:
                 # prepare frequency dep inputs
-                args = np.array([list(qpoint) + [f] for f in self.freqs]).T
+                args = np.array([list(qpoint) + [f] for f in self.freqs])
                 # pass the args into the interpolator
-                return self._interpolator(band_index, *args)
+                return self._interpolator.interpolate(band_index, *args)
 
 
     def set_property_dict(self):
@@ -320,7 +326,7 @@ class Phono3pyManager:
             self.nac_params['factor'] = Hartree * Bohr
             self.phono3py.nac_params = self.nac_params
         ## initialize phonon-phonon interaction instance
-        self.phono3py.init_phph_interaction()
+        self.phono3py.init_phph_interaction(nac_q_direction=[1, 0, 0])
         # initialize bands, eigvecs, ise, and qpoints
         self.bands = None
         self.eigvecs = None
@@ -333,7 +339,7 @@ class Phono3pyManager:
             self.isotopes = None
 
     def set_phonons(self):
-        self.phono3py.run_phonon_solver()
+        #self.phono3py.run_phonon_solver()
         self.bands, self.eigvecs, self.qpoints = self.phono3py.get_phonon_data()
         self.fix_phonon_data()
 
