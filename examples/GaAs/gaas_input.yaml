@@ -11,4 +11,5 @@
  overtones: 2
  scalar_mediator: True
  dark_photon: False
- output: test_gaas_scalarmediator_noparam_nolowq.hdf5
+ output: test_gaas_scalarmediator_noparam.hdf5
+ lowq_scaling: True

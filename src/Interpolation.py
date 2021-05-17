@@ -1,9 +1,9 @@
 import numpy as np
-from scipy.interpolate import LinearNDInterpolator
+from scipy.interpolate import LinearNDInterpolator, RegularGridInterpolator
 from src.utils import BrillouinZoneProperty, PhaseSpace
 
 class Interpolator:
-    def __init__(self, phonon_property: BrillouinZoneProperty):
+    def __init__(self, phonon_property: BrillouinZoneProperty, reg_grid_flag=True):
                  #band=None,
                  #gamma=None,
                  #qpoints=None,
@@ -25,6 +25,7 @@ class Interpolator:
         self.interpolators = None
         self._vector_flag = None
         self._vector_length = None
+        self._reg_grid_flag = reg_grid_flag
         #self.band = band
         #self.gamma = gamma
         #self.qpoints = qpoints
@@ -83,20 +84,52 @@ class Interpolator:
                 self.interpolators[i] = self.set_interpolator_at_band(band_index=i)
 
     def set_interpolator_at_band(self, band_index, vector_index=None):
-        if self.property.freqs is not None:
-            # Assume the interpolator is for the freq dep function
-            phasespace_points = self.phase_space.get_padded_phase_space()
-
-            # Need to convert the property
-            converted_property = self.convert_freq_dep_property(band_index)
-            return LinearNDInterpolator(phasespace_points, converted_property)
+        if self._reg_grid_flag:
+            if self.property.freqs is None:
+                phasespace_points = self.phase_space.get_padded_qpoints()
+            else:
+                phasespace_points = self.phase_space.get_padded_phase_space()
+            points = []
+            for i in range(3):
+                min_q = min(phasespace_points[:, i])
+                max_q = max(phasespace_points[:, i])
+                num_q = np.round((max_q - min_q) * self.phase_space.mesh[i]).astype(int) + 1
+                points.append(np.linspace(min_q, max_q, num_q))
+            if self.property.freqs is None:
+                converted_property = np.empty([len(points[0]), len(points[1]), len(points[2])])
+            else:
+                points.append(self.property.freqs)
+                converted_property = np.empty([len(points[0]),
+                                               len(points[1]),
+                                               len(points[2]),
+                                               len(self.property.freqs)])
+            for i in range(len(points[0])):
+                for j in range(len(points[1])):
+                    for k in range(len(points[2])):
+                        qpt = [points[0][i], points[1][j], points[2][k]]
+                        property_value = self.property.get_property_value(qpt, band_index)
+                        if vector_index is not None:
+                            converted_property[i, j, k] = property_value[vector_index]
+                        elif self.property.freqs is not None:
+                            converted_property[i, j, k, :] = property_value
+                        else:
+                            converted_property[i, j, k] = property_value
+            return RegularGridInterpolator(tuple(points), converted_property)
         else:
-            # Assume the interpolator is for the band function
-            phasespace_points = self.phase_space.get_padded_qpoints()
+            if self.property.freqs is not None:
+                # Assume the interpolator is for the freq dep function
+                phasespace_points = self.phase_space.get_padded_phase_space()
 
-            # Convert scalar or vector quantity
-            converted_property = self.convert_property(band_index=band_index, vector_index=vector_index)
-            return LinearNDInterpolator(phasespace_points, converted_property)
+                # Need to convert the property
+                converted_property = self.convert_freq_dep_property(band_index)
+                return LinearNDInterpolator(phasespace_points, converted_property)
+            else:
+                # Assume the interpolator is for the band function
+                phasespace_points = self.phase_space.get_padded_qpoints()
+
+                # Convert scalar or vector quantity
+                converted_property = self.convert_property(band_index=band_index, vector_index=vector_index)
+                return LinearNDInterpolator(phasespace_points, converted_property)
 
     def convert_freq_dep_property(self, band_index):
         data = []
@@ -144,9 +177,15 @@ class Interpolator:
         if self.interpolators is None:
             self.set_interpolators()
         if not self._vector_flag:
-            return self.interpolators[band_index](*args)
+            if self._reg_grid_flag:
+                return self.interpolators[band_index](args)[0]
+            else:
+                return self.interpolators[band_index](*args)
         else:
-            interpolator_list = [self.interpolators[(band_index, i)](*args) for i in range(self._vector_length)]
+            if self._reg_grid_flag:
+                interpolator_list = [self.interpolators[(band_index, i)](args)[0] for i in range(self._vector_length)]
+            else:
+                interpolator_list = [self.interpolators[(band_index, i)](*args) for i in range(self._vector_length)]
             return interpolator_list
 
 class Regridder:

@@ -78,7 +78,6 @@ class AnharmonicPhonons(object):
             nac_params = parse_BORN(primitive, filename=born)
             nac_params['factor'] = Hartree * Bohr
             self.phono3py.nac_params = nac_params
-            #TODO Test diffferent directions to see what happens
             nac_q_direction = [1, 0, 0]
             self.phono3py.init_phph_interaction(nac_q_direction=nac_q_direction)
         if self.born is None:
