@@ -158,7 +158,7 @@ class AnharmonicPhonons(object):
         key = np.round(np.array(qpoint) * np.array(self.mesh)).astype(int) / np.array(self.mesh)
         return self.grid[tuple(key)]
 
-    def get_broadening_function(self, qpoint, band_index, max_freq=None, phonon_frequency=None):
+    def get_broadening_function(self, qpoint, band_index, max_freq=None):
         #########################################################################################################
         # Method returns a broadening function that will resemble a simple Lorentzian                           #
         # However it is actually a Lorentzian-type function with a frequency-dependent width                    #
@@ -291,6 +291,8 @@ class DynamicStructureFactor(object):
                  fc_file=None,
                  q_point_list=[],
                  q_point_shift=[0.0, 0.0, 0.0],
+                 meshG=[1, 1, 1],
+                 weights=None,
                  fc2_disp=None,
                  fc3_file=None,
                  fc3_disp=None,
@@ -307,9 +309,11 @@ class DynamicStructureFactor(object):
                  param_flag=False,
                  fold_BZ=True,
                  lowq_scaling=False,
-                 scaling_qpoints=None):
+                 scaling_qpoints=None,
+                 no_anh_flag=False):
         self.param_flag = param_flag
         self.mesh = mesh
+        self.meshG = meshG
         self.qpoints = q_point_list
         self.supercell = supercell
         self.delta_e = delta_e
@@ -321,7 +325,6 @@ class DynamicStructureFactor(object):
         self.is_nac = is_nac
         self.fold_BZ = fold_BZ
         self.lowq_scaling = lowq_scaling
-        #TODO Make sure this is right, similar to Anharmonic Phonons
         self._nac_q_direction = [1, 0, 0]
 
         self.disp_data = parse_disp_fc3_yaml(filename=fc3_disp)
@@ -336,8 +339,19 @@ class DynamicStructureFactor(object):
         # if qpoint list not given, then load from mesh and shift
         self.qpoint_shift = q_point_shift
         self._brillouinzone = None
+        self._mesh_brillouinzone = None
         if self.fold_BZ:
-            self._brillouinzone = BrillouinZone(mesh=self.mesh, shift=self.qpoint_shift, poscar=poscar_file)
+            self._mesh_brillouinzone = BrillouinZone(mesh=self.mesh, shift=self.qpoint_shift, poscar=poscar_file)
+            if weights is None:
+                combined_mesh = np.array(self.mesh) * np.array(self.meshG)
+                combined_shift = np.array(self.qpoint_shift) / np.array(self.meshG)
+                self._brillouinzone = BrillouinZone(mesh=combined_mesh, poscar=poscar_file, shift=combined_shift)
+                # need to correct the keys of the weights dict
+                new_weights_dict = {tuple(np.array(k) * np.array(meshG)): v for k, v in self._brillouinzone.weights.items()}
+                self._brillouinzone.weights = new_weights_dict
+                self.weights = new_weights_dict
+            else:
+                self.weights = weights
         #self.kernel_qpoints = self.get_qpoint_list(self.mesh)
         if fc_file is not None:
             if fc_file[-4:] == 'hdf5' or fc_file[-15:] == 'FORCE_CONSTANTS':
@@ -401,6 +415,7 @@ class DynamicStructureFactor(object):
         # Dark matter scattering flags
         self._scalar_mediator_flag = scalar_mediator_flag
         self._dark_photon_flag = dark_photon_flag
+        self._no_anh_flag = no_anh_flag
         #Anharmonic flags
         if fc3_file is not None and fc3_disp is not None:
             self.set_anharmonicities(poscar=poscar_file,
@@ -434,18 +449,31 @@ class DynamicStructureFactor(object):
     def weights(self, new_weights):
         self._weights = new_weights
 
+    @property
+    def scaling_weights(self):
+        if self._scaling_weights is None:
+            if self._mesh_brillouinzone is None:
+                self._scaling_weights = np.ones(len(self._scaling_qpoints))
+            else:
+                self._scaling_weights = self._mesh_brillouinzone.weights
+        return self._scaling_weights
+
+    @scaling_weights.setter
+    def scaling_weights(self, new_weights):
+        self._scaling_weights = new_weights
+
     def sample_longwave_phonons(self):
         # Get array of denser qpoints near Gamma -> easy way is to divide current mesh qpoints by mesh again
         # This leads to a dense sampling of the area around gamma, and replaces the qpoint=[0,0,0] value of
         #    the multiphonon DSF, which is identically zero
-        scaling_qpoints, scaling_weights = [], []
-        for q, w in self._brillouinzone.weights.items():
-            scaling_qpoints.append(q)
-            scaling_weights.append(w)
-        # Convert from dict_keys to np.array for further math operations
-        self._scaling_weights = np.array(list(scaling_weights))
-        self._scaling_qpoints = np.array(list(scaling_qpoints))
-        self._scaling_qpoints /= self.mesh
+        sq = self._scaling_qpoints
+        if sq is None:
+            scaling_qpoints = []
+            for q, w in self._mesh_brillouinzone.weights.items():
+                scaling_qpoints.append(q)
+            # Convert from dict_keys to np.array for further math operations
+            self._scaling_qpoints = np.array(list(scaling_qpoints))
+            self._scaling_qpoints /= self.mesh
         self.sample_longwave_phonons_at_q()
 
     def sample_longwave_phonons_at_q(self, qpoints=None):
@@ -487,8 +515,8 @@ class DynamicStructureFactor(object):
 
                 for tau_1 in range(natoms):
                     for tau_2 in range(natoms):
-                        if self.anharmonicities is None:
-                            function = 1
+                        if self.anharmonicities is None or self._no_anh_flag:
+                            function = self.create_delta(freq)
                         else:
                             interp = self.anharmonicities.get_broadening_function(qpoint=self._scaling_qpoints[sq_index],
                                                                                     band_index=i,
@@ -735,7 +763,10 @@ class DynamicStructureFactor(object):
             # print('using anharmonic gammas')
             for i in range(len(frequencies)):
                 # print('integral of broad func in DSF code =', np.trapz(self.create_anharmonic_distribution(q_point, band_index))*0.1)
-                anh_dist = self.create_anharmonic_distribution(q_point, band_index)
+                if self._no_anh_flag:
+                    anh_dist = self.create_delta(frequencies[i])
+                else:
+                    anh_dist = self.create_anharmonic_distribution(q_point, band_index)
                 integral = np.trapz(anh_dist, freqs)
                 # print('integral =', integral)
                 if integral != 0:
@@ -860,7 +891,7 @@ class DynamicStructureFactor(object):
     def interpolate_sqw(self, sqw, q_point):
         # print('q-point =', q_point)
         # TODO save for later, implement actual interpolation scheme, right now will set up for the exact grid points
-        indices = np.array(q_point * self.mesh - self.qpoint_shift).astype(np.int)
+        indices = np.round(q_point * self.mesh - self.qpoint_shift).astype(np.int)
         indices = indices % self.mesh
         # print('indices =', indices)
         return sqw[indices[0], indices[1], indices[2], :]
@@ -870,7 +901,7 @@ class DynamicStructureFactor(object):
             stop_q_index = len(self.qpoints)
         if self.fold_BZ and self._brillouinzone is not None and self.qpoints is None:
             qpoints = list(self.weights.keys())[start_q_index:stop_q_index]
-        elif self.fold_BZ and self._brillouinzone is None:
+        elif self.fold_BZ and self._brillouinzone is None and self.qpoints is None:
             print('NOTHING IMPLEMENTED YET FOR THE CASE OF BZ FOLDING BUT NO GRID, ENJOY YOUR ERROR MESSAGE! >:D')
         else:
             qpoints = self.qpoints[start_q_index:stop_q_index]
@@ -882,7 +913,7 @@ class DynamicStructureFactor(object):
                 self.sqw.append(np.zeros(self.skw_kernel.shape[-1], dtype=np.complex))
             else:
                 self.sqw.append(self.interpolate_sqw(self.get_coherent_sqw_at_q(i), qpoint))
-            print('i = ', i)
+            print('Progress =', i, '/', len(self.qpoints))
         # set qpoints to what was actually calculated
         self.qpoints = self.qpoints[start_q_index:stop_q_index]
         if self.lowq_scaling:
@@ -908,13 +939,31 @@ class DynamicStructureFactor(object):
 
             with h5.File(filename, 'w') as fw:
                 fw['q-points'] = self.qpoints
+                # Write down connected q-points and weights if the BZ was folded
                 if self.fold_BZ:
-                    fw['weights'] = [self.weights[tuple(self._brillouinzone.shift_q_to_1stBZ(q))] for q in self.qpoints]
+                    from yaml import dump
+                    try:
+                        from yaml import CDumper as Dumper
+                    except ImportError:
+                        from yaml import Dumper
+                    # TODO doesn't work with G-vectors
+                    fw['weights'] = [self.weights[tuple(q)] for q in self.qpoints]
+                    # connected q-points
+                    #new_symm_dict = {k: np.array(v) * np.array(self.meshG)
+                    #                 for k, v in self._brillouinzone.symm_qpoints.items()}
+                    irr_gps = np.unique(self._brillouinzone.mapping)
+                    symm_points = []
+                    for gps in irr_gps:
+                        q = self._brillouinzone.qpoints[gps]
+                        symm_points.append(list(np.array(self._brillouinzone.symm_qpoints[tuple(q)]) *
+                                                np.array(self.meshG)))
+                    #symm_points = [np.array(self._brillouinzone.symm_qpoints[tuple(q)]) * np.array(self.meshG)
+                    #               for q in irr_qpoints]
+                    fw['equivalent q-points'] = dump(symm_points, Dumper=Dumper)
                 else:
                     if self.weights is None:
                         self.weights = np.ones(len(self.qpoints))
                     fw['weights'] = self.weights
-                print(np.array(self.sqw).shape)
                 fw['sqw'] = np.abs(self.sqw)
                 fw['reclat'] = self.rec_lat * 2 * np.pi
                 fw['frequencies'] = self.get_bin_energies()
@@ -924,12 +973,22 @@ class DynamicStructureFactor(object):
                     fw['scaling_sqw'] = np.abs(self.scaling_sqw)
                     fw['scaling_q-points'] = self._scaling_qpoints
                     if self.fold_BZ:
-                        if self.weights is None:
+                        #symm_points = [np.array(self._mesh_brillouinzone.symm_qpoints[tuple(q * self.mesh)]) / np.array(self.mesh)
+                        #               for q in self._scaling_qpoints]
+                        irr_gps = np.unique(self._mesh_brillouinzone.mapping)
+                        symm_points = []
+                        for gps in irr_gps:
+                            q = self._mesh_brillouinzone.qpoints[gps]
+                            symm_points.append(list(np.array(self._mesh_brillouinzone.symm_qpoints[tuple(q)]) /
+                                                    np.array(self.mesh)))
+                        fw['equivalent scaling_qpoints'] = dump(symm_points, Dumper=Dumper)
+                        if self.scaling_weights is None:
                             # Case where scaling points are set but want is to include folded weights
-                            fw['scaling_weights'] = [self._brillouinzone.weights[tuple(q * self.mesh)]
+                            # TODO won't work with G-vectors in the weights object, need separate scaling BZ
+                            fw['scaling_weights'] = [self._mesh_brillouinzone.weights[tuple(q * self.mesh)]
                                                      for q in self._scaling_qpoints]
                         else:
-                            fw['scaling_weights'] = list(self.weights.values())
+                            fw['scaling_weights'] = list(self.scaling_weights.values())
                     else:
                         fw['scaling_weights'] = np.ones(len(self._scaling_qpoints))
                     fw['scaling_dxdydz'] = self.dxdydz / np.prod(self.mesh)

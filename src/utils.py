@@ -87,9 +87,22 @@ class MPGrid:
         curr_qz = self.shift[2]
         spacing = 1.0 / np.array(self.mesh)
         for z in range(self.mesh[2]):
+            if z / self.mesh[2] + self.shift[2] > 0.5:
+                adj_z = z - self.mesh[2]
+            else:
+                adj_z = z + self.shift[2]
             for y in range(self.mesh[1]):
+                if y / self.mesh[1] + self.shift[1] > 0.5:
+                    adj_y = y - self.mesh[1]
+                else:
+                    adj_y = y + self.shift[1]
                 for x in range(self.mesh[0]):
-                    self.qpoints[count, :] = [curr_qx, curr_qy, curr_qz]
+                    if x / self.mesh[0] + self.shift[0] > 0.5:
+                        adj_x = x - self.mesh[0]
+                    else:
+                        adj_x = x + self.shift[0]
+                    self.qpoints[count, :] = np.array([adj_x, adj_y, adj_z]) / self.mesh + self.shift
+                    #self.qpoints[count, :] = np.array([curr_qx, curr_qy, curr_qz])
                     count += 1
                     curr_qx += spacing[0]
                     if curr_qx > 0.5:
@@ -237,6 +250,43 @@ class BrillouinZoneProperty:
     def set_property_dict(self):
         pass
 
+
+#from numba.experimental import jitclass
+#@jitclass
+# Keep numba part commented for now.
+'''
+from numba import jit
+@jit
+def _init_BZ_numba(mesh: np.array, mapping: np.ndarray, grid: np.ndarray):
+    new_grid = {}
+    for v, k in enumerate(grid):
+        new_grid[tuple(k / mesh)] = v
+
+    #grid = {tuple(k / mesh): v for (v, k) in enumerate(grid)} # return
+    inverse_grid = {}
+    for v, k in enumerate(grid):
+        inverse_grid[v] = tuple(k / mesh)
+    #inverse_grid = {v: tuple(k / mesh) for (v, k) in enumerate(new_grid)} # return
+    temp_irr_BZ_gridpoints = np.unique(mapping)
+    irr_BZ_gridpoints = {}
+    for v, k in enumerate(temp_irr_BZ_gridpoints):
+        irr_BZ_gridpoints[k] = v
+    #irr_BZ_gridpoints = {k: v for v, k in enumerate(irr_BZ_gridpoints)} # return
+
+    # Create a dict of irreducible q-points; key is a q-point in full grid, and value is the irreducible q-point
+    irr_BZ_qpoints = {}
+    for k, gp in new_grid.items():
+        irr_BZ_qpoints[k] = inverse_grid[mapping[gp]]
+    #irr_BZ_qpoints = {k: inverse_grid[mapping[gp]] for k, gp in new_grid.items()} # return
+    # Create dictionary of weights for each irred q-point
+    weights = {}
+    for irred_gp in temp_irr_BZ_gridpoints:
+        weights[inverse_grid[irred_gp]] = list(mapping).count(irred_gp)
+    #weights = {inverse_grid[irred_gp]: list(mapping).count(irred_gp) # return
+    #                for irred_gp in temp_irr_BZ_gridpoints}
+    return (new_grid, inverse_grid, irr_BZ_gridpoints, irr_BZ_qpoints, weights)
+'''
+
 class BrillouinZone(MPGrid):
     """
     Abstract class for organizing all annoying gridpoints and mappings within Phono3py
@@ -253,6 +303,14 @@ class BrillouinZone(MPGrid):
         self.irr_BZ_qpoints = None
         self.weights = None
         self._init_BZ()
+        # TODO think what to do with numba in this section
+        # numba init BZ for large BZ's
+        #self.mapping, grid = get_ir_reciprocal_mesh(mesh=self.mesh, cell=self.cell)
+        #print(type(self.mapping))
+        #print(type(grid))
+        #data = _init_BZ_numba(np.array(self.mesh), self.mapping, grid)
+        #self.grid, self.inverse_grid, self.irr_BZ_gridpoints, self.irr_BZ_qpoints, self.weights = data
+
 
     def _init_BZ(self):
         self.mapping, grid = get_ir_reciprocal_mesh(mesh=self.mesh, cell=self.cell)
@@ -264,8 +322,28 @@ class BrillouinZone(MPGrid):
         # Create a dict of irreducible q-points; key is a q-point in full grid, and value is the irreducible q-point
         self.irr_BZ_qpoints = {k: self.get_qpoint(self.mapping[gp]) for k, gp in self.grid.items()}
         # Create dictionary of weights for each irred q-point
-        self.weights = {self.get_qpoint(irred_gp): list(self.mapping).count(irred_gp)
-                        for irred_gp in irr_BZ_gridpoints}
+        symm_qpoints_list = [[] for _ in irr_BZ_gridpoints]
+        weight_list = np.zeros(len(irr_BZ_gridpoints))
+        for index, irred_gp in enumerate(self.mapping):
+            symm_qpoints_list[self.irr_BZ_gridpoints[irred_gp]].append(self.qpoints[index])
+            weight_list[self.irr_BZ_gridpoints[irred_gp]] += 1
+        self.symm_qpoints = {}
+        self.weights = {}
+        for irr_gp, symm_qpoints, weight in zip(irr_BZ_gridpoints, symm_qpoints_list, weight_list):
+            self.symm_qpoints[tuple(self.get_qpoint(irr_gp))] = symm_qpoints
+            self.weights[tuple(self.get_qpoint(irr_gp))] = weight
+
+        #self.weights = {self.get_qpoint(irred_gp): list(self.mapping).count(irred_gp)
+        #                for irred_gp in irr_BZ_gridpoints}
+
+    def get_symmetrically_equiv_qpoints(self, qpoint):
+        gp = self.get_gridpoint(qpoint)
+        irr_gp = self.mapping[gp]
+        qpoints = []
+        for index, tmp_gp in enumerate(self.mapping):
+            if irr_gp == tmp_gp:
+                qpoints.append(self.qpoints[index])
+        return qpoints
 
     def get_gridpoint(self, qpoint):
         for i, q in enumerate(qpoint):

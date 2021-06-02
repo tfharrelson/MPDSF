@@ -70,6 +70,8 @@ class MPDSF:
                                                    'approximation is used for these points (no contact interation). '
                                                    'Anharmonicities can still be calculated through interpolation. ',
                             action='store_true')
+        parser.add_argument('--no_anh', help='Flag specifying to not use anharmonic broadening, even when available.',
+                            action='store_true')
 
         args = parser.parse_args()
         self.poscar = args.poscar
@@ -113,6 +115,7 @@ class MPDSF:
         self.param_flag = args.param_lorentzian
         self.nofold_BZ = args.nofold_BZ
         self.lowq_scaling = args.lowq_scaling
+        self.no_anh_flag = args.no_anh
 
         if self.input is not None:
             self.parse_input_file(self.input)
@@ -186,6 +189,8 @@ class MPDSF:
             self.nofold_BZ = config_dict['nofold_BZ']
         if 'lowq_scaling' in config_dict.keys():
             self.lowq_scaling = config_dict['lowq_scaling']
+        if 'no_anh' in config_dict.keys():
+            self.no_anh_flag = config_dict['no_anh']
 
     def set_qpoints(self):
         if self.nofold_BZ:
@@ -280,6 +285,7 @@ class MPDSF:
         self.dsf = DynamicStructureFactor(poscar_file=self.poscar,
                                           fc_file=self.fc2,
                                           mesh=self.mesh,
+                                          meshG=self.meshG,
                                           supercell=self.supercell,
                                           q_point_list=self.qpoints[start_q_index:stop_q_index],
                                           q_point_shift=self.shift,
@@ -295,7 +301,8 @@ class MPDSF:
                                           param_flag=self.param_flag,
                                           fold_BZ=fold_BZ,
                                           lowq_scaling=self.lowq_scaling,
-                                          scaling_qpoints=scaling_qpoints)
+                                          scaling_qpoints=scaling_qpoints,
+                                          no_anh_flag=self.no_anh_flag)
         self.dsf.get_coherent_sqw()
 
     def save_data(self):
