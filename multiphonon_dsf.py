@@ -335,8 +335,8 @@ if __name__ == '__main__':
             num_scaling_qpts_per_rank = np.ceil(len(mpdsf.scaling_qpoints) / size).astype(int)
             start_scale = int(rank * num_scaling_qpts_per_rank)
             stop_scale = int((rank + 1) * num_scaling_qpts_per_rank)
-            if stop_q_index > len(mpdsf.scaling_qpoints):
-                stop_q_index = len(mpdsf.scaling_qpoints)
+            if stop_scale > len(mpdsf.scaling_qpoints):
+                stop_scale = len(mpdsf.scaling_qpoints)
         else:
             start_scale = None
             stop_scale = None
@@ -348,7 +348,7 @@ if __name__ == '__main__':
         # Place barrier to make sure all MPI processes wait for each other
         comm.Barrier()
 
-        full_sqw_list = np.zeros([len(mpdsf.qpoints), len(mpdsf.dsf.sqw[0])])
+        #full_sqw_list = np.zeros([len(mpdsf.qpoints), len(mpdsf.dsf.sqw[0])])
         # Find rec sizes, in which the last rank may have a different number of q-points
         rec_sizes = np.array(int(size) * [num_qpts_per_rank])
         rec_sizes[-1] = len(mpdsf.qpoints) % num_qpts_per_rank

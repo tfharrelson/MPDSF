@@ -906,7 +906,8 @@ class DynamicStructureFactor(object):
         else:
             qpoints = self.qpoints[start_q_index:stop_q_index]
         print('testing qpoints =', qpoints)
-        for i, qpoint in enumerate(qpoints):
+        q_indices = np.arange(start_q_index, stop_q_index)
+        for i, qpoint in zip(q_indices, qpoints):
             if np.linalg.norm(qpoints[i]) == 0.:
                 if len(self.skw_kernel) == 0:
                     self.build_skw_kernel()
@@ -946,7 +947,6 @@ class DynamicStructureFactor(object):
                         from yaml import CDumper as Dumper
                     except ImportError:
                         from yaml import Dumper
-                    # TODO doesn't work with G-vectors
                     fw['weights'] = [self.weights[tuple(q)] for q in self.qpoints]
                     # connected q-points
                     #new_symm_dict = {k: np.array(v) * np.array(self.meshG)

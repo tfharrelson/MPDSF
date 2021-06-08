@@ -4,13 +4,14 @@
  fc3: '../../data/GaAs/FORCES_FC3'
  born: '../../data/GaAs/BORN'
  disp: '../../data/GaAs/disp_fc3.yaml'
- mesh: [ 21, 21, 21]
+ mesh: [ 11, 11, 11 ]
  supercell: [ 2, 2, 2 ]
  max_energy: 100.0
- delta_e: 0.3
- overtones: 2
- scalar_mediator: True
- dark_photon: False
- output: test_gaas_scm_m11.hdf5
+ delta_e: 0.1
+ overtones: 1
+ scalar_mediator: False
+ dark_photon: True
+ output: test_gaas_dp_param_m11.hdf5
  lowq_scaling: True
  no_anh: False
+ param_lorentzian: True
