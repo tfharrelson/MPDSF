@@ -366,10 +366,21 @@ if __name__ == '__main__':
                 final_qpoints = []
                 final_sqw = []
                 final_weights = []
+                if not mpdsf.nofold_BZ:
+                    # Import yaml loader
+                    from yaml import load
+                    try:
+                        from yaml import CLoader as Loader
+                    except ImportError:
+                        from yaml import Loader
+                    # Initialize symm points list
+                    final_symm_points = []
                 if mpdsf.lowq_scaling:
                     scaling_qpoints = []
                     scaling_sqw = []
                     scaling_weights = []
+                    if not mpdsf.nofold_BZ:
+                        scaling_symm_points = []
                 for i in range(size):
                     with h5py.File('tmp_' + str(i) + '_' + output, 'r') as tmp_output:
                         if 'reclat' not in final_output.keys():
@@ -384,17 +395,33 @@ if __name__ == '__main__':
                         final_weights += list(tmp_output['weights'])
                         final_qpoints += list(tmp_output['q-points'])
                         final_sqw += list(tmp_output['sqw'])
+                        if not mpdsf.nofold_BZ:
+                            final_symm_points += list(np.array(load(str(np.array(tmp_output['equivalent q-points'])),
+                                                                    Loader=Loader)))
                         if mpdsf.lowq_scaling:
                             scaling_weights += list(tmp_output['scaling_weights'])
                             scaling_qpoints += list(tmp_output['scaling_q-points'])
                             scaling_sqw += list(tmp_output['scaling_sqw'])
+                            if not mpdsf.nofold_BZ:
+                                scaling_symm_points += list(
+                                    np.array(load(str(np.array(tmp_output['equivalent scaling_qpoints'])),
+                                                  Loader=Loader)))
                 final_output['sqw'] = np.array(final_sqw)
                 final_output['q-points'] = np.array(final_qpoints)
                 final_output['weights'] = np.array(final_weights)
+                if not mpdsf.nofold_BZ:
+                    from yaml import dump
+                    try:
+                        from yaml import CDumper as Dumper
+                    except ImportError:
+                        from yaml import Dumper
+                    final_output['equivalent q-points'] = dump(final_symm_points, Dumper=Dumper)
                 if mpdsf.lowq_scaling:
                     final_output['scaling_sqw'] = np.array(scaling_sqw)
                     final_output['scaling_q-points'] = np.array(scaling_qpoints)
                     final_output['scaling_weights'] = np.array(scaling_weights)
+                    if not mpdsf.nofold_BZ:
+                        final_output['equivalent scaling_qpoints'] = dump(scaling_symm_points, Dumper=Dumper)
             for i in range(size):
                 os.remove('tmp_' + str(i) + '_' + output)
             #if rank == 0:
