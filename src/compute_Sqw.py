@@ -966,6 +966,11 @@ class DynamicStructureFactor(object):
                     fw['weights'] = self.weights
                 fw['sqw'] = np.abs(self.sqw)
                 fw['reclat'] = self.rec_lat * 2 * np.pi
+                volume = np.linalg.det(self.phonon.primitive.get_cell())
+                total_mass = np.sum(self.phonon.masses) * const.atomic_mass
+                density = total_mass / volume * 1e24 / 1000         # Convert kg/Ang^3 to g/cm^3
+                fw['density'] = density
+                fw['max freq'] = np.max(np.array(self.frequencies).reshape(-1))
                 fw['frequencies'] = self.get_bin_energies()
                 fw['delta_w'] = self.delta_e
                 fw['dxdydz'] = self.dxdydz

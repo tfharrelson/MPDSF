@@ -350,16 +350,17 @@ if __name__ == '__main__':
 
         #full_sqw_list = np.zeros([len(mpdsf.qpoints), len(mpdsf.dsf.sqw[0])])
         # Find rec sizes, in which the last rank may have a different number of q-points
-        rec_sizes = np.array(int(size) * [num_qpts_per_rank])
-        rec_sizes[-1] = len(mpdsf.qpoints) % num_qpts_per_rank
-        rec_sizes *= len(mpdsf.dsf.sqw[0])
+        #rec_sizes = np.array(int(size) * [num_qpts_per_rank])
+        #rec_sizes[-1] = len(mpdsf.qpoints) % num_qpts_per_rank
+        #rec_sizes *= len(mpdsf.dsf.sqw[0])
 
         # Find the rec displacements, and we don't want to skip any data, so a cumsum will work
-        rec_disp = np.insert(np.cumsum(rec_sizes), 0, 0)[0:-1]
+        #rec_disp = np.insert(np.cumsum(rec_sizes), 0, 0)[0:-1]
 
         # Gather all objects into rank 0 in full_sqw_list
         #comm.Gatherv(np.abs(mpdsf.dsf.sqw), [full_sqw_list, rec_sizes, rec_disp, MPI.DOUBLE], root=0)
         mpdsf.save_data()
+        comm.Barrier()
         if rank == 0:
             with h5py.File(output, 'w') as final_output:
                 final_qpoints = []
