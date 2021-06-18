@@ -389,39 +389,56 @@ if __name__ == '__main__':
                             final_output['frequencies'] = np.array(tmp_output['frequencies'])
                             final_output['delta_w'] = np.array(tmp_output['delta_w'])
                             final_output['dxdydz'] = np.array(tmp_output['dxdydz'])
+                            if not mpdsf.nofold_BZ:
+                                from yaml import dump
+                                try:
+                                    from yaml import CDumper as Dumper
+                                except ImportError:
+                                    from yaml import Dumper
+                                final_output['equivalent q-points'] = dump(np.array(
+                                    load(str(np.array(tmp_output['equivalent q-points'])),
+                                         Loader=Loader)), Dumper=Dumper)
+                                if 'scaling_dxdydz' in tmp_output.keys():
+                                    final_output['scaling equivalent_q-points'] = dump(np.array(
+                                        load(str(np.array(tmp_output['equivalent scaling_qpoints'])),
+                                             Loader=Loader)), Dumper=Dumper)
+
+
                             # check for lowqscaling
                             if 'scaling_dxdydz' in tmp_output.keys():
                                 final_output['scaling_dxdydz'] = np.array(tmp_output['scaling_dxdydz'])
                         final_weights += list(tmp_output['weights'])
                         final_qpoints += list(tmp_output['q-points'])
                         final_sqw += list(tmp_output['sqw'])
-                        if not mpdsf.nofold_BZ:
-                            final_symm_points += list(np.array(load(str(np.array(tmp_output['equivalent q-points'])),
-                                                                    Loader=Loader)))
+                        #if not mpdsf.nofold_BZ:
+                        #    final_symm_points += list(np.array(load(str(np.array(tmp_output['equivalent q-points'])),
+                        #                                            Loader=Loader)))
                         if mpdsf.lowq_scaling:
                             scaling_weights += list(tmp_output['scaling_weights'])
                             scaling_qpoints += list(tmp_output['scaling_q-points'])
                             scaling_sqw += list(tmp_output['scaling_sqw'])
-                            if not mpdsf.nofold_BZ:
-                                scaling_symm_points += list(
-                                    np.array(load(str(np.array(tmp_output['equivalent scaling_qpoints'])),
-                                                  Loader=Loader)))
+                            #if not mpdsf.nofold_BZ:
+                            #    scaling_symm_points += list(
+                            #        np.array(load(str(np.array(tmp_output['equivalent scaling_qpoints'])),
+                            #                      Loader=Loader)))
                 final_output['sqw'] = np.array(final_sqw)
                 final_output['q-points'] = np.array(final_qpoints)
                 final_output['weights'] = np.array(final_weights)
-                if not mpdsf.nofold_BZ:
+                '''if not mpdsf.nofold_BZ:
                     from yaml import dump
                     try:
                         from yaml import CDumper as Dumper
                     except ImportError:
                         from yaml import Dumper
                     final_output['equivalent q-points'] = dump(final_symm_points, Dumper=Dumper)
+                    '''
                 if mpdsf.lowq_scaling:
                     final_output['scaling_sqw'] = np.array(scaling_sqw)
                     final_output['scaling_q-points'] = np.array(scaling_qpoints)
                     final_output['scaling_weights'] = np.array(scaling_weights)
-                    if not mpdsf.nofold_BZ:
+                    '''if not mpdsf.nofold_BZ:
                         final_output['equivalent scaling_qpoints'] = dump(scaling_symm_points, Dumper=Dumper)
+                        '''
             for i in range(size):
                 os.remove('tmp_' + str(i) + '_' + output)
             #if rank == 0:
