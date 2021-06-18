@@ -1,0 +1,6 @@
+/usr/local/anaconda3/envs/phono3py/bin/sumo-phonon-bandplot --dim 2 2 2 --born BORN --poscar POSCAR --primitive-auto -f FORCE_SETS
+Using supercell with dimensions:
+	[[2. 0. 0.]
+	 [0. 2. 0.]
+	 [0. 0. 2.]]
+
