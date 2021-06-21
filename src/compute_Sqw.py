@@ -986,7 +986,7 @@ class DynamicStructureFactor(object):
                             q = self._mesh_brillouinzone.qpoints[gps]
                             symm_points.append(list(np.array(self._mesh_brillouinzone.symm_qpoints[tuple(q)]) /
                                                     np.array(self.mesh)))
-                        fw['equivalent scaling_qpoints'] = dump(symm_points, Dumper=Dumper)
+                        fw['equivalent scaling_q-points'] = dump(symm_points, Dumper=Dumper)
                         if self.scaling_weights is None:
                             # Case where scaling points are set but want is to include folded weights
                             # TODO won't work with G-vectors in the weights object, need separate scaling BZ

@@ -11,6 +11,4 @@ RUN /sbin/ldconfig
 
 COPY multiphonon_dsf.py ./
 COPY src ./src
-RUN mkdir file_io
-COPY file_io/__init__.py file_io/
 RUN chmod -R a+rX /app

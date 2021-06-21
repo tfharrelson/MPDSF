@@ -395,13 +395,33 @@ if __name__ == '__main__':
                                     from yaml import CDumper as Dumper
                                 except ImportError:
                                     from yaml import Dumper
-                                final_output['equivalent q-points'] = dump(np.array(
-                                    load(str(np.array(tmp_output['equivalent q-points'])),
-                                         Loader=Loader)), Dumper=Dumper)
+                                s = str(np.array(tmp_output['equivalent q-points']))
+                                if s[0] != '-':
+                                    s = s[2:-1]
+                                # Remove \\n parts of string literal
+                                s_array = s.split('\\n')
+                                # Add \n parts back in
+                                s = '\n'.join(s_array)
+                                symm_points = load(s, Loader=Loader)
+                                #final_output['equivalent q-points'] = dump(np.array(
+                                #    load(str(np.array(tmp_output['equivalent q-points'])),
+                                #         Loader=Loader)), Dumper=Dumper)
+                                final_output['equivalent q-points'] = dump(np.array(symm_points),
+                                        Dumper=Dumper)
                                 if 'scaling_dxdydz' in tmp_output.keys():
-                                    final_output['scaling equivalent_q-points'] = dump(np.array(
-                                        load(str(np.array(tmp_output['equivalent scaling_qpoints'])),
-                                             Loader=Loader)), Dumper=Dumper)
+                                    s = str(np.array(tmp_output['equivalent scaling_q-points']))
+                                    if s[0] != '-':
+                                        s = s[2:-1]
+                                    # Remove \\n parts of string literal
+                                    s_array = s.split('\\n')
+                                    # Add \n parts back in
+                                    s = '\n'.join(s_array)
+                                    symm_points = load(s, Loader=Loader)
+                                    final_output['equivalent scaling_q-points'] = dump(np.array(
+                                        symm_points), Dumper=Dumper)
+                                    #final_output['scaling equivalent_q-points'] = dump(np.array(
+                                    #    load(str(np.array(tmp_output['equivalent scaling_qpoints'])),
+                                    #         Loader=Loader)), Dumper=Dumper)
 
 
                             # check for lowqscaling
