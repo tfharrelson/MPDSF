@@ -11,7 +11,9 @@
  overtones: 1
  scalar_mediator: False
  dark_photon: True
- output: test_gaas_dp_param_m11.hdf5
+ output: test_gaas_dp_param.hdf5
  lowq_scaling: True
  no_anh: False
  param_lorentzian: True
+ med: 'light'
+ reach: True

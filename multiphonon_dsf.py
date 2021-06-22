@@ -59,6 +59,10 @@ class MPDSF:
                                                       'calculations', action='store_true')
         parser.add_argument('--dark_photon', help='Flag specifying if S(q,w) to be calculated for dark-photon '
                                                   'calculations', action='store_true')
+        parser.add_argument('--med', 
+                help='String specifying the mediator type; choose "light" or "heavy". Default is' 
+                '"light"',
+                default='light')
         parser.add_argument('--param_lorentzian', help='Flag specifying to use a constant Lorentzian linewidth instead '
                                                        'of the default frequency-dependent linewidth.',
                             action='store_true')
@@ -72,6 +76,8 @@ class MPDSF:
                             action='store_true')
         parser.add_argument('--no_anh', help='Flag specifying to not use anharmonic broadening, even when available.',
                             action='store_true')
+        parser.add_argument('--reach', help='Flag specifying whether or not to calculate reach.',
+                action='store_true')
 
         args = parser.parse_args()
         self.poscar = args.poscar
@@ -104,6 +110,8 @@ class MPDSF:
             self.is_nac = True
         else:
             self.is_nac = False
+        self.scalar_mediator_flag = args.scalar_mediator
+        self.med = args.med
         self.dark_photon_flag = args.dark_photon
         if self.dark_photon_flag:
             self.overtones = 1
@@ -111,11 +119,12 @@ class MPDSF:
                 print('I HOPE YOU KNOW WHAT YOU\'RE DOING... THERE IS NO FC3 FILE SET AND YOU WANT TO RUN THE DARK'
                       'PHOTON VARIANT OF THE CODE. YOU\'D LIKELY BE BETTER OFF RUNNING A DIFFERENT CODE IN THIS CASE...'
                       'For example, see https://github.com/tanner-trickle/dm-phonon-scatter')
-        self.scalar_mediator_flag = args.scalar_mediator
+        
         self.param_flag = args.param_lorentzian
         self.nofold_BZ = args.nofold_BZ
         self.lowq_scaling = args.lowq_scaling
         self.no_anh_flag = args.no_anh
+        self.reach = args.reach
 
         if self.input is not None:
             self.parse_input_file(self.input)
@@ -183,6 +192,8 @@ class MPDSF:
                       'For example, see https://github.com/tanner-trickle/dm-phonon-scatter')
         if 'scalar_mediator' in config_dict.keys():
             self.scalar_mediator_flag = config_dict['scalar_mediator']
+        if 'med' in config_dict.keys():
+            self.med = config_dict['med']
         if 'param_lorentzian' in config_dict.keys():
             self.param_flag = config_dict['param_lorentzian']
         if 'nofold_BZ' in config_dict.keys():
@@ -191,6 +202,8 @@ class MPDSF:
             self.lowq_scaling = config_dict['lowq_scaling']
         if 'no_anh' in config_dict.keys():
             self.no_anh_flag = config_dict['no_anh']
+        if 'reach' in config_dict.keys():
+            self.reach = config_dict['reach']
 
     def set_qpoints(self):
         if self.nofold_BZ:
@@ -360,12 +373,52 @@ if __name__ == '__main__':
         # Gather all objects into rank 0 in full_sqw_list
         #comm.Gatherv(np.abs(mpdsf.dsf.sqw), [full_sqw_list, rec_sizes, rec_disp, MPI.DOUBLE], root=0)
         mpdsf.save_data()
+
+        if mpdsf.reach:
+            # Calculate reach curves; start by importing dark matter module
+            from src.darkmatter import ReachCalculator
+            equiv_flag = not mpdsf.nofold_BZ
+            calc = ReachCalculator(hdf5_file=mpdsf.output, equiv_flag=equiv_flag)
+            # publication quality figure needs 80 masses, not the default 20
+            num_masses = 80
+            min_mass = 1e3
+            max_mass = 1e10
+            # Specify threshold based on max frequency
+            with h5py.File(mpdsf.output, 'r') as tmp_output:
+                THz_to_meV = 4.13567
+                max_freq = np.array(tmp_output['max freq'])
+                max_freq = max_freq * THz_to_meV / 1000
+            thresholds = [0.001, 1.25 * max_freq, 1.75 * max_freq]
+            if mpdsf.dark_photon_flag:
+                ref = 'electron'
+                med = 'light'
+            elif mpdsf.scalar_mediator_flag:
+                ref = 'nucleon'
+                med = mpdsf.med
+            else:
+               raise SystemExit('Need to have either dark photon or scalar mediator flag set to'
+                       'calculate the reach')
+            reach_list = [calc.calculate_reach(num_masses=num_masses,
+                                               min_mass=min_mass,
+                                               max_mass=max_mass,
+                                               med=med,
+                                               ref=ref,
+                                               threshold=thresh)
+                          for thresh in thresholds]
+            with h5py.File(mpdsf.output, 'a') as tmp_output:
+                tmp_output['reach'] = np.array(reach_list)
+                dm_masses = np.logspace(np.log10(min_mass), np.log10(max_mass), num_masses)
+                tmp_output['dm_masses'] = np.array(dm_masses)
         comm.Barrier()
+
+        # Combine outputs of tmp_output.hdf5 files
         if rank == 0:
             with h5py.File(output, 'w') as final_output:
                 final_qpoints = []
                 final_sqw = []
                 final_weights = []
+                if mpdsf.reach:
+                    final_reach = np.zeros_like(reach_list)
                 if not mpdsf.nofold_BZ:
                     # Import yaml loader
                     from yaml import load
@@ -385,10 +438,16 @@ if __name__ == '__main__':
                     with h5py.File('tmp_' + str(i) + '_' + output, 'r') as tmp_output:
                         if 'reclat' not in final_output.keys():
                             # Write core features
+                            final_output['density'] = np.array(tmp_output['density'])
+                            final_output['max freq'] = np.array(tmp_output['max freq'])
                             final_output['reclat'] = np.array(tmp_output['reclat'])
                             final_output['frequencies'] = np.array(tmp_output['frequencies'])
                             final_output['delta_w'] = np.array(tmp_output['delta_w'])
                             final_output['dxdydz'] = np.array(tmp_output['dxdydz'])
+                            # Begin conditional core features starting with reach flag
+                            if mpdsf.reach:
+                                final_output['dm_masses'] = np.array(tmp_output['dm_masses'])
+                            # Next conditional is whether the BZ was folded or not (default is yes)
                             if not mpdsf.nofold_BZ:
                                 from yaml import dump
                                 try:
@@ -430,6 +489,9 @@ if __name__ == '__main__':
                         final_weights += list(tmp_output['weights'])
                         final_qpoints += list(tmp_output['q-points'])
                         final_sqw += list(tmp_output['sqw'])
+                        if mpdsf.reach:
+                            final_reach += tmp_output['reach']
+
                         #if not mpdsf.nofold_BZ:
                         #    final_symm_points += list(np.array(load(str(np.array(tmp_output['equivalent q-points'])),
                         #                                            Loader=Loader)))
@@ -444,6 +506,8 @@ if __name__ == '__main__':
                 final_output['sqw'] = np.array(final_sqw)
                 final_output['q-points'] = np.array(final_qpoints)
                 final_output['weights'] = np.array(final_weights)
+                if mpdsf.reach:
+                    final_output['reach'] = np.array(final_reach)
                 '''if not mpdsf.nofold_BZ:
                     from yaml import dump
                     try:
@@ -467,6 +531,42 @@ if __name__ == '__main__':
     else:
         mpdsf.run()
         mpdsf.save_data()
+        if mpdsf.reach:
+            # Calculate reach curves; start by importing dark matter module
+            from src.darkmatter import ReachCalculator
+            equiv_flag = not mpdsf.nofold_BZ
+            calc = ReachCalculator(hdf5_file=mpdsf.output, equiv_flag=equiv_flag)
+            # publication quality figure needs 80 masses, not the default 20
+            num_masses = 80
+            min_mass = 1e3
+            max_mass = 1e10
+            # Specify threshold based on max frequency
+            with h5py.File(mpdsf.output, 'r') as tmp_output:
+                THz_to_meV = 4.13567
+                max_freq = np.array(tmp_output['max freq'])
+                max_freq = max_freq * THz_to_meV / 1000
+            thresholds = [0.001, 1.25 * max_freq, 1.75 * max_freq]
+            if mpdsf.dark_photon_flag:
+                ref = 'electron'
+                med = 'light'
+            elif mpdsf.scalar_mediator_flag:
+                ref = 'nucleon'
+                med = mpdsf.med
+            else:
+               raise SystemExit('Need to have either dark photon or scalar mediator flag set to'
+                       'calculate the reach')
+            reach_list = [calc.calculate_reach(num_masses=num_masses,
+                                               min_mass=min_mass,
+                                               max_mass=max_mass,
+                                               med=med,
+                                               ref=ref,
+                                               threshold=thresh)
+                          for thresh in thresholds]
+            with h5py.File(mpdsf.output, 'a') as tmp_output:
+                tmp_output['reach'] = np.array(reach_list)
+                dm_masses = np.logspace(np.log10(min_mass), np.log10(max_mass), num_masses)
+                tmp_output['dm_masses'] = np.array(dm_masses)
+
     # Import q-point list somehow...?
     # Options include specifying a number of G-points to go out to, and calculate for the entire mesh
     # Another option is to read a simple text file with each q-point on each line

@@ -43,10 +43,32 @@ thetaE = (np.pi/180)*42
 
 
 class ReachCalculator:
-    def __init__(self, sqw: DynamicStructureFactor=None, hdf5_file=None):
+    '''
+    Object that is currently implemented to take an hdf5 file created from the multiphonon_dsf.py code
+    and create a reach curve for a default set of masses to produce publication quality data in an 
+    efficient and scalable way.
+
+    Inputs:
+        - sqw: NOT IMPLEMENTED YET; DO NOT USE
+        - hdf5_file: filename for hdf5 file created by multiphonon_dsf.py
+        - equiv_flag: Boolean that describes whether Brillouin zone was folded into the irreducible part
+                      (Eventually this will get removed as this function can be inferred from the hdf5 
+                      file)
+
+    Methods:
+        - calculate:
+            Inputs: 
+                - dm_masses: (optional) array of DM masses in eV
+            Returns:
+                - reach: An array of reach values for each DM mass
+    '''
+    def __init__(self, sqw: DynamicStructureFactor=None, hdf5_file=None, equiv_flag=True):
         self._sqw = sqw
         self._hdf5_file = hdf5_file
+        self._equiv_flag = equiv_flag
+        
         self.data_dict = None
+        self.reach = None
         if self._sqw is not None:
             self.load_from_dsf()
         else:
@@ -67,7 +89,19 @@ class ReachCalculator:
         if filename is not None:
             f = h5py.File(filename, 'r')
             if symm_points_key is not None:
-                symm_points = load(str(np.array(f[symm_points_key])), Loader=Loader)
+                if symm_points_key == 'equivalent scaling_qpoints' and symm_points_key not in f.keys():
+                    symm_points_key = 'scaling equivalent_q-points'
+                if symm_points_key == 'scaling equivalent_q-points' and symm_points_key not in f.keys():
+                    symm_points_key = 'equivalent scaling_q-points'
+                s = str(np.array(f[symm_points_key]))
+                if s[0] != '-':
+                    s = s[2:-1]
+                # Remove \\n parts of string literal
+                s_array = s.split('\\n')
+                # Add \n parts back in
+                s = '\n'.join(s_array)
+                symm_points = load(s, Loader=Loader)
+                #symm_points = load(str(np.array(f[symm_points_key])), Loader=Loader)
                 q_grid = []
                 for q in symm_points:
                     q_grid += list(q)
@@ -153,7 +187,19 @@ class ReachCalculator:
         f = h5py.File(filename, 'r')
         sqw = np.array(f[sqw_key])
         if symm_points_key is not None:
-            symm_points = np.array(load(str(np.array(f[symm_points_key])), Loader=Loader))
+            if symm_points_key == 'equivalent scaling_qpoints' and symm_points_key not in f.keys():
+                symm_points_key = 'scaling equivalent_q-points'
+            if symm_points_key == 'scaling equivalent_q-points' and symm_points_key not in f.keys():
+                symm_points_key = 'equivalent scaling_q-points'
+            s = str(np.array(f[symm_points_key]))
+            if s[0] != '-':
+                s = s[2:-1]
+            # Remove \\n parts of string literal
+            s_array = s.split('\\n')
+            # Add \n parts back in
+            s = '\n'.join(s_array)
+            symm_points = load(s, Loader=Loader)
+            #symm_points = np.array(load(str(np.array(f[symm_points_key])), Loader=Loader))
             unfolded_sqw = []
             for sqw_at_q, qs in zip(sqw, symm_points):
                 for q in qs:
@@ -175,6 +221,8 @@ class ReachCalculator:
         filename
         """
         f = h5py.File(filename, 'r')
+        self._density = np.array(f['density'])
+        self._max_freq = np.array(f['max freq'])
         if equiv_flag:
             data_dict = {
                 "q_grid": list(self.get_q_grid(filename)),
@@ -211,13 +259,38 @@ class ReachCalculator:
         return data_dict
 
     def load_from_file(self):
-        self.data_dict = self.get_all_data_dict(self._hdf5_file)
+        self.data_dict = self.get_all_data_dict(self._hdf5_file, equiv_flag=self._equiv_flag)
 
     def load_from_dsf(self):
         raise SystemExit('Not implemented yet... sorry, will happen sometime soon')
 
-    def calculate_reach(self, density, num_masses=20, min_mass=1e3, max_mass=1e10, threshold=1e-3, t=0):
-
+    def calculate_reach(self, 
+            num_masses=20, 
+            min_mass=1e3, 
+            max_mass=1e10, 
+            threshold=1e-3, 
+            t=0,
+            dm_masses=None,
+            ref='nucleon',
+            med='light'):
+        '''
+        Calculate the dark matter reach (minimal scattering cross-section for 3 events/year into a 1 kg
+        block of material) for a specified model and threshold
+        
+        Inputs:
+            - num_masses: number of dark matter masses to calculate reach for.
+            - min_mass: minimum dark matter mass (in eV) to calculate reach for.
+            - max_mass: maximum dark matter mass
+            - threshold: phonon frequency cutoff in which phonons with energy below this cutoff do not
+                         contribute to the reach.
+            - t: time of day in hours
+            - dm_masses: specify the array of dm_masses directly instead of using (num_masses, min_mass,
+                         max_mass) in conjunction with np.logspace
+            - ref: reference particle used for determining dark matter interaction model. Implemented
+                   'nucleon' and 'electron'
+            - med: mediator tag determining dark matter model. Implemented 'light' and 'heavy'
+        '''
+        density = self._density
         dm_masses = np.logspace(np.log10(min_mass), np.log10(max_mass), num_masses)
         reach = [ph_dd_cross_sec_constraint_numba(mass, density, t,
                                                   self.data_dict['q_grid'],
@@ -230,6 +303,8 @@ class ReachCalculator:
                                                   threshold=threshold)
                  for mass in dm_masses
                  ]
+        self.reach = reach
+        return reach
 
 @nb.jit
 def ph_dd_rate_numba(m_chi, rho_target, t,
