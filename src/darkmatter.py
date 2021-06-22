@@ -292,17 +292,18 @@ class ReachCalculator:
         '''
         density = self._density
         dm_masses = np.logspace(np.log10(min_mass), np.log10(max_mass), num_masses)
-        reach = [ph_dd_cross_sec_constraint_numba(mass, density, t,
-                                                  self.data_dict['q_grid'],
-                                                  self.data_dict['omega_grid'],
-                                                  self.data_dict['jac_q'],
-                                                  self.data_dict['jac_omega'],
-                                                  self.data_dict['dyn_S'],
-                                                  ref='nucleon',
-                                                  med='light',
-                                                  threshold=threshold)
-                 for mass in dm_masses
-                 ]
+        reach = np.empty_like(dm_masses)
+        for i, mass in enumerate(dm_masses):
+            print('i =', i, 'mass =', mass)
+            reach[i] = ph_dd_cross_sec_constraint_numba(mass, density, t,
+                                                      np.array(self.data_dict['q_grid']),
+                                                      np.array(self.data_dict['omega_grid']),
+                                                      np.array(self.data_dict['jac_q']),
+                                                      np.array(self.data_dict['jac_omega']),
+                                                      np.array(self.data_dict['dyn_S']),
+                                                      ref=ref,
+                                                      med=med,
+                                                      threshold=threshold)
         self.reach = reach
         return reach
 
@@ -373,7 +374,7 @@ def ph_dd_rate_numba(m_chi, rho_target, t,
                 # critical that this is allowed
                 rate += jac_q[q] * jac_omega[w] * kinematic_function_numba(q_vec, omega, t, m_chi) * \
                         med_form_factor_sq_numba(q_vec, m_chi, ref=ref, med=med) * \
-                        dyn_structure_factor[q][w]
+                        dyn_structure_factor[q, w]
 
     return overall_const * rate
 
