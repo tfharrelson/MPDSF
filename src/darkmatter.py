@@ -2,6 +2,7 @@ import numpy as np
 from scipy import special
 import numba as nb
 import h5py
+import json
 from yaml import load
 from yaml import CLoader as Loader
 from src.units import *
@@ -56,7 +57,7 @@ class ReachCalculator:
                       file)
 
     Methods:
-        - calculate:
+        - calculate_reach:
             Inputs: 
                 - dm_masses: (optional) array of DM masses in eV
             Returns:
@@ -93,18 +94,22 @@ class ReachCalculator:
                     symm_points_key = 'scaling equivalent_q-points'
                 if symm_points_key == 'scaling equivalent_q-points' and symm_points_key not in f.keys():
                     symm_points_key = 'equivalent scaling_q-points'
-                s = str(np.array(f[symm_points_key]))
-                if s[0] != '-':
-                    s = s[2:-1]
+                #s = str(np.array(f[symm_points_key]))
+                #if s[0] != '-':
+                #    s = s[2:-1]
                 # Remove \\n parts of string literal
-                s_array = s.split('\\n')
+                #s_array = s.split('\\n')
                 # Add \n parts back in
-                s = '\n'.join(s_array)
-                symm_points = load(s, Loader=Loader)
+                #s = '\n'.join(s_array)
+                #symm_points = load(s, Loader=Loader)
+                symm_points_dict = json.loads(f[symm_points_key].asstr()[()])
                 #symm_points = load(str(np.array(f[symm_points_key])), Loader=Loader)
                 q_grid = []
-                for q in symm_points:
-                    q_grid += list(q)
+                qpts = np.array(f[qpts_key])
+                for q in qpts:
+                    key = '{:.8f},{:.8f},{:.8f}'.format(*q)
+                    symm_points = symm_points_dict[key]
+                    q_grid += list(symm_points)
                 q_grid = np.array(q_grid)
             else:
                 q_grid = np.array(f[qpts_key])
@@ -177,7 +182,8 @@ class ReachCalculator:
     def get_dyn_structure_factor(self, filename, sqw_key='sqw',
                                  jacq_key='dxdydz',
                                  reclat_key='reclat',
-                                 symm_points_key='equivalent q-points'):
+                                 symm_points_key='equivalent q-points',
+                                 qpts_key='q-points'):
         """
         Return the dynamic structure factor. Output array should have dim ( N_q, N_w ),
         where N_q is the number of points in the q grid and N_w is the number of omega points.
@@ -191,18 +197,23 @@ class ReachCalculator:
                 symm_points_key = 'scaling equivalent_q-points'
             if symm_points_key == 'scaling equivalent_q-points' and symm_points_key not in f.keys():
                 symm_points_key = 'equivalent scaling_q-points'
-            s = str(np.array(f[symm_points_key]))
-            if s[0] != '-':
-                s = s[2:-1]
+            #s = str(np.array(f[symm_points_key]))
+            #if s[0] != '-':
+            #    s = s[2:-1]
             # Remove \\n parts of string literal
-            s_array = s.split('\\n')
+            #s_array = s.split('\\n')
             # Add \n parts back in
-            s = '\n'.join(s_array)
-            symm_points = load(s, Loader=Loader)
+            #s = '\n'.join(s_array)
+            #symm_points = load(s, Loader=Loader)
+            
             #symm_points = np.array(load(str(np.array(f[symm_points_key])), Loader=Loader))
+            symm_points_dict = json.loads(f[symm_points_key].asstr()[()])
             unfolded_sqw = []
-            for sqw_at_q, qs in zip(sqw, symm_points):
-                for q in qs:
+            qpts = np.array(f[qpts_key])
+            for sqw_at_q, q in zip(sqw, qpts):
+                key = '{:.8f},{:.8f},{:.8f}'.format(*q)
+                qs = symm_points_dict[key]
+                for _ in qs:
                     unfolded_sqw.append(sqw_at_q)
             unfolded_sqw = np.array(unfolded_sqw)
             sqw = unfolded_sqw
@@ -254,7 +265,8 @@ class ReachCalculator:
             data_dict["dyn_S"] += list(self.get_dyn_structure_factor(filename,
                                                                 sqw_key='scaling_sqw',
                                                                 jacq_key='scaling_dxdydz',
-                                                                symm_points_key=symm_points_key
+                                                                symm_points_key=symm_points_key,
+                                                                qpts_key='scaling_q-points'
                                                                 ))
         return data_dict
 
@@ -294,7 +306,7 @@ class ReachCalculator:
         dm_masses = np.logspace(np.log10(min_mass), np.log10(max_mass), num_masses)
         reach = np.empty_like(dm_masses)
         for i, mass in enumerate(dm_masses):
-            print('i =', i, 'mass =', mass)
+            #print('i =', i, 'mass =', mass)
             reach[i] = ph_dd_cross_sec_constraint_numba(mass, density, t,
                                                       np.array(self.data_dict['q_grid']),
                                                       np.array(self.data_dict['omega_grid']),

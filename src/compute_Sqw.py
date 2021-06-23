@@ -942,6 +942,7 @@ class DynamicStructureFactor(object):
                 fw['q-points'] = self.qpoints
                 # Write down connected q-points and weights if the BZ was folded
                 if self.fold_BZ:
+                    import json
                     from yaml import dump
                     try:
                         from yaml import CDumper as Dumper
@@ -959,7 +960,11 @@ class DynamicStructureFactor(object):
                                                 np.array(self.meshG)))
                     #symm_points = [np.array(self._brillouinzone.symm_qpoints[tuple(q)]) * np.array(self.meshG)
                     #               for q in irr_qpoints]
-                    fw['equivalent q-points'] = dump(symm_points, Dumper=Dumper)
+                    #fw['equivalent q-points'] = dump(symm_points, Dumper=Dumper)
+                    symm_points = {'{:.8f},{:.8f},{:.8f}'.format(*(np.array(k) * np.array(self.meshG))): [list(v * np.array(self.meshG)) for v in val] 
+                                    for k, val in self._brillouinzone.symm_qpoints.items()}
+                    dt = h5.string_dtype(encoding='utf-8')
+                    fw.create_dataset('equivalent q-points', shape=(), dtype=dt, data=json.dumps(symm_points))
                 else:
                     if self.weights is None:
                         self.weights = np.ones(len(self.qpoints))
@@ -980,13 +985,19 @@ class DynamicStructureFactor(object):
                     if self.fold_BZ:
                         #symm_points = [np.array(self._mesh_brillouinzone.symm_qpoints[tuple(q * self.mesh)]) / np.array(self.mesh)
                         #               for q in self._scaling_qpoints]
-                        irr_gps = np.unique(self._mesh_brillouinzone.mapping)
-                        symm_points = []
-                        for gps in irr_gps:
-                            q = self._mesh_brillouinzone.qpoints[gps]
-                            symm_points.append(list(np.array(self._mesh_brillouinzone.symm_qpoints[tuple(q)]) /
-                                                    np.array(self.mesh)))
-                        fw['equivalent scaling_q-points'] = dump(symm_points, Dumper=Dumper)
+                        #irr_gps = np.unique(self._mesh_brillouinzone.mapping)
+                        #symm_points = []
+                        #for gps in irr_gps:
+                        #    q = self._mesh_brillouinzone.qpoints[gps]
+                        #    symm_points.append(list(np.array(self._mesh_brillouinzone.symm_qpoints[tuple(q)]) /
+                        #                            np.array(self.mesh)))
+                        symm_points = {'{:.8f},{:.8f},{:.8f}'.format(*(np.array(k) / np.array(self.mesh))): [list(v / np.array(self.mesh)) for v in val] 
+                                        for k, val in self._brillouinzone.symm_qpoints.items()}
+
+                        #fw['equivalent scaling_q-points'] = dump(symm_points, Dumper=Dumper)
+                        #fw['equivalent scaling_q-points'] = json.dumps(symm_points)
+                        dt = h5.string_dtype(encoding='utf-8')
+                        fw.create_dataset('equivalent scaling_q-points', shape=(), dtype=dt, data=json.dumps(symm_points))
                         if self.scaling_weights is None:
                             # Case where scaling points are set but want is to include folded weights
                             # TODO won't work with G-vectors in the weights object, need separate scaling BZ

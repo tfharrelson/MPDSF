@@ -449,35 +449,36 @@ if __name__ == '__main__':
                                 final_output['dm_masses'] = np.array(tmp_output['dm_masses'])
                             # Next conditional is whether the BZ was folded or not (default is yes)
                             if not mpdsf.nofold_BZ:
-                                from yaml import dump
-                                try:
-                                    from yaml import CDumper as Dumper
-                                except ImportError:
-                                    from yaml import Dumper
-                                s = str(np.array(tmp_output['equivalent q-points']))
-                                if s[0] != '-':
-                                    s = s[2:-1]
+                                #from yaml import dump
+                                #try:
+                                #    from yaml import CDumper as Dumper
+                                #except ImportError:
+                                #    from yaml import Dumper
+                                #s = str(np.array(tmp_output['equivalent q-points']))
+                                #if s[0] != '-':
+                                #    s = s[2:-1]
                                 # Remove \\n parts of string literal
-                                s_array = s.split('\\n')
+                                #s_array = s.split('\\n')
                                 # Add \n parts back in
-                                s = '\n'.join(s_array)
-                                symm_points = load(s, Loader=Loader)
+                                #s = '\n'.join(s_array)
+                                #symm_points = load(s, Loader=Loader)
+                                import json
+                                symm_points = json.loads(tmp_output['equivalent q-points'].asstr()[()])
                                 #final_output['equivalent q-points'] = dump(np.array(
                                 #    load(str(np.array(tmp_output['equivalent q-points'])),
                                 #         Loader=Loader)), Dumper=Dumper)
-                                final_output['equivalent q-points'] = dump(np.array(symm_points),
-                                        Dumper=Dumper)
+                                final_output['equivalent q-points'] = json.dumps(symm_points)
                                 if 'scaling_dxdydz' in tmp_output.keys():
-                                    s = str(np.array(tmp_output['equivalent scaling_q-points']))
-                                    if s[0] != '-':
-                                        s = s[2:-1]
+                                    #s = str(np.array(tmp_output['equivalent scaling_q-points']))
+                                    #if s[0] != '-':
+                                    #    s = s[2:-1]
                                     # Remove \\n parts of string literal
-                                    s_array = s.split('\\n')
+                                    #s_array = s.split('\\n')
                                     # Add \n parts back in
-                                    s = '\n'.join(s_array)
-                                    symm_points = load(s, Loader=Loader)
-                                    final_output['equivalent scaling_q-points'] = dump(np.array(
-                                        symm_points), Dumper=Dumper)
+                                    #s = '\n'.join(s_array)
+                                    #symm_points = load(s, Loader=Loader)
+                                    symm_points = json.loads(tmp_output['equivalent scaling_q-points'].asstr()[()])
+                                    final_output['equivalent scaling_q-points'] = json.dumps(symm_points)
                                     #final_output['scaling equivalent_q-points'] = dump(np.array(
                                     #    load(str(np.array(tmp_output['equivalent scaling_qpoints'])),
                                     #         Loader=Loader)), Dumper=Dumper)
