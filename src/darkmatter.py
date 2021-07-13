@@ -106,6 +106,8 @@ class ReachCalculator:
                 #symm_points = load(str(np.array(f[symm_points_key])), Loader=Loader)
                 q_grid = []
                 qpts = np.array(f[qpts_key])
+                if len(qpts) == 0:
+                    return qpts
                 for q in qpts:
                     key = '{:.8f},{:.8f},{:.8f}'.format(*q)
                     symm_points = symm_points_dict[key]
@@ -192,6 +194,8 @@ class ReachCalculator:
         """
         f = h5py.File(filename, 'r')
         sqw = np.array(f[sqw_key])
+        if len(sqw) == 0:
+            return sqw
         if symm_points_key is not None:
             if symm_points_key == 'equivalent scaling_qpoints' and symm_points_key not in f.keys():
                 symm_points_key = 'scaling equivalent_q-points'
@@ -256,18 +260,21 @@ class ReachCalculator:
                 symm_points_key = 'equivalent scaling_qpoints'
             else:
                 symm_points_key = None
-            data_dict["q_grid"] += list(self.get_q_grid(filename,
-                                                   qpts_key='scaling_q-points',
-                                                   symm_points_key=symm_points_key))
-            data_dict["jac_q"] += list(self.get_jac_q(filename, jacq_key='scaling_dxdydz',
-                                                 weight_key='scaling_weights',
-                                                 symm_points_key=symm_points_key))
+            q_grid = list(self.get_q_grid(filename,
+                                          qpts_key='scaling_q-points',
+                                          symm_points_key=symm_points_key))
+
+            data_dict["q_grid"] += q_grid
+            if len(q_grid) > 0:
+                data_dict["jac_q"] += list(self.get_jac_q(filename, jacq_key='scaling_dxdydz',
+                                                          weight_key='scaling_weights',
+                                                          symm_points_key=symm_points_key))
             data_dict["dyn_S"] += list(self.get_dyn_structure_factor(filename,
-                                                                sqw_key='scaling_sqw',
-                                                                jacq_key='scaling_dxdydz',
-                                                                symm_points_key=symm_points_key,
-                                                                qpts_key='scaling_q-points'
-                                                                ))
+                                                                     sqw_key='scaling_sqw',
+                                                                     jacq_key='scaling_dxdydz',
+                                                                     symm_points_key=symm_points_key,
+                                                                     qpts_key='scaling_q-points'
+                                                                    ))
         return data_dict
 
     def load_from_file(self):

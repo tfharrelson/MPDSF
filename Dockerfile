@@ -5,6 +5,8 @@ WORKDIR /app
 RUN conda install scipy h5py matplotlib
 RUN conda install -c conda-forge phonopy
 RUN conda install -c conda-forge phono3py
+RUN conda install -c conda-forge numba
+RUN conda install sympy
 RUN conda clean -a
 
 RUN /sbin/ldconfig

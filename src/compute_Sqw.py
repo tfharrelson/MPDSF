@@ -518,10 +518,13 @@ class DynamicStructureFactor(object):
                         if self.anharmonicities is None or self._no_anh_flag:
                             function = self.create_delta(freq)
                         else:
-                            interp = self.anharmonicities.get_broadening_function(qpoint=self._scaling_qpoints[sq_index],
-                                                                                    band_index=i,
-                                                                                    max_freq=self.max_e)
-                            function = np.array(interp(self.get_bin_energies())).astype(complex)
+                            dist = self.create_anharmonic_distribution(q_point=self._scaling_qpoints[sq_index],
+                                                                         band_index=i)
+                            #interp = self.anharmonicities.get_broadening_function(qpoint=self._scaling_qpoints[sq_index],
+                            #                                                        band_index=i,
+                            #                                                        max_freq=self.max_e)
+                            function = np.array(dist).astype(complex)
+                            #function = np.array(interp(self.get_bin_energies())).astype(complex)
                         factor = np.dot(q_cart, np.dot(outer_eig[tau_1, tau_2, :, :], q_cart)) * function *\
                                  np.exp(2j * np.pi * np.vdot(qpoint, (positions[tau_1] - positions[tau_2]))) \
                                  * DWF[tau_1] * DWF[tau_2]
@@ -692,7 +695,28 @@ class DynamicStructureFactor(object):
     def create_anharmonic_distribution(self, q_point, band_index):
         freqs = self.get_bin_energies()
         anh_dist_func = self.anharmonicities.get_broadening_function(q_point, band_index, max_freq=self.max_e)
-        return anh_dist_func(freqs)
+        gamma = self.anharmonicities.gamma.get_property_value(q_point, band_index)
+        omega = self.anharmonicities.phonon_freqs.get_property_value(q_point, band_index)
+
+        f_index_minus = np.floor(omega / (freqs[1] - freqs[0])).astype(int)
+        if not self.param_flag:
+            avg_gamma_at_freq = (gamma[f_index_minus] + gamma[f_index_minus + 1]) / 2
+        else:
+            avg_gamma_at_freq = gamma
+
+        broadening_func = anh_dist_func(freqs)
+        # Normalize in case Phono3py sampling is denser than delta_e here; I'm looking at you CsI
+        if avg_gamma_at_freq < freqs[1] - freqs[0]:
+            # Case: the width is small, and the area is underestimated
+            # Solution: add a delta function
+            broadening_func += self.create_delta(omega) * (1.0 - np.trapz(broadening_func, freqs))
+        else:
+            # Case: width is large enough, but the area is underestimated
+            # Solution: scale the function by the trapz area
+            broadening_func /= np.trapz(broadening_func, freqs)
+
+        return broadening_func
+        #return anh_dist_func(freqs)
 
     def create_lorentzian(self, energy, gamma):
         # create a Lorentzian function instead of a delta function for peaks broadened by anharmonicities
@@ -973,7 +997,7 @@ class DynamicStructureFactor(object):
                 fw['reclat'] = self.rec_lat * 2 * np.pi
                 volume = np.linalg.det(self.phonon.primitive.get_cell())
                 total_mass = np.sum(self.phonon.masses) * const.atomic_mass
-                density = total_mass / volume * 1e24 / 1000         # Convert kg/Ang^3 to g/cm^3
+                density = total_mass / volume * 1e24 * 1000         # Convert kg/Ang^3 to g/cm^3
                 fw['density'] = density
                 fw['max freq'] = np.max(np.array(self.frequencies).reshape(-1))
                 fw['frequencies'] = self.get_bin_energies()
@@ -992,7 +1016,7 @@ class DynamicStructureFactor(object):
                         #    symm_points.append(list(np.array(self._mesh_brillouinzone.symm_qpoints[tuple(q)]) /
                         #                            np.array(self.mesh)))
                         symm_points = {'{:.8f},{:.8f},{:.8f}'.format(*(np.array(k) / np.array(self.mesh))): [list(v / np.array(self.mesh)) for v in val] 
-                                        for k, val in self._brillouinzone.symm_qpoints.items()}
+                                        for k, val in self._mesh_brillouinzone.symm_qpoints.items()}
 
                         #fw['equivalent scaling_q-points'] = dump(symm_points, Dumper=Dumper)
                         #fw['equivalent scaling_q-points'] = json.dumps(symm_points)

@@ -9,11 +9,11 @@
  max_energy: 100.0
  delta_e: 0.1
  overtones: 1
- scalar_mediator: False
- dark_photon: True
- output: test_gaas_dp_param.hdf5
+ scalar_mediator: True
+ dark_photon: False
+ output: test_gaas_lscm.hdf5
  lowq_scaling: True
  no_anh: False
- param_lorentzian: True
+ param_lorentzian: False
  med: 'light'
  reach: True
