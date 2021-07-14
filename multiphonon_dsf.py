@@ -491,7 +491,9 @@ if __name__ == '__main__':
                         final_qpoints += list(tmp_output['q-points'])
                         final_sqw += list(tmp_output['sqw'])
                         if mpdsf.reach:
-                            final_reach += tmp_output['reach']
+                            tmp_rates = np.array([0. if r==0. else 1. / r for reach_at_thresh in tmp_output['reach' for r in reach_at_thresh])
+                            final_reach += tmp_rates
+                            #final_reach += tmp_output['reach']
 
                         #if not mpdsf.nofold_BZ:
                         #    final_symm_points += list(np.array(load(str(np.array(tmp_output['equivalent q-points'])),
@@ -508,7 +510,7 @@ if __name__ == '__main__':
                 final_output['q-points'] = np.array(final_qpoints)
                 final_output['weights'] = np.array(final_weights)
                 if mpdsf.reach:
-                    final_output['reach'] = np.array(final_reach)
+                    final_output['reach'] = np.array([0. if r==0. else 1. / r for rates_at_thresh in final_reach for r in rates_at_thresh)
                 '''if not mpdsf.nofold_BZ:
                     from yaml import dump
                     try:
