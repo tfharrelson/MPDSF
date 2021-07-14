@@ -510,7 +510,7 @@ if __name__ == '__main__':
                 final_output['q-points'] = np.array(final_qpoints)
                 final_output['weights'] = np.array(final_weights)
                 if mpdsf.reach:
-                    final_output['reach'] = np.array([0. if r==0. else 1. / r for rates_at_thresh in final_reach for r in rates_at_thresh])
+                    final_output['reach'] = np.array([[0. if r==0. else 1. / r for r in rates_at_thresh] for rates_at_thresh in final_reach])
                 '''if not mpdsf.nofold_BZ:
                     from yaml import dump
                     try:
