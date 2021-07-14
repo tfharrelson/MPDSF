@@ -526,8 +526,8 @@ if __name__ == '__main__':
                     '''if not mpdsf.nofold_BZ:
                         final_output['equivalent scaling_qpoints'] = dump(scaling_symm_points, Dumper=Dumper)
                         '''
-            #for i in range(size):
-            #    os.remove('tmp_' + str(i) + '_' + output)
+            for i in range(size):
+                os.remove('tmp_' + str(i) + '_' + output)
             #if rank == 0:
             #    mpdsf.dsf.sqw = full_sqw_list
             #    mpdsf.save_data()
