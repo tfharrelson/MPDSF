@@ -491,7 +491,7 @@ if __name__ == '__main__':
                         final_qpoints += list(tmp_output['q-points'])
                         final_sqw += list(tmp_output['sqw'])
                         if mpdsf.reach:
-                            tmp_rates = np.array([0. if r==0. else 1. / r for reach_at_thresh in tmp_output['reach'] for r in reach_at_thresh])
+                            tmp_rates = np.array([[0. if r==0. else 1. / r for r in reach_at_thresh] for reach_at_thresh in tmp_output['reach']])
                             final_reach += tmp_rates
                             #final_reach += tmp_output['reach']
 
