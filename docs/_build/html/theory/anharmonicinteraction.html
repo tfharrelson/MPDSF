@@ -1,0 +1,228 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Theory: Anharmonic Interactions &mdash; MPDSF 0.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Features: Including low-q scaling behavior" href="../features/lowqscaling.html" />
+    <link rel="prev" title="Theory: Contact Interactions" href="contactinteraction.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> MPDSF
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Table of Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/inputdirectives.html">Input Directives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Theory: Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contactinteraction.html">Theory: Contact Interactions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Theory: Anharmonic Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/lowqscaling.html">Features: Including low-q scaling behavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/darkphoton.html">Features: Dark photon mediated scattering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/scalarmediator.html">Features: Scalar mediator scattering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/reach.html">Features: Plotting Reach Curves</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MPDSF</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Theory: Anharmonic Interactions</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/theory/anharmonicinteraction.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="theory-anharmonic-interactions">
+<h1>Theory: Anharmonic Interactions<a class="headerlink" href="#theory-anharmonic-interactions" title="Permalink to this headline">¶</a></h1>
+<p>The theory of anharmonic interactions in the multi-phonon dynamic structure factor starts with the three-phonon matrix elements. These elements couple three phonons together in two distinct ways; one phonon splitting into two others, and two phonons colliding and forming one different phonon. These can be viewed as time reversal pairs. Not just any three-phonon set can form into a matrix element; there are selection rules. The first is that the “crystal” momentum must be conserved before and after the scattering event. The crystal momentum is the actual momentum modulo a reciprocal lattice vector. Therefore, the crystal momentum cannot be larger than half of a reciprocal lattice vector.</p>
+<p>For example, if two phonons participating in a three-phonon scattering process add to a momentum of [0.6, 0.3, 0.3] (in reduced units), then the crystal momentum of the pair is [-0.4, 0.3, 0.3]. This means that the final phonon state must have this momentum.</p>
+<p>In the calculation of the phonon lifetimes, Fermi’s golden rule is used, and takes the form of:</p>
+<p><span class="math notranslate nohighlight">\(\Gamma_{sk}(\omega) = \frac{18}{\pi} \sum_{s's''k'k''}|\phi_{sk, s'k', s''k''}|^2 \Delta(\textbf{k}-\textbf{k}' - \textbf{k}'')\delta(\omega - \omega_{s'k'} - \omega_{s''k''})(n_{sk} + 1)\)</span></p>
+<p>in which <span class="math notranslate nohighlight">\(\phi\)</span> is the third order force constants, <span class="math notranslate nohighlight">\(\Gamma\)</span> is the phonon decay rate, <span class="math notranslate nohighlight">\(\textbf{k}\)</span> is the phonon wavevector, <span class="math notranslate nohighlight">\(s\)</span> is the phonon mode index, <span class="math notranslate nohighlight">\(\Delta\)</span> is a function that yields 1 if the argument is a reciprocal lattice vector and zero otherwise, and <span class="math notranslate nohighlight">\(\omega_{sk}\)</span> is the phonon frequency for mode s and wavevector, k. In this equation, we see that the energy of the phonon scattering process need not be explicitly conserved. However, as the phonon decay rate enters as the width of a Lorentzian function, which is strongly peaked near <span class="math notranslate nohighlight">\(\omega_{sk}\)</span>, it is common to simplify this expression and assume that the energy must be conserved through the scattering process.</p>
+<p>In the MPDSF code, the <span class="math notranslate nohighlight">\(\Gamma(\omega)\)</span> function is used as a broadening function by default. The simplification of enforcing energy conservation can be set by including the <code class="docutils literal notranslate"><span class="pre">param_lorentzian</span></code> input directive. This will have little impact if you are interested in either integrating over the frequencies to obtain some other observable, or if you are interested in the shape of the dynamic structure factor near the resonances. However, if you are interested in the shape far away from the resonances (the peaks in frequency space), then parametrized Lorentzian will diverge from the actual <span class="math notranslate nohighlight">\(\Gamma\)</span> function. This can be important in some dark matter studies. Also, if the default behavior is used, the contribution to the dynamic structure factor from the three-phonon scattering processes falls to zero at energies larger than twice the largest single phonon energy. This is because one phonon cannot convert to a state with an energy larger than any combination of two phonons in a three-phonon process. To go beyond this, secondary three-phonon scattering processes are needed and/or four-phonon scattering processes.</p>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../features/lowqscaling.html" class="btn btn-neutral float-right" title="Features: Including low-q scaling behavior" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="contactinteraction.html" class="btn btn-neutral float-left" title="Theory: Contact Interactions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Thomas Harrelson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

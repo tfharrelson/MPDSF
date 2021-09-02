@@ -1,0 +1,500 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>scripts package &mdash; MPDSF 0.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> MPDSF
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Table of Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/inputdirectives.html">Input Directives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory/introduction.html">Theory: Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory/contactinteraction.html">Theory: Contact Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory/anharmonicinteraction.html">Theory: Anharmonic Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features/lowqscaling.html">Features: Including low-q scaling behavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features/darkphoton.html">Features: Dark photon mediated scattering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features/scalarmediator.html">Features: Scalar mediator scattering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features/reach.html">Features: Plotting Reach Curves</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">MPDSF</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>scripts package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/scripts.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="scripts-package">
+<h1>scripts package<a class="headerlink" href="#scripts-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-scripts.band_interpolation_plot">
+<span id="scripts-band-interpolation-plot-module"></span><h2>scripts.band_interpolation_plot module<a class="headerlink" href="#module-scripts.band_interpolation_plot" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-scripts.readout_temperature_model">
+<span id="scripts-readout-temperature-model-module"></span><h2>scripts.readout_temperature_model module<a class="headerlink" href="#module-scripts.readout_temperature_model" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.ChannelKernel">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">scripts.readout_temperature_model.</span></span><span class="sig-name descname"><span class="pre">ChannelKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#scripts.readout_temperature_model.PropertyBins" title="scripts.readout_temperature_model.PropertyBins"><span class="pre">scripts.readout_temperature_model.PropertyBins</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_distribution</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.ChannelKernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#scripts.readout_temperature_model.IntegrationKernel" title="scripts.readout_temperature_model.IntegrationKernel"><code class="xref py py-class docutils literal notranslate"><span class="pre">scripts.readout_temperature_model.IntegrationKernel</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.ChannelKernel.set_kernel">
+<span class="sig-name descname"><span class="pre">set_kernel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.ChannelKernel.set_kernel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.CompositeKernel">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">scripts.readout_temperature_model.</span></span><span class="sig-name descname"><span class="pre">CompositeKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#scripts.readout_temperature_model.PropertyBins" title="scripts.readout_temperature_model.PropertyBins"><span class="pre">scripts.readout_temperature_model.PropertyBins</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.CompositeKernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#scripts.readout_temperature_model.IntegrationKernel" title="scripts.readout_temperature_model.IntegrationKernel"><code class="xref py py-class docutils literal notranslate"><span class="pre">scripts.readout_temperature_model.IntegrationKernel</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.CompositeKernel.add_kernel">
+<span class="sig-name descname"><span class="pre">add_kernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#scripts.readout_temperature_model.IntegrationKernel" title="scripts.readout_temperature_model.IntegrationKernel"><span class="pre">scripts.readout_temperature_model.IntegrationKernel</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.CompositeKernel.add_kernel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.CompositeKernel.combine_kernels">
+<span class="sig-name descname"><span class="pre">combine_kernels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kernel_1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#scripts.readout_temperature_model.IntegrationKernel" title="scripts.readout_temperature_model.IntegrationKernel"><span class="pre">scripts.readout_temperature_model.IntegrationKernel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#scripts.readout_temperature_model.IntegrationKernel" title="scripts.readout_temperature_model.IntegrationKernel"><span class="pre">scripts.readout_temperature_model.IntegrationKernel</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.CompositeKernel.combine_kernels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.DecayChannelKernel">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">scripts.readout_temperature_model.</span></span><span class="sig-name descname"><span class="pre">DecayChannelKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#scripts.readout_temperature_model.PropertyBins" title="scripts.readout_temperature_model.PropertyBins"><span class="pre">scripts.readout_temperature_model.PropertyBins</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay_energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.DecayChannelKernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#scripts.readout_temperature_model.CompositeKernel" title="scripts.readout_temperature_model.CompositeKernel"><code class="xref py py-class docutils literal notranslate"><span class="pre">scripts.readout_temperature_model.CompositeKernel</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.DecayChannelKernel.set_kernel">
+<span class="sig-name descname"><span class="pre">set_kernel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.DecayChannelKernel.set_kernel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.DecayDistribution">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">scripts.readout_temperature_model.</span></span><span class="sig-name descname"><span class="pre">DecayDistribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="src.html#src.utils.Phono3pyInputs" title="src.utils.Phono3pyInputs"><span class="pre">src.utils.Phono3pyInputs</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#scripts.readout_temperature_model.PropertyBins" title="scripts.readout_temperature_model.PropertyBins"><span class="pre">scripts.readout_temperature_model.PropertyBins</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gammas</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="src.html#src.utils.Gamma" title="src.utils.Gamma"><span class="pre">src.utils.Gamma</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.DecayDistribution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="src.html#src.utils.BrillouinZoneProperty" title="src.utils.BrillouinZoneProperty"><code class="xref py py-class docutils literal notranslate"><span class="pre">src.utils.BrillouinZoneProperty</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.DecayDistribution.compute_occupation_number">
+<span class="sig-name descname"><span class="pre">compute_occupation_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.DecayDistribution.compute_occupation_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.DecayDistribution.create_decay_spectrum">
+<span class="sig-name descname"><span class="pre">create_decay_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qpoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.DecayDistribution.create_decay_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>pp</strong> – A set of phonon-phonon interaction parameters (equal to <a href="#id1"><span class="problematic" id="id2">|</span></a>matrix element|^2) for a specific grid-point</p>
+</dd>
+</dl>
+<p>that maps to a specific q-point. The shape is [num_triplets, num_branches, num_branches, num_branches]
+:param triplets: List of triplet sets specified by grid-point indices. E.g. triplets[0, :] = [0, 1, 5] means that
+grid-points 0, 1, and 5 form an allowed triplet of q-points
+:param triplet_map: List that maps all triplets to irreducible points in Brillouin zone. In the triplet list, the
+first index is specified by the grid-point, then the second index is free, and the third is fixed by the crystal
+momentum conservation equation q_3 = G - q_1 - q_2, where G is a recip. lattice vector.
+:param grid_points:
+:param frequencies:
+:param delta_e:
+:param temperature:
+:param sigma: Gaussian broadening factor that smooths convergence for integration over BZ
+:param gammas: Data structure containing the relaxation rates for each phonon in the irr. Brillouin zone. Shape is
+[num_temperatures, q-points, branches]. To index correct q-points, need to map grid-points to q-points
+:param min_freq: Ignore all phonons below this frequency threshold:
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.DecayDistribution.create_delta">
+<span class="sig-name descname"><span class="pre">create_delta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.DecayDistribution.create_delta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.DecayDistribution.create_gaussian">
+<span class="sig-name descname"><span class="pre">create_gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mu</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.DecayDistribution.create_gaussian" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.DecayDistribution.gaussian">
+<span class="sig-name descname"><span class="pre">gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.DecayDistribution.gaussian" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.DecayDistribution.get_decay_distribution_at_q">
+<span class="sig-name descname"><span class="pre">get_decay_distribution_at_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qpoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.DecayDistribution.get_decay_distribution_at_q" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.DecayDistribution.get_gridpoints">
+<span class="sig-name descname"><span class="pre">get_gridpoints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.DecayDistribution.get_gridpoints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.DecayKernel">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">scripts.readout_temperature_model.</span></span><span class="sig-name descname"><span class="pre">DecayKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#scripts.readout_temperature_model.PropertyBins" title="scripts.readout_temperature_model.PropertyBins"><span class="pre">scripts.readout_temperature_model.PropertyBins</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay_energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay_weight</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.DecayKernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#scripts.readout_temperature_model.IntegrationKernel" title="scripts.readout_temperature_model.IntegrationKernel"><code class="xref py py-class docutils literal notranslate"><span class="pre">scripts.readout_temperature_model.IntegrationKernel</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.DecayKernel.set_kernel">
+<span class="sig-name descname"><span class="pre">set_kernel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.DecayKernel.set_kernel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.DensityOfStates">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">scripts.readout_temperature_model.</span></span><span class="sig-name descname"><span class="pre">DensityOfStates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="src.html#src.utils.Phono3pyInputs" title="src.utils.Phono3pyInputs"><span class="pre">src.utils.Phono3pyInputs</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.DensityOfStates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.DensityOfStates.get_total_DOS">
+<span class="sig-name descname"><span class="pre">get_total_DOS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.DensityOfStates.get_total_DOS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.DiagonalKernel">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">scripts.readout_temperature_model.</span></span><span class="sig-name descname"><span class="pre">DiagonalKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#scripts.readout_temperature_model.PropertyBins" title="scripts.readout_temperature_model.PropertyBins"><span class="pre">scripts.readout_temperature_model.PropertyBins</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">diag_elements</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.DiagonalKernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#scripts.readout_temperature_model.IntegrationKernel" title="scripts.readout_temperature_model.IntegrationKernel"><code class="xref py py-class docutils literal notranslate"><span class="pre">scripts.readout_temperature_model.IntegrationKernel</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.DiagonalKernel.set_kernel">
+<span class="sig-name descname"><span class="pre">set_kernel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.DiagonalKernel.set_kernel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.IntegrationKernel">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">scripts.readout_temperature_model.</span></span><span class="sig-name descname"><span class="pre">IntegrationKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#scripts.readout_temperature_model.PropertyBins" title="scripts.readout_temperature_model.PropertyBins"><span class="pre">scripts.readout_temperature_model.PropertyBins</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.IntegrationKernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.IntegrationKernel.set_kernel">
+<span class="sig-name descname"><span class="pre">set_kernel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.IntegrationKernel.set_kernel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.NonEqDistribution">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">scripts.readout_temperature_model.</span></span><span class="sig-name descname"><span class="pre">NonEqDistribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#scripts.readout_temperature_model.PropertyBins" title="scripts.readout_temperature_model.PropertyBins"><span class="pre">scripts.readout_temperature_model.PropertyBins</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energies</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="src.html#src.utils.PhononEigenvalues" title="src.utils.PhononEigenvalues"><span class="pre">src.utils.PhononEigenvalues</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.NonEqDistribution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.NonEqDistribution.initialize_distribution">
+<span class="sig-name descname"><span class="pre">initialize_distribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.NonEqDistribution.initialize_distribution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the weight of the non-eq dist function at a specific energy.
+:param energy: energy at which to change the distribution function
+:param weight: new weight of dist. function at that energy
+:return: None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.NonEqDistribution.update_distribution">
+<span class="sig-name descname"><span class="pre">update_distribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_dist</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.NonEqDistribution.update_distribution" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.NoneqDistributionIntegrator">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">scripts.readout_temperature_model.</span></span><span class="sig-name descname"><span class="pre">NoneqDistributionIntegrator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distribution</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#scripts.readout_temperature_model.NonEqDistribution" title="scripts.readout_temperature_model.NonEqDistribution"><span class="pre">scripts.readout_temperature_model.NonEqDistribution</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'euler'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.NoneqDistributionIntegrator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Takes an initial distribution object, and a set of rules, and updates to a new distribution function at the next
+time step.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.NoneqDistributionIntegrator.integrate">
+<span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.NoneqDistributionIntegrator.integrate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.NoneqDistributionIntegrator.integrate_back_euler">
+<span class="sig-name descname"><span class="pre">integrate_back_euler</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.NoneqDistributionIntegrator.integrate_back_euler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.NoneqDistributionIntegrator.integrate_back_euler_step">
+<span class="sig-name descname"><span class="pre">integrate_back_euler_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.NoneqDistributionIntegrator.integrate_back_euler_step" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.NoneqDistributionIntegrator.integrate_euler">
+<span class="sig-name descname"><span class="pre">integrate_euler</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.NoneqDistributionIntegrator.integrate_euler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.NoneqDistributionIntegrator.integrate_euler_step">
+<span class="sig-name descname"><span class="pre">integrate_euler_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.NoneqDistributionIntegrator.integrate_euler_step" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.NoneqDistributionIntegrator.set_kernel">
+<span class="sig-name descname"><span class="pre">set_kernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kernel</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.NoneqDistributionIntegrator.set_kernel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.PropertyBinner">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">scripts.readout_temperature_model.</span></span><span class="sig-name descname"><span class="pre">PropertyBinner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">property</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="src.html#src.utils.BrillouinZoneProperty" title="src.utils.BrillouinZoneProperty"><span class="pre">src.utils.BrillouinZoneProperty</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">energies</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="src.html#src.utils.PhononEigenvalues" title="src.utils.PhononEigenvalues"><span class="pre">src.utils.PhononEigenvalues</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.PropertyBinner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class bins phonon-based properties. It can be changed for other BZ properties, but all the testing will be done
+for phonon-based properties. The biggest foreseen difference is that the energies associated with each property is
+positive semi-definite for phonons, and fully real for electron properties.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.PropertyBinner.average_property_bins">
+<span class="sig-name descname"><span class="pre">average_property_bins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.PropertyBinner.average_property_bins" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loop over binned properties and average over each bin
+:param norm: Boolean that describes whether the norm of the property is averaged.
+:return: set avg_binned_property in object field</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.PropertyBinner.bin_property">
+<span class="sig-name descname"><span class="pre">bin_property</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bin_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.PropertyBinner.bin_property" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.PropertyBinner.create_gaussian">
+<span class="sig-name descname"><span class="pre">create_gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mu</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.PropertyBinner.create_gaussian" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.PropertyBinner.gaussian">
+<span class="sig-name descname"><span class="pre">gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.PropertyBinner.gaussian" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.PropertyBinner.initialize_bins">
+<span class="sig-name descname"><span class="pre">initialize_bins</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.PropertyBinner.initialize_bins" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the binned_property object to an list of empty lists with a length equal to the number of bins
+:return: Nothing, set the binned_property field in the object.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.PropertyBins">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">scripts.readout_temperature_model.</span></span><span class="sig-name descname"><span class="pre">PropertyBins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energies</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="src.html#src.utils.PhononEigenvalues" title="src.utils.PhononEigenvalues"><span class="pre">src.utils.PhononEigenvalues</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.PropertyBins" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.PropertyBins.get_bin_index">
+<span class="sig-name descname"><span class="pre">get_bin_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.PropertyBins.get_bin_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the bin index for an arbitrary energy
+:param energy:
+:return: bin_index as an int or None if outside of range</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.PropertyBins.set_energy_bins">
+<span class="sig-name descname"><span class="pre">set_energy_bins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bin_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.PropertyBins.set_energy_bins" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the number and width of the energy bins to be used in the binning procedure.
+:param bin_width: Sets the energy width of each bin. Default is None, for which the code automatically sets the width.
+:return: Nothing; the relevant values are stored as fields in the PropertyBinner object</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.readout_temperature_model.ReadoutDevice">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">scripts.readout_temperature_model.</span></span><span class="sig-name descname"><span class="pre">ReadoutDevice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">heat_capacity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bath_conductance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">readout_volume</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scripts.readout_temperature_model.ReadoutDevice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class that contains the characteristics of a readout device. All defaults are taken from DOI: XXXXX
+:param heat_capacity - heat capacity of the readout device
+:param bath_conductance - thermal conductance for heat transfer between device and thermal bath
+:param target_area - interfacial area of interconnect between target (absorber) and readout device
+:param readout_volume - volume of readout device</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-scripts">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-scripts" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Thomas Harrelson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

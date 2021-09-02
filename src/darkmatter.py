@@ -50,6 +50,7 @@ class ReachCalculator:
     efficient and scalable way.
 
     Inputs:
+    ------
         - sqw: NOT IMPLEMENTED YET; DO NOT USE
         - hdf5_file: filename for hdf5 file created by multiphonon_dsf.py
         - equiv_flag: Boolean that describes whether Brillouin zone was folded into the irreducible part
@@ -57,6 +58,7 @@ class ReachCalculator:
                       file)
 
     Methods:
+    -----
         - calculate_reach:
             Inputs: 
                 - dm_masses: (optional) array of DM masses in eV
@@ -86,6 +88,21 @@ class ReachCalculator:
         points.
 
         q_vectors should have units : eV
+
+        Parameters
+        -------
+        filename : str
+            Name of hdf5 file
+        qpts_key : str
+            Either normal q-points key ('q-points') or scaling key ('scaling q-points')
+        reclat_key : str
+            Key for reciprocal lattice matrix
+        symm_points_key : str
+            key for symmetrically equivalent q-points dictionary.
+
+        Returns
+        -------
+        q_grid matrix
         """
         if filename is not None:
             f = h5py.File(filename, 'r')
@@ -144,6 +161,17 @@ class ReachCalculator:
         points.
 
         omega's should have units : eV
+
+        Parameters
+        -------
+        filename : str
+            Name of HDF5 file.
+        freq_key : str
+            Dict key for phonon frequencies.  (optional)
+
+        Returns
+        -------
+        Array of phonon frequencies
         """
         frequencies = np.array(h5py.File(filename, 'r')[freq_key])
         unit_conv = to_unit_sys_mag(THz, 'NateV') * 2 * np.pi
@@ -156,6 +184,21 @@ class ReachCalculator:
         where N_q is the number of q points.
 
         jacobian should have units of eV^3
+
+        Parameters
+        -------
+        filename : str
+            Name of HDF5 file.
+        jacq_key : str
+            Key for q-point jacobian.
+        weight_key : str
+            Key for list of weights
+        symm_points_key : str
+            Key for symmetrically equivalent q-points
+
+        Returns
+        -------
+        List of q-point jacobians for each q-point.
         """
         weights = np.array(h5py.File(filename, 'r')[weight_key])
         jac_q = np.array(h5py.File(filename, 'r')[jacq_key])
@@ -174,6 +217,19 @@ class ReachCalculator:
         where N_w is the number of omega points.
 
         jacobian should have units of eV
+
+        Parameters
+        -------
+        filename : str
+            Name of HDF5 file.
+        jacw_key : str
+            Key for omega jacobian (also called dw).
+        freq_key : str
+            Key for phonon frequencies.
+
+        Returns
+        -------
+        List of omega jacobians.
         """
         jac_omega = np.array(h5py.File(filename, 'r')[jacw_key])
         num_freqs = len(np.array(h5py.File(filename, 'r')[freq_key]))
@@ -191,6 +247,25 @@ class ReachCalculator:
         where N_q is the number of points in the q grid and N_w is the number of omega points.
 
         dynamic strucure factor should have units of eV^2
+
+        Parameters
+        -------
+        filename : str
+            Name of HDF5 file.
+        sqw_key : str
+            Key for dynamic structure factor object.
+        jacq_key : str
+            Key for q-point jacobian
+        reclat_key : str
+            Key for reciprocal lattice vector matrix
+        symm_points_key : str
+            Key for symmetrically equivalent q-points
+        qpts_key : str
+            Key for list of q-points
+
+        Returns
+        ------
+        Dynamic structure factor matrix.
         """
         f = h5py.File(filename, 'r')
         sqw = np.array(f[sqw_key])
@@ -234,6 +309,13 @@ class ReachCalculator:
         """
         Collection of previous get functions returning an array of the relevant data given the data
         filename
+
+        Parameters
+        -------
+        filename : str
+            Name of HDF5 file.
+        equiv_flag : bool
+            Boolean flag specifying whether or not symmetrically equivalent objects are in the HDF5 file.
         """
         f = h5py.File(filename, 'r')
         self._density = np.array(f['density'])
@@ -278,9 +360,15 @@ class ReachCalculator:
         return data_dict
 
     def load_from_file(self):
+        '''
+        Load phonon data from HDF5 file.
+        '''
         self.data_dict = self.get_all_data_dict(self._hdf5_file, equiv_flag=self._equiv_flag)
 
     def load_from_dsf(self):
+        '''
+        Load from DynamicStructureFactor object. Not implemented yet, will quit program if called.
+        '''
         raise SystemExit('Not implemented yet... sorry, will happen sometime soon')
 
     def calculate_reach(self, 
@@ -296,18 +384,28 @@ class ReachCalculator:
         Calculate the dark matter reach (minimal scattering cross-section for 3 events/year into a 1 kg
         block of material) for a specified model and threshold
         
-        Inputs:
-            - num_masses: number of dark matter masses to calculate reach for.
-            - min_mass: minimum dark matter mass (in eV) to calculate reach for.
-            - max_mass: maximum dark matter mass
-            - threshold: phonon frequency cutoff in which phonons with energy below this cutoff do not
-                         contribute to the reach.
-            - t: time of day in hours
-            - dm_masses: specify the array of dm_masses directly instead of using (num_masses, min_mass,
-                         max_mass) in conjunction with np.logspace
-            - ref: reference particle used for determining dark matter interaction model. Implemented
-                   'nucleon' and 'electron'
-            - med: mediator tag determining dark matter model. Implemented 'light' and 'heavy'
+        Parameters
+        -------
+        num_masses : int 
+            number of dark matter masses to calculate reach for.
+        min_mass : float
+            minimum dark matter mass (in eV) to calculate reach for.
+        max_mass : float
+            maximum dark matter mass
+        threshold : float
+            phonon frequency cutoff in which phonons with energy below this cutoff do not contribute to the reach.
+        t : float
+            time of day in hours
+        dm_masses : List
+            specify the array of dm_masses directly instead of using (num_masses, min_mass, max_mass) in conjunction with np.logspace
+        ref : str
+            reference particle used for determining dark matter interaction model. Implemented 'nucleon' and 'electron'
+        med : str
+            mediator tag determining dark matter model. Implemented 'light' and 'heavy'
+
+        Returns
+        -------
+        List of reach values for each dark matter mass specified.
         '''
         density = self._density
         dm_masses = np.logspace(np.log10(min_mass), np.log10(max_mass), num_masses)

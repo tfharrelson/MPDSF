@@ -1,0 +1,231 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Theory: Contact Interactions &mdash; MPDSF 0.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Theory: Anharmonic Interactions" href="anharmonicinteraction.html" />
+    <link rel="prev" title="Theory: Introduction" href="introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> MPDSF
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Table of Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/inputdirectives.html">Input Directives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Theory: Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Theory: Contact Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anharmonicinteraction.html">Theory: Anharmonic Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/lowqscaling.html">Features: Including low-q scaling behavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/darkphoton.html">Features: Dark photon mediated scattering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/scalarmediator.html">Features: Scalar mediator scattering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/reach.html">Features: Plotting Reach Curves</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MPDSF</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Theory: Contact Interactions</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/theory/contactinteraction.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="theory-contact-interactions">
+<h1>Theory: Contact Interactions<a class="headerlink" href="#theory-contact-interactions" title="Permalink to this headline">¶</a></h1>
+<p>A “contact” interaction is simply a direct scattering process between the crystal lattice and some particle that results in the generation of some number of phonons directly. If helpful, one can consider the contact interaction to instantaneously generate phonons, while the anharmonic process involves generation of an “off-shell” phonon that decays anharmonically into two “on-shell” phonons. This language is consistent with high-energy physics concepts. It doesn’t make much sense to me personally, since I’m just a lowly condensed matter physicist/chemist, but the language is presented to help others with a different background from my own. To me, the anharmonic interactions mean that the harmonic phonon modes are not true eigenstates of the lattice, potentially making <span class="math notranslate nohighlight">\(\textbf{k}\)</span> and <span class="math notranslate nohighlight">\(s\)</span> not good quantum numbers. The scattering interaction creates probability amplitudes for the high energy eigenstates, but we plot them on a <span class="math notranslate nohighlight">\((\textbf{k},\omega)\)</span> space, which is no longer the eigenbasis. The excited eigenstates are projected onto this space, which transforms delta functions into broadened peaks (e.g. Lorentzians). If the harmonic phonon modes were eigenstates, then the dynamic structure factor would contain delta-functions because <span class="math notranslate nohighlight">\(\textbf{k}\)</span> is a quantum number that specifies a distinct state that can be excited by the scattering process. In other words, if <span class="math notranslate nohighlight">\(\textbf{k}\)</span> is not a quantum number, then the eigenstates are represented as a linear combination of states at different <span class="math notranslate nohighlight">\(\textbf{k}\)</span> values, which end up looking like broadened Lorentzians a lot of the time. Well, that’s a long-winded way of describing that I don’t understand the concept of an off-shell phonon with a finite lifetime; to me, the eigenstates are defined by the Hamiltonian and the scattering process creates these directly (and instantly), which may, or may not be, comprised of multiple phonons.</p>
+<p>Back to the contact interaction, there may be some confusion from any user with a physical chemistry background because most experiments measuring phonons can only probe scattering processes that generate one phonon (e.g. Raman and FTIR). This limitation manifests because there are selection rules in the photon-lattice interaction which allow the generation of one phonon. For a general interaction, there need not be any selection rules, which allows the creation of multiple phonons for a given scattering event. This can be rationalized by examining an arbitrary scattering interaction given by a momentum transfer, <span class="math notranslate nohighlight">\(\textbf{q}\)</span>. In this case, the average energy transfer is given by <span class="math notranslate nohighlight">\(q^2/2m\)</span> (in atomic units). What happens if the average energy transfer is much greater than the highest energy phonon? If only one phonon is allowed to be created, then energy cannot be conserved on average, which is unphysical. So, multiple phonons must be generated. An example of this is in neutron scattering, where multi-phonon generation is quite common, although not always desired since the multiphonon signal appears as a broad background that may obfuscate the measurement of peaks.</p>
+<p>The calculation of multi-phonon contact interactions turns out to be relatively easy to write down in a compact way:</p>
+<p><span class="math notranslate nohighlight">\(S(\textbf{q}, \omega) = N\sum_{\tau_1, \tau_2} e^{-W_{\tau_1} -W_{\tau_2} + i\textbf{q}\cdot (\textbf{r}_{\tau_1}^\circ - \textbf{r}_{\tau_2}^\circ)} \exp\left[\hat{C}^{F,\textbf{q}}_{\tau_1\tau_2}\right]\delta(\textbf{q})\delta(\omega)\)</span></p>
+<p>where <span class="math notranslate nohighlight">\(W\)</span> is the Debye-Waller factor, <span class="math notranslate nohighlight">\(\textbf{q}\)</span> is the momentum transfer, <span class="math notranslate nohighlight">\(\textbf{r}_\tau^\circ\)</span> is the equilibrium position of the atom <span class="math notranslate nohighlight">\(\tau\)</span> inside the unit cell, <span class="math notranslate nohighlight">\(\omega_{sk}\)</span> is the frequency of mode s at k-point <span class="math notranslate nohighlight">\(\textbf{k}\)</span>, <span class="math notranslate nohighlight">\(\epsilon_{\tau,s\textbf{k}}\)</span> is the phonon eigenvector indexed for atom <span class="math notranslate nohighlight">\(\tau\)</span>, and <span class="math notranslate nohighlight">\(C\)</span> is a convolution operation acting on a function to it’s right. The function that is being convolved with the function on the right is:</p>
+<p><span class="math notranslate nohighlight">\(F_{\tau_1\tau_2}(\textbf{k}, \omega; \textbf{q}) = \sum_s \frac{\hbar (\textbf{q} \cdot \boldsymbol{\epsilon}_{\tau_1 s -\textbf{k}}) (\textbf{q} \cdot \boldsymbol{\epsilon}_{\tau_2 s \textbf{k}})}{2N \sqrt{m_{\tau_1}m_{\tau_2}}\omega_{s \textbf{k}}}  \delta(\omega - \omega_{s\textbf{k}})\)</span></p>
+<p>which is a function of the one-phonon properties generated from Phono3py or Phonopy. Since the convolution operation is in the exponent of an exponential function, the way to evaluate it is to expand the exponential into a power series, and successively perform convolutions depending on the order of the term in the power series.</p>
+<p><span class="math notranslate nohighlight">\(\exp(C) = \sum_n \frac{C^n}{n!}\)</span></p>
+<p>The input directive called <code class="docutils literal notranslate"><span class="pre">overtones</span></code> specifies at which order to truncate this expansion. For example if <code class="docutils literal notranslate"><span class="pre">overtones:</span> <span class="pre">5</span></code> is set, then the sum will be carried out until <code class="docutils literal notranslate"><span class="pre">n=5</span></code> in the above equation. Also, to implement this sum we first Fourier transform the <span class="math notranslate nohighlight">\(F\)</span> function, and the current function to be convolved, perform a direct element-wise multiplication between the two functions, and Fourier transform back. The reason is that a convolution operation in the original k-space scales as <span class="math notranslate nohighlight">\(N^2\)</span> where N is the number of elements in each function, whereas fast Fourier transforms scale as <span class="math notranslate nohighlight">\(N\log (N)\)</span>, providing a significant speed-up for calculations of dense k-meshes.</p>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="anharmonicinteraction.html" class="btn btn-neutral float-right" title="Theory: Anharmonic Interactions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="introduction.html" class="btn btn-neutral float-left" title="Theory: Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Thomas Harrelson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

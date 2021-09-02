@@ -1,0 +1,235 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Quick Start Guide &mdash; MPDSF 0.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Input Directives" href="inputdirectives.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> MPDSF
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Table of Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inputdirectives.html">Input Directives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/introduction.html">Theory: Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/contactinteraction.html">Theory: Contact Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/lowqscaling.html">Features: Including low-q scaling behavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/darkphoton.html">Features: Dark photon mediated scattering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/scalarmediator.html">Features: Scalar mediator scattering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/reach.html">Features: Plotting Reach Curves</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MPDSF</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Quick Start Guide</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/usage/quickstart.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="quick-start-guide">
+<span id="quick-start"></span><h1>Quick Start Guide<a class="headerlink" href="#quick-start-guide" title="Permalink to this headline">¶</a></h1>
+<p>Welcome to MPDSF! This is the code for calculating the multi-phonon dynamic structure factor completely from first-principles calculations. The code is built using the Phonopy/Phono3py API, and currently assumes you are using VASP as your DFT solver. If you have a need for calculating the phonon dynamic structure factor complete with so-called contact and anharmonic interactions, then this is the code for you. Applications for this code are the calculation of dark matter scattering rates, and neutron scattering responses. The code utilizes the magic of fast Fourier transforms to speed up the contact interaction calculation by casting the calculation as a convolution operation.</p>
+<p>While the code can be run many different ways, by far the easiest is by creating an input file in YAML format. Examples are in the ‘examples’ folder (I know shocking). I would strongly recommend taking one of these files and modifying it for your needs.</p>
+<p>The full list of input commands are described at the <code class="docutils literal notranslate"><span class="pre">Input</span> <span class="pre">Directives</span></code> section.</p>
+<p>For dark matter enthusiasts, the input commands of most interest will be <code class="docutils literal notranslate"><span class="pre">med</span></code>, <code class="docutils literal notranslate"><span class="pre">scalar_mediator_flag</span></code>, <code class="docutils literal notranslate"><span class="pre">dark_photon_flag</span></code>, and <code class="docutils literal notranslate"><span class="pre">reach</span></code>. Be sure to read up on those!</p>
+<p>For the neutron scattering enthusiasts, the input command of the most interest will be <code class="docutils literal notranslate"><span class="pre">neutron_flag</span></code>.</p>
+<p>Once an input file is created the code can be run by calling:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">mpdsf</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">i</span> <span class="n">my_input_file</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+<p>Outputs will be written to an HDF5 file in the same directory that the above command was run. This output file can get quite large for very well-converged calculations. Since python has a nice HDF5 library called <code class="docutils literal notranslate"><span class="pre">h5py</span></code>, which effectively turns each HDF5 file into a python dictionary, you can check the contents of your output by</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">h5py</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;output_file.hdf5&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="inputdirectives.html" class="btn btn-neutral float-right" title="Input Directives" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Thomas Harrelson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

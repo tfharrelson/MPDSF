@@ -1,0 +1,1715 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>src package &mdash; MPDSF 0.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> MPDSF
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Table of Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/inputdirectives.html">Input Directives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory/introduction.html">Theory: Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory/contactinteraction.html">Theory: Contact Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory/anharmonicinteraction.html">Theory: Anharmonic Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features/lowqscaling.html">Features: Including low-q scaling behavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features/darkphoton.html">Features: Dark photon mediated scattering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features/scalarmediator.html">Features: Scalar mediator scattering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features/reach.html">Features: Plotting Reach Curves</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">MPDSF</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>src package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/src.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="src-package">
+<h1>src package<a class="headerlink" href="#src-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-src.BZUnfolder">
+<span id="src-bzunfolder-module"></span><h2>src.BZUnfolder module<a class="headerlink" href="#module-src.BZUnfolder" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.BZUnfolder.BZUnfolder">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">src.BZUnfolder.</span></span><span class="sig-name descname"><span class="pre">BZUnfolder</span></span><a class="headerlink" href="#src.BZUnfolder.BZUnfolder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.BZUnfolder.BZUnfolder.set_map">
+<span class="sig-name descname"><span class="pre">set_map</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.BZUnfolder.BZUnfolder.set_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.BZUnfolder.BZUnfolder.set_qpoints">
+<span class="sig-name descname"><span class="pre">set_qpoints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.BZUnfolder.BZUnfolder.set_qpoints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.BZUnfolder.BZUnfolder.unfold">
+<span class="sig-name descname"><span class="pre">unfold</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.BZUnfolder.BZUnfolder.unfold" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.BZUnfolder.BZUnfolder.unfold_map">
+<span class="sig-name descname"><span class="pre">unfold_map</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.BZUnfolder.BZUnfolder.unfold_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-src.Interpolation">
+<span id="src-interpolation-module"></span><h2>src.Interpolation module<a class="headerlink" href="#module-src.Interpolation" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.Interpolation.Interpolator">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">src.Interpolation.</span></span><span class="sig-name descname"><span class="pre">Interpolator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phonon_property</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#src.utils.BrillouinZoneProperty" title="src.utils.BrillouinZoneProperty"><span class="pre">src.utils.BrillouinZoneProperty</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reg_grid_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.Interpolation.Interpolator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.Interpolation.Interpolator.check_scalar">
+<span class="sig-name descname"><span class="pre">check_scalar</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.Interpolation.Interpolator.check_scalar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether or not object to be interpolated is either a scalar function or a vector function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>True if interpolated property is scalar, False if anything else.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.Interpolation.Interpolator.convert_freq_dep_property">
+<span class="sig-name descname"><span class="pre">convert_freq_dep_property</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">band_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.Interpolation.Interpolator.convert_freq_dep_property" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a frequency dependent property into a shape that can be used by SciPy inteprolation routines.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>band_index</strong> (<em>int</em>) – Integer index of the phonon band.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>The converted data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.Interpolation.Interpolator.convert_property">
+<span class="sig-name descname"><span class="pre">convert_property</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">band_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padded_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.Interpolation.Interpolator.convert_property" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the property to be usable with SciPy interpolation routines.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>band_index</strong> (<em>int</em>) – Integer index for the phonon band.</p></li>
+<li><p><strong>vector_index</strong> (<em>int</em>) – Integer index for the vector in the object. Does not need to be set for scalar valued properties.</p></li>
+<li><p><strong>padded_flag</strong> (<em>bool</em>) – Boolean that pads the q-point space of the Brillouin zone with periodic neighboring values. This should be set to True in almost all cases.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Converted property data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.Interpolation.Interpolator.interpolate">
+<span class="sig-name descname"><span class="pre">interpolate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">band_index</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.Interpolation.Interpolator.interpolate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate the function for the desired band and vector index if applicable
+:param band_index: Integer index for the phonon mode.
+:param vector_index: Integer index for the vector valued function
+:param args: arguments for interpolator in a list [qx, qy, qz] or [qx, qy, qz, w] for freq dep properties
+:return: List of interpolated values for each of the args passed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.Interpolation.Interpolator.set_interpolator_at_band">
+<span class="sig-name descname"><span class="pre">set_interpolator_at_band</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">band_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.Interpolation.Interpolator.set_interpolator_at_band" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the interpolator for a specific band index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>band_index</strong> (<em>int</em>) – Integer index of the phonon band to be set.</p></li>
+<li><p><strong>vector_index</strong> (<em>int</em>) – Integer index of the vector valued function to be interpolated. Optional, but should be set if you want to interpolate a vector valued function correctly.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>A LinearNDInterpolator object set for the object to be interpolated.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.Interpolation.Interpolator.set_interpolators">
+<span class="sig-name descname"><span class="pre">set_interpolators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_bands</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.Interpolation.Interpolator.set_interpolators" title="Permalink to this definition">¶</a></dt>
+<dd><p>This module sets all interpolators for the interpolable function. For a scalar function, like phonon
+eigenvalues, the operation is simple, as it builds a dict of interpolators with the band indices as keys. For a
+vector quantity, like phonon eigenvectors, it builds a dict of interpolators for each component and band index,
+and the tuple (band_index, vector_index) is the key. For a frequency dependent function, like the imaginary
+self energy, the result is the same as the scalar case, where a dict is built with band indices as keys.
+:param vector_flag: Boolean describing whether or not the object is a vector
+:param vector_length: Integer input that allows user to define the dimensionality of the interpolated vector.</p>
+<blockquote>
+<div><p>If vector_flag is True and no length is given, then the length will be assumed to be
+3 * num_atoms</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.Interpolation.Regridder">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">src.Interpolation.</span></span><span class="sig-name descname"><span class="pre">Regridder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interpolable_object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.Interpolation.Regridder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class that regrids the Brillouin zone onto a new mesh using the Interpolator class. This class doesn’t interact much with the rest of the code, so it may get deprecated soon.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.Interpolation.Regridder.regrid">
+<span class="sig-name descname"><span class="pre">regrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.Interpolation.Regridder.regrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Regrid the Monkhorst-pack k-point grid, and interpolate the values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mesh</strong> (<em>List</em>) – List of integers specifying how to create a gamma-centered Monkhorst-Pack k-point grid.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-src.compute_Sqw">
+<span id="src-compute-sqw-module"></span><h2>src.compute_Sqw module<a class="headerlink" href="#module-src.compute_Sqw" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="src.compute_Sqw.AngstromsToMeters">
+<span class="sig-prename descclassname"><span class="pre">src.compute_Sqw.</span></span><span class="sig-name descname"><span class="pre">AngstromsToMeters</span></span><em class="property"> <span class="pre">=</span> <span class="pre">1e-10</span></em><a class="headerlink" href="#src.compute_Sqw.AngstromsToMeters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Goal of program is to compute S(q,w) with q-points (as vectors) as user-defined inputs.
+Definition of S(q,w):
+F_i(q,w) = sum_j (q * u_{ij})^2 exp[-sum_j (q * u_ij)^2] delta(hbar w - hbar w_j)
+S_i(q,w) = sum_n conv^n/n! * F_i(q,w)
+S(q,w) = sum_i S_i(q,w)
+which is perfectly defined for the “incoherent” approximation in neutron scattering.
+Other words: this is the space and time Fourier transform of the self van-Hove correlation function
+To include “coherent” effects (e.g. compute the full van-Hove correlation function):
+f_i = sum_j (q * u_{ij}) delta(hbar w - hbar w_j)
+DWF_i = exp[-sum_j (q * u_ij)^2/2]
+F_ab(q,w) = conj(f_a) * f_b
+S(q,w) = sum_ab F_ab * DWF_a * DWF_b</p>
+<dl class="simple">
+<dt>What happens when you have two degenerate phonon modes (w_i == w_j)</dt><dd><p><a href="#id1"><span class="problematic" id="id2">|</span></a>(q * u_i) + (q * u_j)|^2 = <a href="#id3"><span class="problematic" id="id4">|</span></a>q*u_i|^2 + <a href="#id5"><span class="problematic" id="id6">|</span></a>q*u_j|^2 + conj(q*u_i) * (q*u_j) + c.c.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.compute_Sqw.AnharmonicPhonons">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">src.compute_Sqw.</span></span><span class="sig-name descname"><span class="pre">AnharmonicPhonons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">poscar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fc3_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">supercell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">born</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.AnharmonicPhonons" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class containing all information on anharmonicities/matrix elements for a specific material.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.AnharmonicPhonons.create_delta">
+<span class="sig-name descname"><span class="pre">create_delta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_e</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.AnharmonicPhonons.create_delta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a delta function at a specified energy with a discretized space defined by <cite>num_bins</cite> and <cite>delta_e</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>energy</strong> – Energy at which the delta function exists. As the energy value can be somewhere between the discretized points, we represent the delta function as a trapezoid.</p></li>
+<li><p><strong>num_bins</strong> – Number of bins in the discrete frequency space</p></li>
+<li><p><strong>delta_e</strong> – Spacing between the bins in the discrete frequency space</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A spectrum representing a delta function with a shape of (num_bins,).</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>delta_fcn</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.AnharmonicPhonons.get_broadening_function">
+<span class="sig-name descname"><span class="pre">get_broadening_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qpoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.AnharmonicPhonons.get_broadening_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a broadening Lorentzian-type function with a frequency-dependent width. Since the frequency-dependent widths are still relatively small compared to the oscillator frequency, the broadening function will look like a “normal” Lorentzian near the resonance, but may appear non-Lorentzian far away from the resonance. One issue is that Lorentzians with widths smaller than the frequency spacing are not well defined which primarily means they are not normalized. Normalize the integral by adding in a delta function with the remaining weight</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qpoint</strong> – List/array specifying the q-point in reduced coordinates</p></li>
+<li><p><strong>band_index</strong> – Integer specifying the phonon band/mode index</p></li>
+<li><p><strong>max_freq</strong> – Optional value to specify the maximum frequency considered in the broadening function. Default is None, which means the code will automatically decide the maximum frequency based on the details in the Phono3py object.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.AnharmonicPhonons.get_gamma_data">
+<span class="sig-name descname"><span class="pre">get_gamma_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">band_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.AnharmonicPhonons.get_gamma_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get Gamma data from phono3py API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>band_index</strong> – Integer specifying the band index.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.AnharmonicPhonons.get_gridpoint">
+<span class="sig-name descname"><span class="pre">get_gridpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qpoint</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.AnharmonicPhonons.get_gridpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience function used to translate a q-point to a grid-point used in phonopy API functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>qpoint</strong> – List/array that specifies the q-point in reduced coordinates.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.AnharmonicPhonons.get_imag_self_energy">
+<span class="sig-name descname"><span class="pre">get_imag_self_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gridpoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.AnharmonicPhonons.get_imag_self_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter of imaginary self energies.
+Note that this returns the imaginary self energy function does not return the self energy evaluated at the phonon frequency. As a result, a tuple is returned with the frequency points, and self energy</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gridpoint</strong> – Gridpoint index used in phonopy/phono3py API</p></li>
+<li><p><strong>band_index</strong> – Index of phonon band.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.AnharmonicPhonons.get_imag_self_energy_interpolator">
+<span class="sig-name descname"><span class="pre">get_imag_self_energy_interpolator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gridpoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.AnharmonicPhonons.get_imag_self_energy_interpolator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter of interpolator object for the imaginary self energy function. The resulting object can be used as “y = ufunc(x)”. The reason for creating an interpolator is because the frequency discretization is different in phono3py compared to my code below.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gridpoint</strong> – Gridpoint index used in phonopy/phono3py API</p></li>
+<li><p><strong>band_index</strong> – Index of phonon band.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.AnharmonicPhonons.get_phonon_freqs">
+<span class="sig-name descname"><span class="pre">get_phonon_freqs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.AnharmonicPhonons.get_phonon_freqs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter for phonon frequencies</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.AnharmonicPhonons.set_gamma_interpolator">
+<span class="sig-name descname"><span class="pre">set_gamma_interpolator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.AnharmonicPhonons.set_gamma_interpolator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setter of a Gamma interpolator. This function sets the interpolator of the Gamma class using the Interpolator class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.AnharmonicPhonons.set_irr_BZ_gridpoints">
+<span class="sig-name descname"><span class="pre">set_irr_BZ_gridpoints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.AnharmonicPhonons.set_irr_BZ_gridpoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setter of irreducible Brillouin zone q-points</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.AnharmonicPhonons.set_phonon_freqs">
+<span class="sig-name descname"><span class="pre">set_phonon_freqs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.AnharmonicPhonons.set_phonon_freqs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setter for phonon frequencies</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.AnharmonicPhonons.set_self_energies">
+<span class="sig-name descname"><span class="pre">set_self_energies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.AnharmonicPhonons.set_self_energies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setter of imaginary self energies. The imaginary self energy objects are stored in phono3py object in a weird way; the object is a list of a list of nparrays
+first index = grid-points, which are “addresses” of the irreducible q-points in the Brillouin zone. On the surface these are not obviously related to the q-points, but the grid points are given by:</p>
+<blockquote>
+<div><p>np.unique(mapping)
+The actual q-points are stored in grid with a 1-to-1 correspondence to mapping</p>
+</div></blockquote>
+<p>second index = sigma values, there is only one sigma=None in default tetrahedron method
+third index is the nparray, which is arranged as:</p>
+<blockquote>
+<div><p>(temperatures, frequency points, band index)</p>
+</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">src.compute_Sqw.</span></span><span class="sig-name descname"><span class="pre">DynamicStructureFactor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">poscar_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">supercell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fc_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_point_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_point_shift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meshG</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1,</span> <span class="pre">1,</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fc2_disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fc3_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fc3_disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_e</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_e</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_overtones</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primitive_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_nac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">born_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_mediator_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dark_photon_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fold_BZ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowq_scaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_qpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_anh_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class that calculates the dynamic structure factor from a set of Phono3py/Phonopy inputs with the option to print the output to HDF5 files. The inputs can also augment the dynamic structure factor to calculate the differential scattering cross section for a variety of dark matter models and neutron scattering.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.build_skw_kernel">
+<span class="sig-name descname"><span class="pre">build_skw_kernel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.build_skw_kernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internal routine that builds the kernel used for calculating the dynamic structure factor. This is important to pre-calculate for the contact interaction terms.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.circ_conv">
+<span class="sig-name descname"><span class="pre">circ_conv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.circ_conv" title="Permalink to this definition">¶</a></dt>
+<dd><p>purpose is to perform a circular convolution (e.g. signal is periodic) of a 3-dimensional object. In this case, the 3-d object is a function proportional to phonon eigenvector as a function of q in the BZ
+TODO Incorporate my own padding to the frequency dimension of the circular convolution; use appropriate tags</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>signal</strong> (<em>List</em>) – Initial signal function to be convolved.</p></li>
+<li><p><strong>kernel</strong> (<em>List</em>) – Kernel function with which to convolve the signal.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>The convolution of the signal and kernel using the convolution theorem using the Fourier transforms.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.compute_exp_DWF_at_q">
+<span class="sig-name descname"><span class="pre">compute_exp_DWF_at_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.compute_exp_DWF_at_q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the Debye-Waller factor (DWF) for a given q_index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q_index</strong> (<em>int</em>) – Integer specifying the q-point index for which to calculate the Debye-Waller factor.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Returns the calculated Debye waller factor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.convolve_f_i">
+<span class="sig-name descname"><span class="pre">convolve_f_i</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coh_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.convolve_f_i" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convolve the current version of the scattering signal. The kernel that convolves with the signal is determined from the self.skw_kernel object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f_i</strong> (<em>List</em>) – Current version of signal to be convolved.</p></li>
+<li><p><strong>coh_flag</strong> (<em>bool</em>) – Boolean specifying if coherent scattering version of dynamic structure factor is to be used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>total_f_i</strong> – The convolved signal</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.create_anharmonic_distribution">
+<span class="sig-name descname"><span class="pre">create_anharmonic_distribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q_point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.create_anharmonic_distribution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate and return the anharmonic distribution function. Calculate from the Phono3py API. Can return a parametrized Lorentzian from phonon lifetime.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q_point</strong> (<em>List</em>) – Vector representing the q-point for which to calculate the anharmonic distribution.</p></li>
+<li><p><strong>band_index</strong> (<em>int</em>) – Integer representing the band/mode index.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>broadening_func</strong> – List representing the broadening function calculated from Phono3py API.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.create_delta">
+<span class="sig-name descname"><span class="pre">create_delta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.create_delta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Module that creates a delta function at a specified energy/frequency. Uses self.delta_e and self.max_e to determine the discretized field over which to create the delta function. The delta function is a trapezoid function where the largest side of the trapezoid coincides with the discretized energy value closest to the provided energy value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>delta_fcn</strong> – The delta function list. The list is mostly zeros, so it could be possible to build a delta function class that allows for more of a sparse representation easing the memory constraints of the code. Although the memory constraints are not too restrictive.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.create_lorentzian">
+<span class="sig-name descname"><span class="pre">create_lorentzian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.create_lorentzian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Module that calculates a Lorentzian. Very likely deprecated at this point as the parametrized Lorentzian is now calculated from a different piece of code.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>energy</strong> (<em>float</em>) – Energy representing the center of the Lorentzian function.</p></li>
+<li><p><strong>gamma</strong> (<em>float</em>) – Float representing the width of the Lorentzian.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>lorentzian</strong> – List representing the Lorentzian function</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.get_bin_energies">
+<span class="sig-name descname"><span class="pre">get_bin_energies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.get_bin_energies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a list of discretized energies used to calculate the dynamic structure factor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.get_coherent_sqw">
+<span class="sig-name descname"><span class="pre">get_coherent_sqw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_q_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop_q_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.get_coherent_sqw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the coherent dynamic structure factor optionally starting with a given q-point index and stopping at another specified one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start_q_index</strong> (<em>int</em>) – Optional integer specifying which q-point index to start at. Helpful if user doesn’t want to calculate for all q-points in the Brillouin zone.</p></li>
+<li><p><strong>stop_q_index</strong> (<em>int</em>) – Optional integer specifying which q-point index to stop at.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.get_coherent_sqw_at_q">
+<span class="sig-name descname"><span class="pre">get_coherent_sqw_at_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.get_coherent_sqw_at_q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the coherent dynamic structure factor at a given q-point index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q_index</strong> (<em>int</em>) – Integer specifying the q-point to use from the self.qpoints list.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>sqw</strong> – Returns the dynamic structure factor function calculated a given q-point.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.get_exp_DWF">
+<span class="sig-name descname"><span class="pre">get_exp_DWF</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.get_exp_DWF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Debye Waller factor for each q-point from the internal list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Nothing, saves the list of Debye Waller factors into self.exp_DWF</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.get_indices_from_qpoint">
+<span class="sig-name descname"><span class="pre">get_indices_from_qpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q_point</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.get_indices_from_qpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function to get index from q-point vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q_point</strong> (<em>List</em>) – List representing q-point for which to get index.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.get_outer_eig">
+<span class="sig-name descname"><span class="pre">get_outer_eig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eigvec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">masses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduced_q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.get_outer_eig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the outer products of an eigenvectors with itself.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>eigvec</strong> (<em>numpy.array</em>) – Phonon eigenvector that is a list of 3 vectors for each atom in the unit cell.</p></li>
+<li><p><strong>masses</strong> (<em>List</em>) – List of masses for each atom in the unit cell.</p></li>
+<li><p><strong>freq</strong> (<em>float</em>) – Frequency of phonon mode associated with the eigenvector provided.</p></li>
+<li><p><strong>reduced_q</strong> (<em>List</em>) – The q-point in reduced coordinates that matches with the eigenvector provided.</p></li>
+<li><p><strong>pos</strong> (<em>List</em>) – The positions of the atoms in the unit cell in reduced coordinates. This input could be removed in favor of saving the atomic positions into a field in the class itself.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of outer products of eigenvectors.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>outer_eig</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.get_outer_eigs_at_q">
+<span class="sig-name descname"><span class="pre">get_outer_eigs_at_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.get_outer_eigs_at_q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the outer product of an eigenvector at a given q-point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q_index</strong> (<em>int</em>) – Integer specifying the index of the q-point in the self.qpoints array. This uses the get_outer_eig module above to get the list of outer_eigs. The code loops over all branch indices for a given q-point to create a list of outer product of eigenvectors</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of outer product of eigenvectors for each branch index at a given q-point. Shape = (num_masses, num_masses, 3, 3, num phonon modes)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>outer_eig_list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.get_qpoint_list">
+<span class="sig-name descname"><span class="pre">get_qpoint_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.get_qpoint_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get q-point list from a given Gamma-centered MP mesh. Ignore the meshG parameter and do not fold into the irreducible zone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mesh</strong> (<em>List</em>) – List of mesh indices. This could be removed to make this module use self.mesh instead.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of qpoints requested from mesh indices. Shape = (prod(mesh), 3)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>qpoints</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.get_spectrum">
+<span class="sig-name descname"><span class="pre">get_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_ab</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequencies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_point</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.get_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the spectrum for a given frequency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f_ab</strong> (<em>List</em>) – List of weights that multiply the spectra by.</p></li>
+<li><p><strong>frequencies</strong> (<em>List</em>) – List of phonon frequencies for which to calculate spectra.</p></li>
+<li><p><strong>q_point</strong> (<em>List</em>) – Optional specification of q_points for which to calculate the spectrum.</p></li>
+<li><p><strong>band_index</strong> (<em>int</em>) – Optional specification of band index for use with anharmonic part of code.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>spectrum</strong> – Returns the spectrum</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.interpolate_sqw">
+<span class="sig-name descname"><span class="pre">interpolate_sqw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sqw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_point</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.interpolate_sqw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Module for interpolating sqw, but will be deprecated soon and removed because interpolation was never implemented for the full dynamic structure factor here. Also, interpolation may be implemented at some point, but will not be implemented in this module; would most likely use the Interpolater class from the <cite>src</cite> directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sqw</strong> (<em>List</em>) – Array representing the dynamic structure factor to interpolate.</p></li>
+<li><p><strong>q_point</strong> (<em>List</em>) – Arbitrary q-point to calculate the dynamic structure factor for.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>The interpolated function for the dynamic structure factor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.run_mesh">
+<span class="sig-name descname"><span class="pre">run_mesh</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.run_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the phonon properties using Phonopy API for the mesh of q-points.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.sample_longwave_phonons">
+<span class="sig-name descname"><span class="pre">sample_longwave_phonons</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.sample_longwave_phonons" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sample dynamic structure factor near the Gamma point by dividing the current q-points in the mesh by the mesh list again to get small values of q-points that exist near the Gamma point. Then, the phonon properties are sampled at arbitrary q-points using Phonopy API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Nothing, the sampled values are stored in <cite>self._scaling_freqs</cite> and <cite>self._scaling_eigs</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.sample_longwave_phonons_at_q">
+<span class="sig-name descname"><span class="pre">sample_longwave_phonons_at_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.sample_longwave_phonons_at_q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sample low-q phonon directly by running Phonopy API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Nothing, the sampled values are stored in <cite>self._scaling_freqs</cite> and <cite>self._scaling_eigs</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.scaling_weights">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">scaling_weights</span></span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.scaling_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter function of scaling_weights parameter.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.set_anharmonicities">
+<span class="sig-name descname"><span class="pre">set_anharmonicities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">poscar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fc3_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">born</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.set_anharmonicities" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set anharmonicities using AnharmonicPhonons object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>poscar</strong> (<em>str</em>) – VASP POSCAR file.</p></li>
+<li><p><strong>fc3_file</strong> (<em>str</em>) – FORCES_SETS_FC3 file from phono3py.</p></li>
+<li><p><strong>disp_file</strong> (<em>str</em>) – disp.yaml file created from the <cite>phono3py -d</cite> command option.</p></li>
+<li><p><strong>born</strong> (<em>str</em>) – BORN file created from <cite>phonopy-vasp-born</cite> command.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.set_born_charges">
+<span class="sig-name descname"><span class="pre">set_born_charges</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.set_born_charges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setter of born charges to get array of Born charges from phonopy.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.set_dielectric">
+<span class="sig-name descname"><span class="pre">set_dielectric</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.set_dielectric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setter of dielectric to get 3x3 array of dielectric tensor from phonopy.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.set_dxdydzdw">
+<span class="sig-name descname"><span class="pre">set_dxdydzdw</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.set_dxdydzdw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the jacobian of the dynamic structure factor. Defined as the dq_x * dq_y * dq_z * dw, where d_w is differential for the frequency.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.single_phonon_dsf">
+<span class="sig-name descname"><span class="pre">single_phonon_dsf</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.single_phonon_dsf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the dynamic structure factor for the single phonon and 3-phonon anharmonic contributions, ignoring the contact interaction terms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Nothing, the dynamic structure factor is stored in self.scaling_sqw</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.test_exp_DWF_at_q">
+<span class="sig-name descname"><span class="pre">test_exp_DWF_at_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.test_exp_DWF_at_q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the Debye-Waller factor (DWF) for a given q_index and qpoint. This is a test module to attempt to speed up DWF calculation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q_index</strong> (<em>int</em>) – Integer specifying q-index.</p></li>
+<li><p><strong>q_point</strong> (<em>List</em>) – List specifying the q-point.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>exp_DWF</strong> – List of DWF for each atomic index.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.weights">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">weights</span></span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter function of weights parameter.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.compute_Sqw.DynamicStructureFactor.write_coherent_sqw">
+<span class="sig-name descname"><span class="pre">write_coherent_sqw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ftype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hdf5'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.DynamicStructureFactor.write_coherent_sqw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the final results to a file. Only works for an HDF5 file right now, so it’s not advised to change the ftype command.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – Name of output file (given without suffix)</p></li>
+<li><p><strong>ftype</strong> (<em>str</em>) – Type of output file to write. Only ‘hdf5’ is supported at this time. Subject to change in the future.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.compute_Sqw.set_qpoints">
+<span class="sig-prename descclassname"><span class="pre">src.compute_Sqw.</span></span><span class="sig-name descname"><span class="pre">set_qpoints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_Gpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_shift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride_G</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.compute_Sqw.set_qpoints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-src.darkmatter">
+<span id="src-darkmatter-module"></span><h2>src.darkmatter module<a class="headerlink" href="#module-src.darkmatter" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.darkmatter.ReachCalculator">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">src.darkmatter.</span></span><span class="sig-name descname"><span class="pre">ReachCalculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sqw</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#src.compute_Sqw.DynamicStructureFactor" title="src.compute_Sqw.DynamicStructureFactor"><span class="pre">src.compute_Sqw.DynamicStructureFactor</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hdf5_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equiv_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.darkmatter.ReachCalculator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Object that is currently implemented to take an hdf5 file created from the multiphonon_dsf.py code
+and create a reach curve for a default set of masses to produce publication quality data in an
+efficient and scalable way.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>sqw: NOT IMPLEMENTED YET; DO NOT USE</p></li>
+<li><p>hdf5_file: filename for hdf5 file created by multiphonon_dsf.py</p></li>
+<li><dl class="simple">
+<dt>equiv_flag: Boolean that describes whether Brillouin zone was folded into the irreducible part</dt><dd><p>(Eventually this will get removed as this function can be inferred from the hdf5
+file)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>calculate_reach:</dt><dd><dl class="simple">
+<dt>Inputs:</dt><dd><ul>
+<li><p>dm_masses: (optional) array of DM masses in eV</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul>
+<li><p>reach: An array of reach values for each DM mass</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.darkmatter.ReachCalculator.calculate_reach">
+<span class="sig-name descname"><span class="pre">calculate_reach</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_masses</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_mass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_mass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dm_masses</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nucleon'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">med</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'light'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.darkmatter.ReachCalculator.calculate_reach" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the dark matter reach (minimal scattering cross-section for 3 events/year into a 1 kg
+block of material) for a specified model and threshold</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_masses</strong> (<em>int</em>) – number of dark matter masses to calculate reach for.</p></li>
+<li><p><strong>min_mass</strong> (<em>float</em>) – minimum dark matter mass (in eV) to calculate reach for.</p></li>
+<li><p><strong>max_mass</strong> (<em>float</em>) – maximum dark matter mass</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – phonon frequency cutoff in which phonons with energy below this cutoff do not contribute to the reach.</p></li>
+<li><p><strong>t</strong> (<em>float</em>) – time of day in hours</p></li>
+<li><p><strong>dm_masses</strong> (<em>List</em>) – specify the array of dm_masses directly instead of using (num_masses, min_mass, max_mass) in conjunction with np.logspace</p></li>
+<li><p><strong>ref</strong> (<em>str</em>) – reference particle used for determining dark matter interaction model. Implemented ‘nucleon’ and ‘electron’</p></li>
+<li><p><strong>med</strong> (<em>str</em>) – mediator tag determining dark matter model. Implemented ‘light’ and ‘heavy’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List of reach values for each dark matter mass specified.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.darkmatter.ReachCalculator.get_all_data_dict">
+<span class="sig-name descname"><span class="pre">get_all_data_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equiv_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.darkmatter.ReachCalculator.get_all_data_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collection of previous get functions returning an array of the relevant data given the data
+filename</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – Name of HDF5 file.</p></li>
+<li><p><strong>equiv_flag</strong> (<em>bool</em>) – Boolean flag specifying whether or not symmetrically equivalent objects are in the HDF5 file.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.darkmatter.ReachCalculator.get_dyn_structure_factor">
+<span class="sig-name descname"><span class="pre">get_dyn_structure_factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sqw_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sqw'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jacq_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dxdydz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reclat_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'reclat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symm_points_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'equivalent</span> <span class="pre">q-points'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qpts_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'q-points'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.darkmatter.ReachCalculator.get_dyn_structure_factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the dynamic structure factor. Output array should have dim ( N_q, N_w ),
+where N_q is the number of points in the q grid and N_w is the number of omega points.</p>
+<p>dynamic strucure factor should have units of eV^2</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – Name of HDF5 file.</p></li>
+<li><p><strong>sqw_key</strong> (<em>str</em>) – Key for dynamic structure factor object.</p></li>
+<li><p><strong>jacq_key</strong> (<em>str</em>) – Key for q-point jacobian</p></li>
+<li><p><strong>reclat_key</strong> (<em>str</em>) – Key for reciprocal lattice vector matrix</p></li>
+<li><p><strong>symm_points_key</strong> (<em>str</em>) – Key for symmetrically equivalent q-points</p></li>
+<li><p><strong>qpts_key</strong> (<em>str</em>) – Key for list of q-points</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Dynamic structure factor matrix.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.darkmatter.ReachCalculator.get_jac_omega">
+<span class="sig-name descname"><span class="pre">get_jac_omega</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jacw_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'delta_w'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'frequencies'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.darkmatter.ReachCalculator.get_jac_omega" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the jacobian for the w grid integration. Output array should have dim ( N_w ),
+where N_w is the number of omega points.</p>
+<p>jacobian should have units of eV</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – Name of HDF5 file.</p></li>
+<li><p><strong>jacw_key</strong> (<em>str</em>) – Key for omega jacobian (also called dw).</p></li>
+<li><p><strong>freq_key</strong> (<em>str</em>) – Key for phonon frequencies.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List of omega jacobians.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.darkmatter.ReachCalculator.get_jac_q">
+<span class="sig-name descname"><span class="pre">get_jac_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jacq_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dxdydz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'weights'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symm_points_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'equivalent</span> <span class="pre">q-points'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.darkmatter.ReachCalculator.get_jac_q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the jacobian for the q grid integration. Output array should have dim ( N_q ),
+where N_q is the number of q points.</p>
+<p>jacobian should have units of eV^3</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – Name of HDF5 file.</p></li>
+<li><p><strong>jacq_key</strong> (<em>str</em>) – Key for q-point jacobian.</p></li>
+<li><p><strong>weight_key</strong> (<em>str</em>) – Key for list of weights</p></li>
+<li><p><strong>symm_points_key</strong> (<em>str</em>) – Key for symmetrically equivalent q-points</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List of q-point jacobians for each q-point.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.darkmatter.ReachCalculator.get_omega_grid">
+<span class="sig-name descname"><span class="pre">get_omega_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'frequencies'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.darkmatter.ReachCalculator.get_omega_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of omega values. Output array should have dim ( N_w ), where N_w is the number of omega
+points.</p>
+<p>omega’s should have units : eV</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – Name of HDF5 file.</p></li>
+<li><p><strong>freq_key</strong> (<em>str</em>) – Dict key for phonon frequencies.  (optional)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Array of phonon frequencies</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.darkmatter.ReachCalculator.get_q_grid">
+<span class="sig-name descname"><span class="pre">get_q_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qpts_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'q-points'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reclat_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'reclat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symm_points_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'equivalent</span> <span class="pre">q-points'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.darkmatter.ReachCalculator.get_q_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of q vectors. Output array should have dim ( N_q, 3 ), where N_q is the number of q
+points.</p>
+<p>q_vectors should have units : eV</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – Name of hdf5 file</p></li>
+<li><p><strong>qpts_key</strong> (<em>str</em>) – Either normal q-points key (‘q-points’) or scaling key (‘scaling q-points’)</p></li>
+<li><p><strong>reclat_key</strong> (<em>str</em>) – Key for reciprocal lattice matrix</p></li>
+<li><p><strong>symm_points_key</strong> (<em>str</em>) – key for symmetrically equivalent q-points dictionary.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>q_grid matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.darkmatter.ReachCalculator.load_from_dsf">
+<span class="sig-name descname"><span class="pre">load_from_dsf</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.darkmatter.ReachCalculator.load_from_dsf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load from DynamicStructureFactor object. Not implemented yet, will quit program if called.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.darkmatter.ReachCalculator.load_from_file">
+<span class="sig-name descname"><span class="pre">load_from_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.darkmatter.ReachCalculator.load_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load phonon data from HDF5 file.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.darkmatter.kinematic_function_numba">
+<span class="sig-prename descclassname"><span class="pre">src.darkmatter.</span></span><span class="sig-name descname"><span class="pre">kinematic_function_numba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_chi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.darkmatter.kinematic_function_numba" title="Permalink to this definition">¶</a></dt>
+<dd><p>g function = 2*pi*int d^3v f_chi delta(omega - omega_q)</p>
+<dl class="simple">
+<dt>Input units: q_vec - eV</dt><dd><p>omega - eV
+t - hr
+m_chi - eV</p>
+</dd>
+</dl>
+<p>Output units - eV^(-1)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.darkmatter.med_form_factor_sq_numba">
+<span class="sig-prename descclassname"><span class="pre">src.darkmatter.</span></span><span class="sig-name descname"><span class="pre">med_form_factor_sq_numba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_chi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'electron'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">med</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'light'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.darkmatter.med_form_factor_sq_numba" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mediator form factor</p>
+<dl class="simple">
+<dt>Input units: q_vec - eV</dt><dd><p>m_chi - eV</p>
+</dd>
+</dl>
+<p>Output units: dimensionless</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.darkmatter.mu_numba">
+<span class="sig-prename descclassname"><span class="pre">src.darkmatter.</span></span><span class="sig-name descname"><span class="pre">mu_numba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.darkmatter.mu_numba" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.darkmatter.ph_dd_cross_sec_constraint_numba">
+<span class="sig-prename descclassname"><span class="pre">src.darkmatter.</span></span><span class="sig-name descname"><span class="pre">ph_dd_cross_sec_constraint_numba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m_chi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jac_q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jac_omega</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dyn_structure_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'electron'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">med</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'light'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.darkmatter.ph_dd_cross_sec_constraint_numba" title="Permalink to this definition">¶</a></dt>
+<dd><p>See documentation for rate.</p>
+<p>n_cl - number of events of a certain confidence level
+exp - total exposure of experiment</p>
+<p>Output - cross section constraint   units : cmet^2</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.darkmatter.ph_dd_rate_numba">
+<span class="sig-prename descclassname"><span class="pre">src.darkmatter.</span></span><span class="sig-name descname"><span class="pre">ph_dd_rate_numba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m_chi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jac_q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jac_omega</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dyn_structure_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cross_sec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'electron'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">med</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'light'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.darkmatter.ph_dd_rate_numba" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the direct detection rate given the dynamic structure factor. N_q is number of q points
+and N_w is the number of omega points</p>
+<p>Integrals are discretized as:</p>
+<blockquote>
+<div><p>int d^3q    -&gt; sum_q jac_q
+int d omega -&gt; sum_omega jac_omega</p>
+</div></blockquote>
+<dl>
+<dt>Inputs<span class="classifier">m_chi      - DM mass              units</span><span class="classifier">eV</span></dt><dd><blockquote>
+<div><p>rho_target - target density       units : gm/cmet^3
+t          - time                 units : hr</p>
+<p>ref        - cross section to reference to, either ‘electron’ or ‘nucleon’
+med        - type of mediator, either ‘heavy’ or ‘light’</p>
+<p>q_grid     - ( N_q, 3 ) list of momentum transfer vectors  units : eV
+omega_grid - ( N_w ) list of energy transfers              units : eV
+jac_q      - ( N_q ) jacobian of q point                   units : eV^3
+jac_oemga  - ( N_w ) jacobian of omega point               units : eV</p>
+<p>dyn_structure_factor - ( N_q, N_w ) dynamic structure factor    units : eV^2</p>
+</div></blockquote>
+<p>Outputs : direct detection rate per kg-year  units : dimensionless</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.darkmatter.vE_vec_numba">
+<span class="sig-prename descclassname"><span class="pre">src.darkmatter.</span></span><span class="sig-name descname"><span class="pre">vE_vec_numba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.darkmatter.vE_vec_numba" title="Permalink to this definition">¶</a></dt>
+<dd><p>Earth velocity as a function of time</p>
+<p>t - hr</p>
+</dd></dl>
+
+</div>
+<div class="section" id="src-interp-sqw-module">
+<h2>src.interp_sqw module<a class="headerlink" href="#src-interp-sqw-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-src.phonon_lifetimes">
+<span id="src-phonon-lifetimes-module"></span><h2>src.phonon_lifetimes module<a class="headerlink" href="#module-src.phonon_lifetimes" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.phonon_lifetimes.Anh_System">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">src.phonon_lifetimes.</span></span><span class="sig-name descname"><span class="pre">Anh_System</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yaml_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hdf5_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.phonon_lifetimes.Anh_System" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.phonon_lifetimes.Anh_System.import_gammas">
+<span class="sig-name descname"><span class="pre">import_gammas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hdf5_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.phonon_lifetimes.Anh_System.import_gammas" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="src-plot-decay-channels-module">
+<h2>src.plot_decay_channels module<a class="headerlink" href="#src-plot-decay-channels-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="src-sqw-mpi-module">
+<h2>src.sqw_mpi module<a class="headerlink" href="#src-sqw-mpi-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-src.units">
+<span id="src-units-module"></span><h2>src.units module<a class="headerlink" href="#module-src.units" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.units.to_unit">
+<span class="sig-prename descclassname"><span class="pre">src.units.</span></span><span class="sig-name descname"><span class="pre">to_unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_unit_sys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NateV'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.units.to_unit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tries to convert expr to the equivalent expression with units new_units. Returns expr in
+natural units if the conversion is not possible.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.units.to_unit_from_sys">
+<span class="sig-prename descclassname"><span class="pre">src.units.</span></span><span class="sig-name descname"><span class="pre">to_unit_from_sys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_sys</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.units.to_unit_from_sys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an expression in unit_sys unit system and tries to convert to new_units. Returns
+expr if the units are not equivalent.</p>
+<p>BUGS: unit_sys has to be defined by one unit (e.g. NateV)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.units.to_unit_mag">
+<span class="sig-prename descclassname"><span class="pre">src.units.</span></span><span class="sig-name descname"><span class="pre">to_unit_mag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_unit_sys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NateV'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.units.to_unit_mag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.units.to_unit_sys">
+<span class="sig-prename descclassname"><span class="pre">src.units.</span></span><span class="sig-name descname"><span class="pre">to_unit_sys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_sys</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.units.to_unit_sys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert expr to equivalent expression in unit_sys unit system.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.units.to_unit_sys_mag">
+<span class="sig-prename descclassname"><span class="pre">src.units.</span></span><span class="sig-name descname"><span class="pre">to_unit_sys_mag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_sys</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.units.to_unit_sys_mag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert expr to equivalent expression in unit_sys unit system WITHOUT units.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-src.utils">
+<span id="src-utils-module"></span><h2>src.utils module<a class="headerlink" href="#module-src.utils" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.utils.BrillouinZone">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">src.utils.</span></span><span class="sig-name descname"><span class="pre">BrillouinZone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">poscar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'POSCAR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.BrillouinZone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.utils.MPGrid" title="src.utils.MPGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">src.utils.MPGrid</span></code></a></p>
+<p>Abstract class for organizing all annoying gridpoints and mappings within Phono3py. Built from the MPGrid super class.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.BrillouinZone.get_gridpoint">
+<span class="sig-name descname"><span class="pre">get_gridpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qpoint</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.BrillouinZone.get_gridpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a grid-point given a q-point. Gridpoint is used to properly access Phono3py objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>qpoint</strong> (<em>List</em>) – Vector of a q-point in reduced coordinates</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>The gridpoint associated with the passed q-point (gridpoint is an integer)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.BrillouinZone.get_qpoint">
+<span class="sig-name descname"><span class="pre">get_qpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gridpoint</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.BrillouinZone.get_qpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get qpoint from a gridpoint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>gridpoint</strong> (<em>int</em>) – Integer specifying the gridpoint used in Phono3py objects.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>q-point vector associated with gridpoint.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.BrillouinZone.get_symmetrically_equiv_qpoints">
+<span class="sig-name descname"><span class="pre">get_symmetrically_equiv_qpoints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qpoint</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.BrillouinZone.get_symmetrically_equiv_qpoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the symmetrically equivalent q-points given a specific q-point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>qpoint</strong> (<em>List</em>) – Vector of a q-point in reduced coordinates.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List of q-point vectors that are symmetrically equivalent to the original q-point.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.BrillouinZone.shift_q_to_1stBZ">
+<span class="sig-name descname"><span class="pre">shift_q_to_1stBZ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qpoint</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.BrillouinZone.shift_q_to_1stBZ" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shift q-point to 1st Brillouin zone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>qpoint</strong> (<em>List</em>) – Vector of a q-point in reduced coordinates</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.utils.BrillouinZoneProperty">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">src.utils.</span></span><span class="sig-name descname"><span class="pre">BrillouinZoneProperty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#src.utils.Phono3pyInputs" title="src.utils.Phono3pyInputs"><span class="pre">src.utils.Phono3pyInputs</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.BrillouinZoneProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Abstract class that maps a specific property (band, eigenvector, imag self energy) to BZ coordinates and branch index. Default is to cast property over specified MP grid. Properties are stored as a dictionary, in which the keys are the q-point and band index combinations.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.BrillouinZoneProperty.assign_value">
+<span class="sig-name descname"><span class="pre">assign_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.BrillouinZoneProperty.assign_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign value for a given key. The key is either a q-point or a phase-space point depending on the property.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.BrillouinZoneProperty.get_property_value">
+<span class="sig-name descname"><span class="pre">get_property_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qpoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.BrillouinZoneProperty.get_property_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a property value given a q-point and band_index. The qpoint and band_index values are used to create a dict key, which then accesses the internal dictionary to extract the value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qpoint</strong> (<em>List</em>) – q-point vector labeling the property value.</p></li>
+<li><p><strong>band_index</strong> (<em>int</em>) – Integer index specifying the phonon mode index.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.BrillouinZoneProperty.set_key">
+<span class="sig-name descname"><span class="pre">set_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qpoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.BrillouinZoneProperty.set_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the dictionary key given a q-point and phonon band-index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qpoint</strong> (<em>List</em>) – q-point vector labeling the property.</p></li>
+<li><p><strong>band_index</strong> (<em>int</em>) – Integer index specifying the phonon mode index.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>A vector ready to be used as a dictionary key.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.BrillouinZoneProperty.set_property_dict">
+<span class="sig-name descname"><span class="pre">set_property_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.BrillouinZoneProperty.set_property_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the dictionary object containing all the property data. This module changes depending on the property.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.utils.Gamma">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">src.utils.</span></span><span class="sig-name descname"><span class="pre">Gamma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#src.utils.Phono3pyInputs" title="src.utils.Phono3pyInputs"><span class="pre">src.utils.Phono3pyInputs</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.Gamma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.utils.BrillouinZoneProperty" title="src.utils.BrillouinZoneProperty"><code class="xref py py-class docutils literal notranslate"><span class="pre">src.utils.BrillouinZoneProperty</span></code></a></p>
+<p>Extension of BrillouinZoneProperty to calculate the Gamma parameter which is related to the inverse phonon lifetime. The relationship in Phono3py units is lifetime=1/(4*pi*Gamma). This class is similar to ImaginarySelfEnergy, but evaluates the ISE at the phonon frequency only</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.Gamma.set_property_dict">
+<span class="sig-name descname"><span class="pre">set_property_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.Gamma.set_property_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the property dictionary for the Gamma functions.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.utils.GroupVelocities">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">src.utils.</span></span><span class="sig-name descname"><span class="pre">GroupVelocities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#src.utils.Phono3pyInputs" title="src.utils.Phono3pyInputs"><span class="pre">src.utils.Phono3pyInputs</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.GroupVelocities" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.utils.BrillouinZoneProperty" title="src.utils.BrillouinZoneProperty"><code class="xref py py-class docutils literal notranslate"><span class="pre">src.utils.BrillouinZoneProperty</span></code></a></p>
+<p>Extension of BrillouinZoneProperty to calculate phonon group velocities, and store/access them in one place. This is a <em>vector</em> valued property. Units are Angstroms / ps.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.GroupVelocities.set_property_dict">
+<span class="sig-name descname"><span class="pre">set_property_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.GroupVelocities.set_property_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the property dictionary for group velocities using Phono3py API, and store internally in class. The unit is in Angstroms / ps.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.utils.ImaginarySelfEnergy">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">src.utils.</span></span><span class="sig-name descname"><span class="pre">ImaginarySelfEnergy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#src.utils.Phono3pyInputs" title="src.utils.Phono3pyInputs"><span class="pre">src.utils.Phono3pyInputs</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.ImaginarySelfEnergy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.utils.BrillouinZoneProperty" title="src.utils.BrillouinZoneProperty"><code class="xref py py-class docutils literal notranslate"><span class="pre">src.utils.BrillouinZoneProperty</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.ImaginarySelfEnergy.get_imag_self_energies_at_q">
+<span class="sig-name descname"><span class="pre">get_imag_self_energies_at_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qpoint</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.ImaginarySelfEnergy.get_imag_self_energies_at_q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get imaginary self energy functions at a given q-point (instead of a gridpoint).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>qpoint</strong> (<em>List</em>) – q-point vector in reduced coordinates</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Imaginary self energy function.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.ImaginarySelfEnergy.set_property_dict">
+<span class="sig-name descname"><span class="pre">set_property_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.ImaginarySelfEnergy.set_property_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the property dictionary for the imaginary self energy function.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.ImaginarySelfEnergy.set_self_energies">
+<span class="sig-name descname"><span class="pre">set_self_energies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.ImaginarySelfEnergy.set_self_energies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Imaginary self energy objects are stored in phono3py object in a weird way.</p>
+<p>The object is a list of a list of ndarrays.</p>
+<p>First index = grid-points, which are “addresses” of the irreducible q-points in the Brillouin zone. At the surface these are meaningless, but the grid points are given by: np.unique(mapping). The actual q-points are stored in grid with a 1-to-1 correspondence to mapping</p>
+<p>Second index = sigma values, there is only one sigma=None in default tetrahedron method</p>
+<p>Third index is the nparray, which is arranged as: (temperatures, frequency points, band index)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.utils.IsotopicImagSelfEnergy">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">src.utils.</span></span><span class="sig-name descname"><span class="pre">IsotopicImagSelfEnergy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#src.utils.Phono3pyInputs" title="src.utils.Phono3pyInputs"><span class="pre">src.utils.Phono3pyInputs</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.IsotopicImagSelfEnergy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.utils.BrillouinZoneProperty" title="src.utils.BrillouinZoneProperty"><code class="xref py py-class docutils literal notranslate"><span class="pre">src.utils.BrillouinZoneProperty</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.IsotopicImagSelfEnergy.set_property_dict">
+<span class="sig-name descname"><span class="pre">set_property_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.IsotopicImagSelfEnergy.set_property_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the property dictionary for the isotopic self energy for each q-point in the MP grid.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.IsotopicImagSelfEnergy.set_self_energies">
+<span class="sig-name descname"><span class="pre">set_self_energies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.IsotopicImagSelfEnergy.set_self_energies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set isotopic self energies using Phono3pyIsotope class. The self energies are stored in self.manager.isotope.gamma with units of THz.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.utils.MPGrid">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">src.utils.</span></span><span class="sig-name descname"><span class="pre">MPGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.MPGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class that accounts for all details associated with the Monkhorst-Pack discretization of the Brilloin zone.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.MPGrid.get_padded_qpoints">
+<span class="sig-name descname"><span class="pre">get_padded_qpoints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.MPGrid.get_padded_qpoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter class for padded q-points</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.MPGrid.set_padded_qpoints">
+<span class="sig-name descname"><span class="pre">set_padded_qpoints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.MPGrid.set_padded_qpoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setter for padded q-points. Padded by including redundant q-points related by periodicity of the Brillouin zone. For example, a 5x5x5 grid should only include q-points up to +2/5 and -2/5 in any direction, but a padded zone will have the 3/5 point which is the same as -2/5, and the -3/5 point (which is the 2/5 point).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.MPGrid.set_qpoints">
+<span class="sig-name descname"><span class="pre">set_qpoints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.MPGrid.set_qpoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setter for q-points that depends on the mesh and shift parameters passed during contruction. Sets self.qpoints object.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.utils.PhaseSpace">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">src.utils.</span></span><span class="sig-name descname"><span class="pre">PhaseSpace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freqs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.PhaseSpace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.utils.MPGrid" title="src.utils.MPGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">src.utils.MPGrid</span></code></a></p>
+<p>Child class of MPGrid, which is extended to include frequency discretization, meaning that this class contains info on all q-points (momentum space) and frequencies (energy space), which is why it is called a phase space.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.PhaseSpace.get_padded_phase_space">
+<span class="sig-name descname"><span class="pre">get_padded_phase_space</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.PhaseSpace.get_padded_phase_space" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter for padded phase space object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.PhaseSpace.get_phase_space">
+<span class="sig-name descname"><span class="pre">get_phase_space</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.PhaseSpace.get_phase_space" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter for phase space. If phase-space not set, it will be set by calling this.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.PhaseSpace.set_padded_phase_space">
+<span class="sig-name descname"><span class="pre">set_padded_phase_space</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.PhaseSpace.set_padded_phase_space" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setter of padded phase space. Code is set up in a lazy way in which the phase-space objects are not calculated until necessary.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.PhaseSpace.set_phase_space">
+<span class="sig-name descname"><span class="pre">set_phase_space</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.PhaseSpace.set_phase_space" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setter of the phase space object. phase_space object is Nx4 array for (qx, qy, qz, w) where N is the total number of phase-space points (equal to prod(mesh) * len(freqs)).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.utils.Phono3pyInputs">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">src.utils.</span></span><span class="sig-name descname"><span class="pre">Phono3pyInputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">poscar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'POSCAR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fc3_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FORCES_FC3'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fc2_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FORCE_SETS'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'disp.yaml'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[5,</span> <span class="pre">5,</span> <span class="pre">5]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">supercell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[2,</span> <span class="pre">2,</span> <span class="pre">2]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">born_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotope_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.Phono3pyInputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class that compartmentalizes all the Phono3py input files and tags. They get complicated very quickly.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.utils.Phono3pyManager">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">src.utils.</span></span><span class="sig-name descname"><span class="pre">Phono3pyManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#src.utils.Phono3pyInputs" title="src.utils.Phono3pyInputs"><span class="pre">src.utils.Phono3pyInputs</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.Phono3pyManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class that manages all relevant functions of the Phono3py API, and connects these functions with the other classes in this mpdsf. This manager has not been checked for Phono3py versions &gt;2.0; this will be looked into in the future.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.Phono3pyManager.center_qpoints">
+<span class="sig-name descname"><span class="pre">center_qpoints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.Phono3pyManager.center_qpoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move any q-point outside the first Brillouin zone back into the first zone</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.Phono3pyManager.fix_phonon_data">
+<span class="sig-name descname"><span class="pre">fix_phonon_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.Phono3pyManager.fix_phonon_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fix phonon data to remove the redundant q-points and shift the q-points back to 1st Brillouin zone.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.Phono3pyManager.set_phonons">
+<span class="sig-name descname"><span class="pre">set_phonons</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.Phono3pyManager.set_phonons" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate phonon data using Phono3py. Store the frequencies, eigenvectors and qpoints.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.utils.PhononEigenvalues">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">src.utils.</span></span><span class="sig-name descname"><span class="pre">PhononEigenvalues</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#src.utils.Phono3pyInputs" title="src.utils.Phono3pyInputs"><span class="pre">src.utils.Phono3pyInputs</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.PhononEigenvalues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.utils.BrillouinZoneProperty" title="src.utils.BrillouinZoneProperty"><code class="xref py py-class docutils literal notranslate"><span class="pre">src.utils.BrillouinZoneProperty</span></code></a></p>
+<p>Extension of BrillouinZoneProperty to calculate phonon eigenvalues, and store/access them simply in one place. This is a scalar valued property.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.PhononEigenvalues.set_property_dict">
+<span class="sig-name descname"><span class="pre">set_property_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.PhononEigenvalues.set_property_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the property dictionary for phonon eigenvalues.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.utils.PhononEigenvectors">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">src.utils.</span></span><span class="sig-name descname"><span class="pre">PhononEigenvectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#src.utils.Phono3pyInputs" title="src.utils.Phono3pyInputs"><span class="pre">src.utils.Phono3pyInputs</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.PhononEigenvectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.utils.BrillouinZoneProperty" title="src.utils.BrillouinZoneProperty"><code class="xref py py-class docutils literal notranslate"><span class="pre">src.utils.BrillouinZoneProperty</span></code></a></p>
+<p>Extension of BrillouinZoneProperty to calculate phonon eigenvectors, and store/access them in one place. This is a <em>vector</em> valued property.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.PhononEigenvectors.set_property_dict">
+<span class="sig-name descname"><span class="pre">set_property_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.PhononEigenvectors.set_property_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the property dictionary for phonon eigenvectors.
+IMPORTANT NOTE: I believe the way Phono3py stores it’s eigenvectors is in a matrix of shape:</p>
+<blockquote>
+<div><p>(num qpts, num bands, 3 * num_atoms)</p>
+</div></blockquote>
+<p>This is hard to test because the shape of the matrix at each q-point is square; (num bands) = (3 * num atoms)</p>
+<p>However, in the Phono3py source code, the eigenvectors are determined via a call to linalg.eigh acting on the dynamical matrix. This call returns the eigenvectors as column vectors in a square matrix such that the second index is eigenvector index, and the first index corresponds to the eigenvector components</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.utils.WeightedQuantity">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">src.utils.</span></span><span class="sig-name descname"><span class="pre">WeightedQuantity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">property</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.WeightedQuantity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Abstract class that covers all phonon-based numbers that have k-point and branch indices. Examples include
+phonon band frequencies, eigenvectors, imaginary self energies</p>
+<p>AS FAR AS I KNOW: Phono3py naturally makes phonon objects on the entire BZ, not the irr BZ, which is kind of
+annoying. But I will leave this class here in case this changes, and Phono3py naturally outputs the phonon data on
+the irr BZ points.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.utils.suppress_stdout">
+<span class="sig-prename descclassname"><span class="pre">src.utils.</span></span><span class="sig-name descname"><span class="pre">suppress_stdout</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.utils.suppress_stdout" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-src.yaml_phonons">
+<span id="src-yaml-phonons-module"></span><h2>src.yaml_phonons module<a class="headerlink" href="#module-src.yaml_phonons" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.yaml_phonons.Dyn_System">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">src.yaml_phonons.</span></span><span class="sig-name descname"><span class="pre">Dyn_System</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yaml_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.yaml_phonons.Dyn_System" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.yaml_phonons.Dyn_System.find_natoms">
+<span class="sig-name descname"><span class="pre">find_natoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yaml_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.yaml_phonons.Dyn_System.find_natoms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.yaml_phonons.Dyn_System.import_eigvecs">
+<span class="sig-name descname"><span class="pre">import_eigvecs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yaml_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">natoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_eigs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.yaml_phonons.Dyn_System.import_eigvecs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.yaml_phonons.Dyn_System.import_frequencies">
+<span class="sig-name descname"><span class="pre">import_frequencies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yaml_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_freqs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.yaml_phonons.Dyn_System.import_frequencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.yaml_phonons.Dyn_System.import_lattice">
+<span class="sig-name descname"><span class="pre">import_lattice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yaml_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.yaml_phonons.Dyn_System.import_lattice" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.yaml_phonons.Dyn_System.import_masses">
+<span class="sig-name descname"><span class="pre">import_masses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yaml_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">natoms</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.yaml_phonons.Dyn_System.import_masses" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.yaml_phonons.Dyn_System.import_mesh">
+<span class="sig-name descname"><span class="pre">import_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.yaml_phonons.Dyn_System.import_mesh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.yaml_phonons.Dyn_System.import_positions">
+<span class="sig-name descname"><span class="pre">import_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yaml_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.yaml_phonons.Dyn_System.import_positions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.yaml_phonons.Dyn_System.import_qpts">
+<span class="sig-name descname"><span class="pre">import_qpts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yaml_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.yaml_phonons.Dyn_System.import_qpts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.yaml_phonons.Dyn_System.import_recip_lattice">
+<span class="sig-name descname"><span class="pre">import_recip_lattice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.yaml_phonons.Dyn_System.import_recip_lattice" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.yaml_phonons.Dyn_System.import_supercell">
+<span class="sig-name descname"><span class="pre">import_supercell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yaml_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.yaml_phonons.Dyn_System.import_supercell" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.yaml_phonons.Dyn_System.import_weights">
+<span class="sig-name descname"><span class="pre">import_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yaml_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_weights</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.yaml_phonons.Dyn_System.import_weights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.yaml_phonons.Dyn_System.unnormalize_eigvecs">
+<span class="sig-name descname"><span class="pre">unnormalize_eigvecs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.yaml_phonons.Dyn_System.unnormalize_eigvecs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-src">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-src" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Thomas Harrelson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

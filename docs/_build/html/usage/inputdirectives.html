@@ -1,0 +1,249 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Input Directives &mdash; MPDSF 0.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Theory: Introduction" href="../theory/introduction.html" />
+    <link rel="prev" title="Quick Start Guide" href="quickstart.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> MPDSF
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Table of Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Input Directives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/introduction.html">Theory: Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/contactinteraction.html">Theory: Contact Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/anharmonicinteraction.html">Theory: Anharmonic Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/lowqscaling.html">Features: Including low-q scaling behavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/darkphoton.html">Features: Dark photon mediated scattering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/scalarmediator.html">Features: Scalar mediator scattering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/reach.html">Features: Plotting Reach Curves</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MPDSF</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Input Directives</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/usage/inputdirectives.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="input-directives">
+<span id="input-commands"></span><h1>Input Directives<a class="headerlink" href="#input-directives" title="Permalink to this headline">¶</a></h1>
+<dl class="simple">
+<dt>Below is a list of all input commands/directives along with descriptions:</dt><dd><ul class="simple">
+<li><p><strong>poscar</strong> - name of the VASP POSCAR file.</p></li>
+<li><p><strong>fc2</strong> - Name of the 2nd order force constants file made from Phonopy. It is usually called <code class="docutils literal notranslate"><span class="pre">FORCE_SETS</span></code>.</p></li>
+<li><p><strong>fc3</strong> - Name of the 3rd order force sets file made by Phono3py. It is usually called <code class="docutils literal notranslate"><span class="pre">FORCES_FC3</span></code>.</p></li>
+<li><p><strong>disp</strong> - Name of the displacements file created by Phono3py/Phonopy in YAML format. It is sometimes called <code class="docutils literal notranslate"><span class="pre">disp.yaml</span></code>. If not this, it is likely named something very similar.</p></li>
+<li><p><strong>mesh</strong> - A comma separated list representing the discretization of the Monkhorst-Pack grid used in the phonon calculations. The format of the tag must be like <code class="docutils literal notranslate"><span class="pre">mesh:</span> <span class="pre">[</span> <span class="pre">5,</span> <span class="pre">5,</span> <span class="pre">5</span> <span class="pre">]</span></code>, in which the numbers can change, but the placement of the brackets and commas cannot.</p></li>
+<li><p><strong>supercell</strong> - A comma separated list representing the size of the supercell created to calculate the inter-atomic forces used in the phonon calculations. Must be of the form <code class="docutils literal notranslate"><span class="pre">supercell:</span> <span class="pre">[</span> <span class="pre">2,</span> <span class="pre">2,</span> <span class="pre">2</span> <span class="pre">]</span></code>, and the numbers of the supercell must match what is in the <code class="docutils literal notranslate"><span class="pre">disp.yaml</span></code> file, and must accurately represent the size of the DFT calculations performed.</p></li>
+<li><p><strong>max_energy</strong> - The maximum energy (in THz) to be considered in the multiphonon calculation.</p></li>
+<li><p><strong>delta_e</strong> - The spacing between the discrete energies/frequencies.</p></li>
+<li><p><strong>overtones</strong> - The number of contact-type multiphonon interactions to consider in the calculation. For example, if 5 is input here, then all up to 5-phonon contact interactions will be considered. That is, the code will consider scattering events that generate 5 distinct phonons as valid.</p></li>
+<li><p><strong>output</strong> - The name of the output HDF5 file. It is technically allowed to specify a <code class="docutils literal notranslate"><span class="pre">.txt</span></code> file, but this is currently deprecated, and there are not any immediate plans to make this feature usable in the future. As such, specify <code class="docutils literal notranslate"><span class="pre">hdf5</span></code> files only.</p></li>
+<li><p><strong>Gmesh</strong> - The number of reciprocal lattice vectors to consider in addition to the q-points specified by the <code class="docutils literal notranslate"><span class="pre">mesh</span></code> tag. This tag is part of building the q-points for which the dynamic structure factor is calculated. The format must be similar to <code class="docutils literal notranslate"><span class="pre">Gmesh:</span> <span class="pre">[</span> <span class="pre">2,</span> <span class="pre">2,</span> <span class="pre">2</span> <span class="pre">]</span></code>. In this example, the maximum reciprocal lattice vector is 1 (in reduced units) in each direction of the Brillouin zone. This is because the <code class="docutils literal notranslate"><span class="pre">2</span></code> value in the example is a non-inclusive maximum to the reciprocal lattice vector. Therefore, the final q-points array will include points like <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">-1,</span> <span class="pre">0,</span> <span class="pre">0</span> <span class="pre">]</span></code>, <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0</span> <span class="pre">]</span></code>, and <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">0</span> <span class="pre">]</span></code>.</p></li>
+<li><p><strong>shift</strong> - You can change the center of you Monkhorst-Pack grid with this command. It must be of the form <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">0.1,</span> <span class="pre">0.1,</span> <span class="pre">0.1</span> <span class="pre">]</span></code>. Of course, the numbers in this example can change however you see fit.</p></li>
+<li><p><strong>qmax</strong> - Specify the maximum q-point magnitude (in reduced coordinates) for which dynamic structure factor data is written. This command is useful if you need to calculate the dynamic structure factor for a very large/dense grid, but do not need the high q-point values.</p></li>
+<li><p><strong>mpi</strong> - Boolean flag specifying if the code is being run with an MPI directive like <code class="docutils literal notranslate"><span class="pre">srun</span></code> or <code class="docutils literal notranslate"><span class="pre">mpiexec</span></code>.</p></li>
+<li><p><strong>born</strong> - Name of the BORN file containing the Born effective charges and dielectric tensor. This file is generally good to calculate for nearly all materials, except for elemental solids. This file is also necessary for dark photon calculations.</p></li>
+<li><p><strong>dark_photon</strong> - Boolean flag specifying if you want the differential scattering rate for a dark photon mediated process to be calculated instead of the dynamic structure factor. The internal components are re-weighted according to expressions related to the Frohlich Hamiltonian before being summed.</p></li>
+<li><p><strong>scalar_mediator</strong> - Boolean flag specifying if you want the differential scattering rate for a light/heavy scalar mediated process to be calculated instead of the dynamic structure factor. The internal components are re-weighted by the atomic mass before being summed. Specification of light vs heavy mediators is in the <code class="docutils literal notranslate"><span class="pre">med</span></code> tag.</p></li>
+<li><p><strong>med</strong> - Tag specifying whether the scalar mediator is <code class="docutils literal notranslate"><span class="pre">&quot;light&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;heavy&quot;</span></code>.</p></li>
+<li><p><strong>param_lorentzian</strong> - Boolean tag specifying if the anharmonic processes are parametrized by Lorentzian functions with widths given by the inverse phonon lifetimes.</p></li>
+<li><p><strong>nofold_BZ</strong> - Boolean tag specifying that the full Brillouin zone sampling of q-points is to be calculated, ignoring all symmetries. The reason for setting up the code this way is because it is recommended to fold Brillouin zones using the symmetries of the crystal structure to save memory and time. Only users who really want an unfolded Brillouin zone should use this tag.</p></li>
+<li><p><strong>lowq_scaling</strong> - Inclusion of low-q-point scaling characteristics of dynamic structure factor. The way this is done is through linear interpolation of phonon eigenvalues, eigenvectors, and imaginary self-energies, and the sampling points are chosen by dividing each q-point in the 1st Brillouin zone by the mesh (element-wise) to sample small q-points very close to the Gamma point. The use of this tag is strongly recommended for anyone doing dark matter calculations.</p></li>
+<li><p><strong>no_anh</strong> - Boolean flag directing the code to ignore the anharmonic processes even if the <code class="docutils literal notranslate"><span class="pre">fc3</span></code> tag is used.</p></li>
+<li><p><strong>reach</strong> - Boolean flag directing the code to calculate the dark matter reach for the material in addition to the differential scattering rates. The reach is defined as the minimum cross-section (in cm^2) to observe 3 dark matter scattering events in a year for 1 kg of the material.</p></li>
+</ul>
+</dd>
+</dl>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../theory/introduction.html" class="btn btn-neutral float-right" title="Theory: Introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="quickstart.html" class="btn btn-neutral float-left" title="Quick Start Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Thomas Harrelson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

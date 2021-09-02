@@ -25,6 +25,9 @@ def suppress_stdout():
 
 
 class Phono3pyInputs:
+    '''
+    Class that compartmentalizes all the Phono3py input files and tags. They get complicated very quickly.
+    '''
     def __init__(self,
                  poscar='POSCAR',
                  fc3_file='FORCES_FC3',
@@ -37,6 +40,34 @@ class Phono3pyInputs:
                  born_file=None,
                  temperature=0.,
                  isotope_flag=False):
+        '''
+        Constructor that takes all Phono3py inputs and stores them in the class.
+
+        Parameters
+        -------
+        poscar : str
+            VASP POSCAR file.
+        fc3_file : str
+            Third order force sets file created by Phono3py. Default is 'FORCES_FC3'.
+        fc2_file : str
+            Second order force sets file created by either Phonopy or Phono3py. Default is 'FORCE_SETS'.
+        disp_file : str
+            Yaml file outputted by Phono3py that specifies the displacements made to calculate the force sets. Default is 'disp.yaml'
+        mesh : List
+            List of integers specifying a Gamma-centered Monkhorst-Pack grid for discretizing k-points. Default is [5,5,5].
+        shift : List
+            List of floats specifying the shift from a Gamma-centered grid.
+        supercell : List
+            List of integers specifying the size of the supercell created to calculate the force sets.
+        nac : bool
+            Boolean flag specifying if the non-analytic term correction is to be used.
+        born_file : str
+            BORN file created from `phonopy-vasp-born`.
+        temperature : float
+            Temperature of the material. Default 0 K.
+        isotope_flag : bool
+            Boolean flag specifying if isotopic scattering is to be calculated.
+        '''
         self.poscar = poscar
         self.fc2_file = fc2_file
         self.fc3_file = fc3_file
@@ -66,7 +97,20 @@ class WeightedQuantity:
 
 
 class MPGrid:
+    '''
+    Class that accounts for all details associated with the Monkhorst-Pack discretization of the Brilloin zone.
+    '''
     def __init__(self, mesh, shift=None):
+        '''
+        Constructor from a mesh and shift list objects.
+
+        Parameters
+        -------
+        mesh : List
+            List of integers specifying a Gamma-centered Monkhorst-Pack grid
+        shift : List
+            List of floats specifying the shift from a Gamma-centered grid.
+        '''
         self.mesh = mesh
         if shift is not None:
             self.shift = shift
@@ -80,6 +124,9 @@ class MPGrid:
             self.set_qpoints()
 
     def set_qpoints(self):
+        '''
+        Setter for q-points that depends on the mesh and shift parameters passed during contruction. Sets self.qpoints object.
+        '''
         self.qpoints = np.zeros([np.prod(self.mesh), 3])
         count = 0
         curr_qx = self.shift[0]
@@ -115,6 +162,9 @@ class MPGrid:
                 curr_qz -= 1.0
 
     def set_padded_qpoints(self):
+        '''
+        Setter for padded q-points. Padded by including redundant q-points related by periodicity of the Brillouin zone. For example, a 5x5x5 grid should only include q-points up to +2/5 and -2/5 in any direction, but a padded zone will have the 3/5 point which is the same as -2/5, and the -3/5 point (which is the 2/5 point).
+        '''
         self.padded_qpoints = np.zeros([np.prod(np.array(self.mesh) + 2), 3])
         count = 0
         curr_qx = self.shift[0]
@@ -137,13 +187,28 @@ class MPGrid:
                 curr_qz -= (1.0 + 2 * spacing[2])
 
     def get_padded_qpoints(self):
+        '''
+        Getter class for padded q-points
+        '''
         if self.padded_qpoints is None:
             self.set_padded_qpoints()
         return self.padded_qpoints
 
 
 class PhaseSpace(MPGrid):
+    '''
+    Child class of MPGrid, which is extended to include frequency discretization, meaning that this class contains info on all q-points (momentum space) and frequencies (energy space), which is why it is called a phase space.
+    '''
     def __init__(self, freqs=None, **kwargs):
+        '''
+        Constructor for PhaseSpace.
+
+        Parameters
+        -------
+        freqs : List
+            List of frequencies to be used in the phase space.
+        kwargs : keyword args to be used in MPGrid construction.
+        '''
         super().__init__(**kwargs)
         self.freqs = freqs
         self.phase_space = None
@@ -151,6 +216,9 @@ class PhaseSpace(MPGrid):
         self.set_phase_space()
 
     def set_phase_space(self):
+        '''
+        Setter of the phase space object. phase_space object is Nx4 array for (qx, qy, qz, w) where N is the total number of phase-space points (equal to prod(mesh) * len(freqs)).
+        '''
         # set phase_space from freqs and qpoints from super()
         if self.freqs is not None:
             self.phase_space = np.array([list(q) + [freq] for q in self.qpoints for freq in self.freqs])
@@ -159,6 +227,9 @@ class PhaseSpace(MPGrid):
             self.phase_space = self.qpoints
 
     def set_padded_phase_space(self):
+        '''
+        Setter of padded phase space. Code is set up in a lazy way in which the phase-space objects are not calculated until necessary.
+        '''
         # set phase_space from freqs and qpoints from super()
         if self.freqs is not None:
             if self.padded_qpoints is None:
@@ -169,11 +240,17 @@ class PhaseSpace(MPGrid):
             self.padded_phase_space = self.padded_qpoints
 
     def get_phase_space(self):
+        '''
+        Getter for phase space. If phase-space not set, it will be set by calling this.
+        '''
         if self.phase_space is None:
             self.set_phase_space()
         return self.phase_space
 
     def get_padded_phase_space(self):
+        '''
+        Getter for padded phase space object.
+        '''
         if self.padded_phase_space is None:
             self.set_padded_phase_space()
         return self.padded_phase_space
@@ -181,10 +258,17 @@ class PhaseSpace(MPGrid):
 
 class BrillouinZoneProperty:
     """
-    Abstract class that maps a specific property (band, eigenvector, imag self energy) to BZ coordinates and branch
-    index. Default is to cast property over specified MP grid.
+    Abstract class that maps a specific property (band, eigenvector, imag self energy) to BZ coordinates and branch index. Default is to cast property over specified MP grid. Properties are stored as a dictionary, in which the keys are the q-point and band index combinations.
     """
     def __init__(self, inputs: Phono3pyInputs):
+        '''
+        Constructor from Phono3pyInputs class. Takes the Phono3pyInputs object and calculates a specific Brillouin zone property. Specific properties are specified by child classes.
+
+        Parameters
+        -------
+        inputs : Phono3pyInputs
+            input containing all Phono3py input files and tags.
+        '''
         self.mesh = inputs.mesh
         self.shift = inputs.shift
         self._brillouinzone = BrillouinZone(poscar=inputs.poscar, mesh=self.mesh, shift=self.shift)
@@ -198,13 +282,31 @@ class BrillouinZoneProperty:
         self._interpolator = None
 
     def _set_interpolator(self):
+        '''
+        Private setter class for interpolation using the Interpolator class
+        '''
         from src.Interpolation import Interpolator
         self._interpolator = Interpolator(phonon_property=self)
 
     def assign_value(self, key, value):
+        '''
+        Assign value for a given key. The key is either a q-point or a phase-space point depending on the property.
+        '''
         self.property[key] = value
 
     def _shift_q_to_1stBZ(self, qpoint):
+        '''
+        Internal class that shifts a given q-point back to the 1st Brillouin zone.
+
+        Parameters
+        -------
+        qpoint : List
+            q-point vector in reduced units that may or may not be outside the 1st Brillouin zone.
+
+        Returns
+        ------
+        The shifted q-point vector.
+        '''
         shifted_qpoint = []
         for q in qpoint:
             if q <= -0.5:
@@ -215,6 +317,20 @@ class BrillouinZoneProperty:
         return np.array(shifted_qpoint)
 
     def set_key(self, qpoint, band_index):
+        '''
+        Set the dictionary key given a q-point and phonon band-index.
+
+        Parameters
+        -------
+        qpoint : List
+            q-point vector labeling the property.
+        band_index : int
+            Integer index specifying the phonon mode index.
+
+        Returns
+        -------
+        A vector ready to be used as a dictionary key.
+        '''
         key = []
         thresh = 1e-3
         for q, s, m in zip(qpoint, self.shift, self.mesh):
@@ -228,6 +344,16 @@ class BrillouinZoneProperty:
         return tuple(key)
 
     def get_property_value(self, qpoint, band_index):
+        '''
+        Get a property value given a q-point and band_index. The qpoint and band_index values are used to create a dict key, which then accesses the internal dictionary to extract the value.
+
+        Parameters
+        -------
+        qpoint : List
+            q-point vector labeling the property value.
+        band_index : int
+            Integer index specifying the phonon mode index.
+        '''
         if len(self.property_dict) == 0:
             self.set_property_dict()
         key = self.set_key(self._shift_q_to_1stBZ(qpoint), band_index)
@@ -248,6 +374,9 @@ class BrillouinZoneProperty:
 
 
     def set_property_dict(self):
+        '''
+        Construct the dictionary object containing all the property data. This module changes depending on the property.
+        '''
         pass
 
 
@@ -289,9 +418,23 @@ def _init_BZ_numba(mesh: np.array, mapping: np.ndarray, grid: np.ndarray):
 
 class BrillouinZone(MPGrid):
     """
-    Abstract class for organizing all annoying gridpoints and mappings within Phono3py
+    Abstract class for organizing all annoying gridpoints and mappings within Phono3py. Built from the MPGrid super class.
     """
     def __init__(self, poscar='POSCAR', temperature=0., **kwargs):
+        '''
+        Constructor from vasp POSCAR, temperature and MPGrid keyword args (mesh and shift).
+
+        Parameters
+        -------
+        poscar : str
+            VASP POSCAR file.
+        temperature : float
+            Temperature of material.
+        mesh : List
+            List of integers specifying a Gamma-centered Monkhorst-Pack grid
+        shift : List
+            List of floats specifying the shift from a Gamma-centered grid.
+        '''
         super().__init__(**kwargs)
         self.cell = read_vasp(poscar)
         self.mapping = None
@@ -313,6 +456,9 @@ class BrillouinZone(MPGrid):
 
 
     def _init_BZ(self):
+        '''
+        Private class to initialize the Brillouin zone.
+        '''
         self.mapping, grid = get_ir_reciprocal_mesh(mesh=self.mesh, cell=self.cell)
         self.grid = {tuple(k / self.mesh): v for (v, k) in enumerate(grid)}
         self.inverse_grid = {v: tuple(k / self.mesh) for (v, k) in enumerate(grid)}
@@ -337,6 +483,18 @@ class BrillouinZone(MPGrid):
         #                for irred_gp in irr_BZ_gridpoints}
 
     def get_symmetrically_equiv_qpoints(self, qpoint):
+        '''
+        Get the symmetrically equivalent q-points given a specific q-point.
+
+        Parameters
+        -------
+        qpoint : List
+            Vector of a q-point in reduced coordinates.
+
+        Returns
+        -------
+        List of q-point vectors that are symmetrically equivalent to the original q-point.
+        '''
         gp = self.get_gridpoint(qpoint)
         irr_gp = self.mapping[gp]
         qpoints = []
@@ -346,6 +504,18 @@ class BrillouinZone(MPGrid):
         return qpoints
 
     def get_gridpoint(self, qpoint):
+        '''
+        Get a grid-point given a q-point. Gridpoint is used to properly access Phono3py objects.
+
+        Parameters
+        ------
+        qpoint : List
+            Vector of a q-point in reduced coordinates
+
+        Returns
+        -------
+        The gridpoint associated with the passed q-point (gridpoint is an integer).
+        '''
         for i, q in enumerate(qpoint):
             if q > 0.5:
                 shift = np.ceil(q).astype(np.int)
@@ -358,9 +528,29 @@ class BrillouinZone(MPGrid):
         return self.grid[tuple(key)]
 
     def get_qpoint(self, gridpoint):
+        '''
+        Get qpoint from a gridpoint.
+
+        Parameters
+        -------
+        gridpoint : int
+            Integer specifying the gridpoint used in Phono3py objects.
+
+        Returns
+        -------
+        q-point vector associated with gridpoint.
+        '''
         return self.inverse_grid[gridpoint]
 
     def shift_q_to_1stBZ(self, qpoint):
+        '''
+        Shift q-point to 1st Brillouin zone.
+
+        Parameters
+        -------
+        qpoint : List
+            Vector of a q-point in reduced coordinates
+        '''
         shifted_qpoint = []
         for q in qpoint:
             sq = q % 1.
@@ -372,6 +562,9 @@ class BrillouinZone(MPGrid):
         return np.array(shifted_qpoint)
 
 class Phono3pyManager:
+    '''
+    Class that manages all relevant functions of the Phono3py API, and connects these functions with the other classes in this mpdsf. This manager has not been checked for Phono3py versions >2.0; this will be looked into in the future.
+    '''
     def __init__(self,
                  inputs: Phono3pyInputs):
         """
@@ -417,11 +610,17 @@ class Phono3pyManager:
             self.isotopes = None
 
     def set_phonons(self):
+        '''
+        Calculate phonon data using Phono3py. Store the frequencies, eigenvectors and qpoints.
+        '''
         #self.phono3py.run_phonon_solver()
         self.bands, self.eigvecs, self.qpoints = self.phono3py.get_phonon_data()
         self.fix_phonon_data()
 
     def fix_phonon_data(self):
+        '''
+        Fix phonon data to remove the redundant q-points and shift the q-points back to 1st Brillouin zone.
+        '''
         # check if there are more than the expected number of qpoints
         expected_num_qpoints = np.round(np.prod(self.inputs.mesh)).astype(int)
         if expected_num_qpoints < len(self.qpoints):
@@ -432,8 +631,11 @@ class Phono3pyManager:
             self.qpoints = self.qpoints[:expected_num_qpoints, :]
         # want to ensure all q-points are inside the 1st Brillouin zone
         self.center_qpoints()
+
     def center_qpoints(self):
-        # Move any q-points outside the first Brillouin zone back into the first zone
+        '''
+        Move any q-point outside the first Brillouin zone back into the first zone
+        '''
         temp_qpoints = []
         for q in self.qpoints:
             q = np.array(q).astype(np.float64)
@@ -467,17 +669,17 @@ class ImaginarySelfEnergy(BrillouinZoneProperty):
         self.set_property_dict()
 
     def set_self_energies(self):
-        #########################################################################################################
-        # imaginary self energy objects are stored in phono3py object in a weird way                            #
-        # the object is a list of a list of ndarrays                                                            #
-        # first index = grid-points, which are "addresses" of the irreducible q-points in the Brillouin zone    #
-        #       At the surface these are meaningless, but the grid points are given by:                         #
-        #       np.unique(mapping)                                                                              #
-        #       The actual q-points are stored in grid with a 1-to-1 correspondence to mapping                  #
-        # second index = sigma values, there is only one sigma=None in default tetrahedron method               #
-        # third index is the nparray, which is arranged as:                                                     #
-        #       (temperatures, frequency points, band index)                                                    #
-        #########################################################################################################
+        '''
+        Imaginary self energy objects are stored in phono3py object in a weird way.
+
+        The object is a list of a list of ndarrays.
+        
+        First index = grid-points, which are "addresses" of the irreducible q-points in the Brillouin zone. At the surface these are meaningless, but the grid points are given by: np.unique(mapping). The actual q-points are stored in grid with a 1-to-1 correspondence to mapping
+        
+        Second index = sigma values, there is only one sigma=None in default tetrahedron method
+        
+        Third index is the nparray, which is arranged as: (temperatures, frequency points, band index)
+        '''
         self.manager.phono3py.init_phph_interaction()
         if self._brillouinzone.mapping is None:
             self._brillouinzone.set_irr_BZ_gridpoints()
@@ -489,21 +691,47 @@ class ImaginarySelfEnergy(BrillouinZoneProperty):
             self.manager.phono3py.run_imag_self_energy(np.unique(self._brillouinzone.mapping), temperatures=temp)
 
     def _get_imag_self_energies_from_gp(self, gridpoint):
-        #########################################################################################################
-        # Note that this returns the imaginary self energy function                                             #
-        # Does not return the self energy evaluated at the phonon frequency                                     #
-        # As a result, a tuple is returned with the frequency points, and self energy                           #
-        #########################################################################################################
+        '''
+        Private function for getting imaginary self energy functions from Phono3py after specifying a q-point.
+
+        Note that this returns the imaginary self energy function.
+        Does not return the self energy evaluated at the phonon frequency.
+        As a result, a tuple is returned with the frequency points, and self energy.
+
+        Parameters
+        -------
+        gridpoint : int
+            Integer specifying the Phono3py gridpoint.
+
+        Returns
+        -------
+        Imaginary self energy function
+        '''
         irr_gp = self._brillouinzone.mapping[gridpoint]
         grid_index = self._brillouinzone.irr_BZ_gridpoints[irr_gp]
         return self.manager.phono3py._frequency_points, self.manager.phono3py._gammas[grid_index][0][0, :, :]
 
     def get_imag_self_energies_at_q(self, qpoint):
+        '''
+        Get imaginary self energy functions at a given q-point (instead of a gridpoint).
+
+        Parameters
+        -------
+        qpoint : List
+            q-point vector in reduced coordinates
+
+        Returns
+        ------
+        Imaginary self energy function.
+        '''
         gridpoint = self._brillouinzone.grid[tuple(qpoint)]
         _, ises = self._get_imag_self_energies_from_gp(gridpoint)
         return ises
 
     def set_property_dict(self):
+        '''
+        Calculate the property dictionary for the imaginary self energy function.
+        '''
         for i, q in enumerate(self._brillouinzone.qpoints):
             # i is the gridpoint index
             # q is the qpoint vector
@@ -517,12 +745,26 @@ class ImaginarySelfEnergy(BrillouinZoneProperty):
 
 
 class PhononEigenvalues(BrillouinZoneProperty):
+    '''
+    Extension of BrillouinZoneProperty to calculate phonon eigenvalues, and store/access them simply in one place. This is a scalar valued property.
+    '''
     def __init__(self, inputs: Phono3pyInputs):
+        '''
+        Constructor from Phono3py inputs object.
+
+        Parameters
+        -------
+        inputs : Phono3pyInputs
+            Class containing all Phono3py related input files and tags.
+        '''
         super().__init__(inputs)
         self.eigenvalues = {}
         self.set_property_dict()
 
     def set_property_dict(self):
+        '''
+        Calculate the property dictionary for phonon eigenvalues.
+        '''
         self.manager.set_phonons()
         for i, q in enumerate(self._brillouinzone.qpoints):
             for band_index, eig in enumerate(self.manager.bands[i, :]):
@@ -533,19 +775,32 @@ class PhononEigenvalues(BrillouinZoneProperty):
 
 
 class PhononEigenvectors(BrillouinZoneProperty):
+    '''
+    Extension of BrillouinZoneProperty to calculate phonon eigenvectors, and store/access them in one place. This is a *vector* valued property.
+    '''
     def __init__(self, inputs: Phono3pyInputs):
+        '''
+        Constructor from Phono3py inputs object.
+
+        Parameters
+        -------
+        inputs : Phono3pyInputs
+            Class containing all Phono3py related input files and tags.
+        '''
         super().__init__(inputs)
         self.eigenvectors = {}
         self.set_property_dict()
 
     def set_property_dict(self):
-        # IMPORTANT: I believe the way Phono3py stores it's eigenvectors is in a matrix of shape:
-        # (num qpts, num bands, 3 * num_atoms)
-        # This is hard to test because the shape of the matrix at each q-point is square; (num bands) = (3 * num atoms)
-        # However, in the Phono3py source code, the eigenvectors are determined via a call to linalg.eigh acting on the
-        # dynamical matrix. This call returns the eigenvectors as column vectors in a square matrix such that the second
-        # index is eigenvector index, and the first index corresponds to the eigenvector components
-
+        '''
+        Calculate the property dictionary for phonon eigenvectors.
+        IMPORTANT NOTE: I believe the way Phono3py stores it's eigenvectors is in a matrix of shape:
+            (num qpts, num bands, 3 * num_atoms)
+        
+        This is hard to test because the shape of the matrix at each q-point is square; (num bands) = (3 * num atoms)
+        
+        However, in the Phono3py source code, the eigenvectors are determined via a call to linalg.eigh acting on the dynamical matrix. This call returns the eigenvectors as column vectors in a square matrix such that the second index is eigenvector index, and the first index corresponds to the eigenvector components
+        '''
         self.manager.set_phonons()
         for i, q in enumerate(self._brillouinzone.qpoints):
             for band_index, eigvec in enumerate(self.manager.eigvecs[i].T):
@@ -555,12 +810,26 @@ class PhononEigenvectors(BrillouinZoneProperty):
 
 
 class GroupVelocities(BrillouinZoneProperty):
+    '''
+    Extension of BrillouinZoneProperty to calculate phonon group velocities, and store/access them in one place. This is a *vector* valued property. Units are Angstroms / ps.
+    '''
     def __init__(self, inputs: Phono3pyInputs):
+        '''
+        Constructor from Phono3py inputs object.
+
+        Parameters
+        -------
+        inputs : Phono3pyInputs
+            Class containing all Phono3py related input files and tags.
+        '''
         super().__init__(inputs)
         self.group_velocities = {}
         self.set_property_dict()
 
     def set_property_dict(self):
+        '''
+        Calculate the property dictionary for group velocities using Phono3py API, and store internally in class. The unit is in Angstroms / ps.
+        '''
         self.manager.phono3py.init_phph_interaction()
         group_vels = GroupVelocity(self.manager.phono3py.dynamical_matrix)
 
@@ -575,6 +844,14 @@ class GroupVelocities(BrillouinZoneProperty):
 
 class IsotopicImagSelfEnergy(BrillouinZoneProperty):
     def __init__(self, inputs: Phono3pyInputs):
+        '''
+        Constructor from Phono3py inputs object.
+
+        Parameters
+        -------
+        inputs : Phono3pyInputs
+            Class containing all Phono3py related input files and tags.
+        '''
         super().__init__(inputs)
         self.ise = None
         self.units = 'THz = 1 / (4pi * tau)'
@@ -584,9 +861,7 @@ class IsotopicImagSelfEnergy(BrillouinZoneProperty):
 
     def set_self_energies(self):
         '''
-        Set isotopic self energies using PHono3pyIsotope class. The self energies are stored in
-        self.manager.isotope.gamma with units of THz
-        :return:
+        Set isotopic self energies using Phono3pyIsotope class. The self energies are stored in self.manager.isotope.gamma with units of THz.
         '''
         # init dynamical matrix
         self.manager.isotopes.init_dynamical_matrix(fc2=self.manager.phono3py.fc2,
@@ -599,6 +874,9 @@ class IsotopicImagSelfEnergy(BrillouinZoneProperty):
         self.manager.isotopes.run(gridpoints)
 
     def set_property_dict(self):
+        '''
+        Calculate the property dictionary for the isotopic self energy for each q-point in the MP grid.
+        '''
         for i, q in enumerate(self._brillouinzone.qpoints):
             # i is the gridpoint index
             # q is the qpoint vector
@@ -612,9 +890,19 @@ class IsotopicImagSelfEnergy(BrillouinZoneProperty):
 
 class Gamma(BrillouinZoneProperty):
     '''
-    This class is similar to ImaginarySelfEnergy, but evaluates the ISE at the phonon frequency only
+    Extension of BrillouinZoneProperty to calculate the Gamma parameter which is related to the inverse phonon lifetime. The relationship in Phono3py units is lifetime=1/(4*pi*Gamma). This class is similar to ImaginarySelfEnergy, but evaluates the ISE at the phonon frequency only
     '''
     def __init__(self, inputs: Phono3pyInputs, f_min=1e-3):
+        '''
+        Constructor from Phono3py inputs object.
+
+        Parameters
+        -------
+        inputs : Phono3pyInputs
+            Class containing all Phono3py related input files and tags.
+        f_min : float
+            Minimum frequency. Phonons with frequencies below this threshold are ignored in any analysis and set to 0.
+        '''
         super().__init__(inputs)
         self.ise = ImaginarySelfEnergy(inputs)
         self.eigs = PhononEigenvalues(inputs)
@@ -622,6 +910,9 @@ class Gamma(BrillouinZoneProperty):
         self.set_property_dict()
 
     def set_property_dict(self):
+        '''
+        Calculate the property dictionary for the Gamma functions.
+        '''
         for key, ise_at_key in self.ise.property_dict.items():
             eig_at_key = self.eigs.property_dict[key]
             if eig_at_key < self.f_min:

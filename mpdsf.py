@@ -8,7 +8,13 @@ from yaml import SafeLoader
 import h5py
 
 class MPDSF:
+    """
+    Class that drives the calculation of the Multi-Phonon Dynamic Structure Factor (MPDSF).
+    """
     def __init__(self):
+        """
+        Initialization of the MPDSF class starts from either command line arguments that are parsed by ArgumentParser or from a command line argument pointing to an input file containing all relevant commands.
+        """
         parser = argparse.ArgumentParser()
         parser.add_argument("-p", "--poscar", help='VASP poscar file of unit cell.', default='POSCAR')
         parser.add_argument("-fc3", "--fc3", help='Third order force constants file in hdf5 format.',
@@ -99,7 +105,6 @@ class MPDSF:
         self.qpoints = None
         self.scaling_qpoints = None
         self.scaling_weights = None
-        #TODO Implement code that transforms qpoints into irreducible qpoints depending on the symmetry of the lattice
         self.weights = None
 
         self.input = args.input
@@ -133,6 +138,14 @@ class MPDSF:
         print('final qpoints are', self.qpoints)
 
     def parse_input_file(self, input_file):
+        """
+        Parse YAML input file, which sets all internal fields in the MPDSF object.
+    
+        Parameters
+        -----
+        input_file
+            String specifying the location of a YAML input file to be parsed.
+        """
         print('input file is', input_file)
         config_dict = yaml.load(open(input_file, 'rb'), Loader=SafeLoader)
         print('after loading, dict is ', config_dict)
@@ -162,13 +175,11 @@ class MPDSF:
             self.strideQ = config_dict['strideQ']
         if 'shift' in config_dict.keys():
             self.shift = config_dict['shift']
-        # TODO decide whether implementing a stride in G is worth it
         if 'strideG' in config_dict.keys():
             self.strideG = 1
         if 'qmax' in config_dict.keys():
             self.qmax = config_dict['qmax']
         self.qpoints = None
-        # TODO Implement code that transforms qpoints into irreducible qpoints depending on the symmetry of the lattice
         self.weights = None
 
         self.set_qpoints()
@@ -206,12 +217,18 @@ class MPDSF:
             self.reach = config_dict['reach']
 
     def set_qpoints(self):
+        """
+        qpoints setter that uses the nofold_BZ tag to drive the creation of qpoints
+        """
         if self.nofold_BZ:
             self.set_qpoints_full()
         else:
             self.set_qpoints_folded()
 
     def set_qpoints_folded(self):
+        """
+        Create irreducible part of q-points from BrillouinZone object using self.mesh and self.meshG as inputs.
+        """
         from src.utils import BrillouinZone
         combined_mesh = np.array(self.mesh) * np.array(self.meshG)
         combined_shift = np.array(self.shift) / np.array(self.meshG)
@@ -233,6 +250,9 @@ class MPDSF:
             self.scaling_weights = np.array(list(scaling_weights))
 
     def set_qpoints_full(self):
+        """
+        Create the full q-points list, ignoring all symmetries, and including all G-point contributions
+        """
         self.qpoints = np.zeros([0, 3])
         count = 0
         curr_qx = self.shift[0] / self.mesh[0]
@@ -288,6 +308,9 @@ class MPDSF:
         return self.qpoints
 
     def run(self, start_q_index=0, stop_q_index=None, start_scale_index=None, stop_scale_index=None):
+        """
+        Run multiphonon code using previously set inputs and the DynamicStructureFactor object.
+        """
         fold_BZ = not self.nofold_BZ
         if stop_q_index is None:
             stop_q_index = len(self.qpoints)
@@ -319,6 +342,9 @@ class MPDSF:
         self.dsf.get_coherent_sqw()
 
     def save_data(self):
+        """
+        Save the data to an hdf5 file.
+        """
         if self.dsf is None:
             print('ERROR: Need to execute the run command to create the multiphonon dynamic structure factor object.')
         else:
@@ -449,41 +475,12 @@ if __name__ == '__main__':
                                 final_output['dm_masses'] = np.array(tmp_output['dm_masses'])
                             # Next conditional is whether the BZ was folded or not (default is yes)
                             if not mpdsf.nofold_BZ:
-                                #from yaml import dump
-                                #try:
-                                #    from yaml import CDumper as Dumper
-                                #except ImportError:
-                                #    from yaml import Dumper
-                                #s = str(np.array(tmp_output['equivalent q-points']))
-                                #if s[0] != '-':
-                                #    s = s[2:-1]
-                                # Remove \\n parts of string literal
-                                #s_array = s.split('\\n')
-                                # Add \n parts back in
-                                #s = '\n'.join(s_array)
-                                #symm_points = load(s, Loader=Loader)
                                 import json
                                 symm_points = json.loads(tmp_output['equivalent q-points'].asstr()[()])
-                                #final_output['equivalent q-points'] = dump(np.array(
-                                #    load(str(np.array(tmp_output['equivalent q-points'])),
-                                #         Loader=Loader)), Dumper=Dumper)
                                 final_output['equivalent q-points'] = json.dumps(symm_points)
                                 if 'scaling_dxdydz' in tmp_output.keys():
-                                    #s = str(np.array(tmp_output['equivalent scaling_q-points']))
-                                    #if s[0] != '-':
-                                    #    s = s[2:-1]
-                                    # Remove \\n parts of string literal
-                                    #s_array = s.split('\\n')
-                                    # Add \n parts back in
-                                    #s = '\n'.join(s_array)
-                                    #symm_points = load(s, Loader=Loader)
                                     symm_points = json.loads(tmp_output['equivalent scaling_q-points'].asstr()[()])
                                     final_output['equivalent scaling_q-points'] = json.dumps(symm_points)
-                                    #final_output['scaling equivalent_q-points'] = dump(np.array(
-                                    #    load(str(np.array(tmp_output['equivalent scaling_qpoints'])),
-                                    #         Loader=Loader)), Dumper=Dumper)
-
-
                             # check for lowqscaling
                             if 'scaling_dxdydz' in tmp_output.keys():
                                 final_output['scaling_dxdydz'] = np.array(tmp_output['scaling_dxdydz'])
@@ -493,19 +490,10 @@ if __name__ == '__main__':
                         if mpdsf.reach:
                             tmp_rates = np.array([[0. if r==0. else 1. / r for r in reach_at_thresh] for reach_at_thresh in tmp_output['reach']])
                             final_reach += tmp_rates
-                            #final_reach += tmp_output['reach']
-
-                        #if not mpdsf.nofold_BZ:
-                        #    final_symm_points += list(np.array(load(str(np.array(tmp_output['equivalent q-points'])),
-                        #                                            Loader=Loader)))
                         if mpdsf.lowq_scaling:
                             scaling_weights += list(tmp_output['scaling_weights'])
                             scaling_qpoints += list(tmp_output['scaling_q-points'])
                             scaling_sqw += list(tmp_output['scaling_sqw'])
-                            #if not mpdsf.nofold_BZ:
-                            #    scaling_symm_points += list(
-                            #        np.array(load(str(np.array(tmp_output['equivalent scaling_qpoints'])),
-                            #                      Loader=Loader)))
                 final_output['sqw'] = np.array(final_sqw)
                 final_output['q-points'] = np.array(final_qpoints)
                 final_output['weights'] = np.array(final_weights)
@@ -528,9 +516,6 @@ if __name__ == '__main__':
                         '''
             for i in range(size):
                 os.remove('tmp_' + str(i) + '_' + output)
-            #if rank == 0:
-            #    mpdsf.dsf.sqw = full_sqw_list
-            #    mpdsf.save_data()
     else:
         mpdsf.run()
         mpdsf.save_data()

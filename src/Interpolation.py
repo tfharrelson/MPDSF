@@ -31,13 +31,15 @@ class Interpolator:
         #self.qpoints = qpoints
         #self.freqs = freqs
         #self.kind = kind
-    """
-    def set_band(self, band):
-        self.band = band
-    def set_freqs(self, freqs):
-        self.freqs = freqs
-    """
+    
     def check_scalar(self):
+        '''
+        Check whether or not object to be interpolated is either a scalar function or a vector function.
+
+        Returns
+        -------
+        True if interpolated property is scalar, False if anything else.
+        '''
         # Need to check if the property is a scalar or vector quantity
         check_qpt = self.phase_space.qpoints[0]
         check_val = self.property.get_property_value(check_qpt, band_index=0)
@@ -84,6 +86,20 @@ class Interpolator:
                 self.interpolators[i] = self.set_interpolator_at_band(band_index=i)
 
     def set_interpolator_at_band(self, band_index, vector_index=None):
+        '''
+        Sets the interpolator for a specific band index.
+
+        Parameters
+        -------
+        band_index : int
+            Integer index of the phonon band to be set.
+        vector_index : int
+            Integer index of the vector valued function to be interpolated. Optional, but should be set if you want to interpolate a vector valued function correctly.
+
+        Returns
+        -------
+        A LinearNDInterpolator object set for the object to be interpolated.
+        '''
         if self._reg_grid_flag:
             if self.property.freqs is None:
                 phasespace_points = self.phase_space.get_padded_qpoints()
@@ -132,6 +148,18 @@ class Interpolator:
                 return LinearNDInterpolator(phasespace_points, converted_property)
 
     def convert_freq_dep_property(self, band_index):
+        '''
+        Converts a frequency dependent property into a shape that can be used by SciPy inteprolation routines.
+
+        Parameters
+        -------
+        band_index : int
+            Integer index of the phonon band.
+
+        Returns
+        -------
+        The converted data.
+        '''
         data = []
         for q in self.phase_space.get_padded_qpoints():
             prop_func = self.property.get_property_value(q, band_index)
@@ -140,6 +168,22 @@ class Interpolator:
         return data
 
     def convert_property(self, band_index, vector_index=None, padded_flag=True):
+        '''
+        Convert the property to be usable with SciPy interpolation routines.
+
+        Parameters
+        -------
+        band_index : int
+            Integer index for the phonon band.
+        vector_index : int
+            Integer index for the vector in the object. Does not need to be set for scalar valued properties.
+        padded_flag : bool
+            Boolean that pads the q-point space of the Brillouin zone with periodic neighboring values. This should be set to True in almost all cases.
+
+        Returns
+        -------
+        Converted property data.
+        '''
         # Set padded_flag to true because that ensures proper action of an interpolator that is periodic
         data = []
         if padded_flag:
@@ -161,10 +205,10 @@ class Interpolator:
     def interpolate(self, band_index, *args):
         """
         Interpolate the function for the desired band and vector index if applicable
-        :param band_index:
-        :param vector_index:
+        :param band_index: Integer index for the phonon mode.
+        :param vector_index: Integer index for the vector valued function
         :param args: arguments for interpolator in a list [qx, qy, qz] or [qx, qy, qz, w] for freq dep properties
-        :return:
+        :return: List of interpolated values for each of the args passed.
         """
         args = list(args)
         if len(np.array(args).shape) > 1:
@@ -189,15 +233,37 @@ class Interpolator:
             return interpolator_list
 
 class Regridder:
+    '''
+    Class that regrids the Brillouin zone onto a new mesh using the Interpolator class. This class doesn't interact much with the rest of the code, so it may get deprecated soon.
+    '''
     def __init__(self, interpolable_object,
                  mesh=None, freqs=None):
+        '''
+        Parameters
+        -------
+        interpolable_object
+            Must be a phonon property, typically something like a PhononEigenvalues, PhononEigenvectors, etc.
+        mesh : List
+            List of integers specifying how to create a gamma-centered Monkhorst-Pack k-point grid.
+        freqs : List
+            List of discrete frequencies representing the frequency/energy field for frequency-dependent properties.
+        '''
         self.interpolator = Interpolator(interpolable_object)
         self.mesh = mesh
         self.freqs = freqs
 
         # set Phase space from mesh and freqs
         self.phase_space = PhaseSpace(freqs=self.freqs, mesh=self.mesh)
+    
     def regrid(self, mesh=None):
+        '''
+        Regrid the Monkhorst-pack k-point grid, and interpolate the values.
+
+        Parameters
+        -------
+        mesh : List
+            List of integers specifying how to create a gamma-centered Monkhorst-Pack k-point grid.
+        '''
         if mesh is not None:
             self.mesh = mesh
             self.phase_space = PhaseSpace(freqs=self.freqs,
