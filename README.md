@@ -8,7 +8,7 @@ The code also contains general object-oriented modules that handle different pho
 
 ## Installation
 
-Currently installation via pip is not supported, but `requirements.txt` provide all the necessary dependences to create a working conda environment. Also, there will be a working version of the code on Docker soon.
+Currently installation via pip is not supported, but `requirements.yml` provide all the necessary dependences to create a working conda environment. To do so, we recommend running `conda create -f requirements.yml`, which will create a conda environment called `multiphonon` which contains all packages needed to run MPDSF. Also, there will be a working version of the code on Docker soon.
 
 ## Usage
 
